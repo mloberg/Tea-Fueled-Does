@@ -1,0 +1,27 @@
+# Mac files
+.DS_Store?
+Icon?
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Apache log folder
+logs/*
+
+# TFD specific files
+tfd/config/*
+public/www/*.php
+!public/www/index.php
+public/masters/*.php
+!public/masters/master.php
+!public/masters/404.php
+public/admin-dashboard/*.php
+!public/admin-dashboard/index.php
+includes/content/routes.json
+
+# temp files to ignore
+public/modules/*

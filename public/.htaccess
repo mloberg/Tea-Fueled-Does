@@ -1,0 +1,31 @@
+### PHP settings ###
+	php_flag display_errors on
+	php_flag register_globals off
+	php_flag magic_quotes_gpc off
+	php_flag register_long_arrays off
+	php_flag short_open_tag on
+
+### Rewrite on ###
+	RewriteEngine On
+
+### route css, js, and images to their folders ###
+	RewriteRule css/(.*)$ css/$1 [L]
+	RewriteRule js/(.*)$ js/$1 [L]
+	RewriteRule img/(.*)$ img/$1 [L]
+
+### Protect protect files (do this with chmod stuff later) ###
+	#RewriteRule admin/(.*)$ 404 [L]
+	RewriteRule ajax/(.*)$ 404 [L]
+	RewriteRule masters/(.*)$ 404 [L]
+	RewriteRule models/(.*)$ 404 [L]
+	RewriteRule modules/(.*)$ 404 [L]
+	RewriteRule partials/(.*)$ 404 [L]
+	RewriteRule public_admin/(.*)$ 404 [L]
+	RewriteRule www/(.*)$ 404 [L]
+	RewriteRule hooks.php$ 404 [L]
+	RewriteRule routes.json$ 404 [L]
+
+### All other requests ###
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^(.*)$ index.php?tfd_request=$1&%{QUERY_STRING}
