@@ -13,15 +13,14 @@ Icon?
 logs/*
 
 # TFD specific files
-tfd/config/*
-public/www/*.php
-!public/www/index.php
-public/masters/*.php
-!public/masters/master.php
-!public/masters/404.php
-public/admin-dashboard/*.php
-!public/admin-dashboard/index.php
-includes/content/routes.json
+content/www/*.php
+!content/www/index.php
+content/masters/*.php
+!content/masters/master.php
+!content/masters/404.php
+content/admin-dashboard/*.php
+!content/admin-dashboard/index.php
+content/routes.json
 
 # temp files to ignore
-public/modules/*
+content/modules/*

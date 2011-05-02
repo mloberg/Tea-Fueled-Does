@@ -58,6 +58,7 @@
 			$pass = $_POST['password'];
 			// get user info
 			$user_info = $this->mysql->where('username',$user)->limit(1)->get(USERS_TABLE);
+			if($user_info == '') return false;
 			$salt = $user_info[0]['salt'];
 			// check password
 			if(AdminValidation::check_password($salt, $pass)){

@@ -116,7 +116,7 @@
 		
 		protected function routes(){
 			// get the routes file
-			$routes_file = file_get_contents(PUBLIC_DIR . 'routes.json');
+			$routes_file = file_get_contents(CONTENT_DIR . 'routes.json');
 			$routes = json_decode($routes_file, true);
 			$routes = $routes['routes'];
 			// look for a match and if match, return
@@ -170,7 +170,7 @@
 			}
 			// cannot render partials from admin
 			if($dir && $dir !== 'admin'){
-				$file = PUBLIC_DIR.$dir.'/'.$file.EXT;
+				$file = CONTENT_DIR.$dir.'/'.$file.EXT;
 			}else{
 				$file = PARTIALS_DIR.$file.EXT;
 			}
@@ -193,7 +193,7 @@
 				if($dir == 'admin' && !$this->admin->loggedin()){
 					$master = '404';
 				}else{
-					$file = PUBLIC_DIR . "{$dir}/{$file}".EXT;
+					$file = CONTENT_DIR . "{$dir}/{$file}".EXT;
 				}
 			}else{
 				$file = WEB_DIR . $file . EXT;
