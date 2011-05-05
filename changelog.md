@@ -9,3 +9,7 @@
 * fixed issue with login
 * content can be outside of the web directory
 
+## 1.0.2
+
+* all files with in content/config are loaded
+

@@ -24,3 +24,4 @@ content/routes.json
 
 # temp files to ignore
 content/modules/*
+tfd/core/redis.php

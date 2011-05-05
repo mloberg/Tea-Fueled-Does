@@ -32,9 +32,9 @@ define('HOOKS_FILE', CONTENT_DIR . 'hooks' . EXT);
 
 // include all the other config files
 define('CONF_DIR', CONTENT_DIR . '_config/');
-include_once(CONF_DIR . 'general.php');
-include_once(CONF_DIR . 'environments.php');
-include_once(CONF_DIR . 'api-keys.php');
+foreach(glob(CONF_DIR."*".EXT) as $conf){
+	include_once($conf);
+}
 
 // And now include the core file
 include_once(CORE_DIR.'app.php');
