@@ -20,3 +20,9 @@
 * updated htaccess to protect tfd and content folders if those folders are found in the public directory
 * added JavaScript class
 * added initialize hook
+
+## 1.0.4
+
+* actually included the JavaScript library
+* added CSS library
+* added render hook

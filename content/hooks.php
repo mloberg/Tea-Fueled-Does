@@ -10,6 +10,10 @@
 			
 		}
 		
+		function render(){
+			$this->css->load('reset');
+		}
+		
 		function login($user){
 			
 		}

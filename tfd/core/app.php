@@ -178,6 +178,7 @@
 		}
 		
 		protected function render($options){
+			$this->hooks->render();
 			extract($options);
 			// get full path of the file
 			if($dir){
