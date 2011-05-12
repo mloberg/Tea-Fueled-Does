@@ -30,3 +30,9 @@
 ## 1.0.5
 
 * CSS library extended (see content/www/style.php for examples)
+
+## 1.0.6
+
+* Updated style CSS method
+* Added add_font method
+* Updated htaccess to point font(s) to a fonts folder

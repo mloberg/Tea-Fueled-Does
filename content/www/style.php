@@ -13,7 +13,7 @@
 			'background-color' => '#000'
 		)
 	);
-	
+	$this->css->add_font('foobar','fonts/foobar.ttf');
 	$this->css->style($style);
 ?>
 <div id="element" class="class">

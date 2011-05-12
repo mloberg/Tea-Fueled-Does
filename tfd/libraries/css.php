@@ -6,6 +6,7 @@
 			'reset' => 'css/reset.css'
 		);
 		private static $styles = array();
+		private static $style_tag = null;
 		
 		function echo_stylesheets(){
 			if(is_array(self::$styles)){
@@ -13,6 +14,9 @@
 					$sheets .= "{$s}\n";
 				}
 				echo $sheets;
+			}
+			if(!is_null(self::$style_tag)){
+				echo "\t<style>\n".self::$style_tag."\t</style>\n";
 			}
 		}
 		
@@ -28,7 +32,6 @@
 		}
 		
 		function style($styles){
-			$sheet = "\t<style>\n";
 			foreach($styles as $element => $style){
 				$sheet .= <<<STYLE
 	{$element}{
@@ -44,8 +47,19 @@ STYLE;
 				}
 				$sheet .= "\t}\n";
 			}
-			$sheet .= "\t</style>";
-			self::$styles[] = $sheet;
+			self::$style_tag .= $sheet;
+		}
+		
+		function add_font($name, $src){
+			if(is_array($src)){
+			
+			}
+			$style = self::$style_tag;
+			$font = <<<FONT
+	@font-face{font-family: "{$name}"; src: url('{$src}');}
+
+FONT;
+			self::$style_tag = $font.$style;
 		}
 	
 	}

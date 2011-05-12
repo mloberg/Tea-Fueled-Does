@@ -1,16 +1,14 @@
-{
-	"routes" : {
-		"test": {
-			"file": "custom"
-		},
-		"signup/[:any]": {
-			"module": "signup"
-		},
-		"signup": {
-			"redirect": "signup/"
-		},
-		"api/[:any]": {
-			"module": "api"
-		}
+{"routes" : {
+	"test": {
+		"file": "custom"
+	},
+	"signup/[:any]": {
+		"module": "signup"
+	},
+	"signup": {
+		"redirect": "signup/"
+	},
+	"api/[:any]": {
+		"module": "api"
 	}
-}
+}}

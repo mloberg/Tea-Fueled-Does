@@ -16,6 +16,9 @@
 	RewriteRule css/(.*)$ css/$1 [L]
 	RewriteRule js/(.*)$ js/$1 [L]
 	RewriteRule img/(.*)$ img/$1 [L]
+	RewriteRule image/(.*)$ image/$1 [L]
+	RewriteRule fonts/(.*)$ fonts/$1 [L]
+	RewriteRule font/(.*)$ font/$1 [L]
 
 ### All other requests ###
 	RewriteCond %{REQUEST_FILENAME} !-f
