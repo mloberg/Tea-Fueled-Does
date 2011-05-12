@@ -29,18 +29,6 @@
 		return '<img src="'.$img.'" alt="'.$alt.'" '.$attr.' />'."\n";
 	}
 	
-	function mootools($more=false){
-		$mootools = "<script src=\"js/mootools-core-1.3.1.min.js\"></script>\n";
-		if($more){
-			$mootools .= "<script src=\"js/mootools-more-1.3.1.1.min\"></script>\n";
-		}
-		return $mootools;
-	}
-	
-	function script($script){
-		return "<script src=\"js/{$script}.js\"></script>\n";
-	}
-	
 	function post($name){
 		return $_POST[$name];
 	}

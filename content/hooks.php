@@ -6,6 +6,10 @@
 			parent::__construct();
 		}
 		
+		function initialize(){
+			
+		}
+		
 		function login($user){
 			
 		}

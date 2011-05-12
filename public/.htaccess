@@ -8,7 +8,11 @@
 ### Rewrite on ###
 	RewriteEngine On
 
-### route css, js, and images to their folders ###
+### Not recommended to have the content and tfd folder in the root, but if they did... ###
+	RewriteRule ^content/(.*)$ 404 [L]
+	RewriteRule ^tfd/(.*)$ 404 [L]
+
+### points all requests that have css/, js/, or img/ to their respective folders ###
 	RewriteRule css/(.*)$ css/$1 [L]
 	RewriteRule js/(.*)$ js/$1 [L]
 	RewriteRule img/(.*)$ img/$1 [L]

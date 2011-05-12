@@ -9,6 +9,7 @@
 </head>
 <body>
 <div id="wrapper">
+	<h1>404</h1>
 	<p>File not found.</p>
 </div>
 </body>

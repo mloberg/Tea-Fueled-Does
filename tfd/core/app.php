@@ -62,6 +62,7 @@
 		}
 		
 		public function site(){
+			$this->hooks->initialize();
 			if(preg_match('/^tfd-ajax\//', $this->request)){
 				$file = preg_replace('/^tfd-ajax\//', '', $this->request);
 				if($file == '') $file = 'ajax';
@@ -151,16 +152,6 @@
 			}
 		}
 		
-		protected function url($segment=null){
-			if($segment == null){
-				return $this->request;
-			}else{
-				$segments = explode('/', $this->request);
-				$seg = $segment - 1;
-				return $segments[$seg];
-			}
-		}
-		
 		function partial($options,$extra=null){
 			if(is_array($extra)) extract($extra);
 			if(is_array($options)){
@@ -191,6 +182,7 @@
 			// get full path of the file
 			if($dir){
 				if($dir == 'admin' && !$this->admin->loggedin()){
+					$this->send_404();
 					$master = '404';
 				}else{
 					$file = CONTENT_DIR . "{$dir}/{$file}".EXT;
@@ -207,10 +199,11 @@
 				$content = ob_get_contents();
 				// clean the output buffer
 				ob_clean();
-			}elseif($this->testing){
+			}elseif($this->testing && $this->request !== '404'){
 				$this->error->report("{$file} not found!");
 			}else{
 				// if the file wasn't found, 404
+				$this->send_404();
 				$master = '404';
 			}
 			// figure out the title
@@ -234,6 +227,22 @@
 			
 			// return the page
 			return $page;
+		}
+		
+		// General Functions
+		
+		function send_404(){
+			header('HTTP/1.1 404 Not Found');
+		}
+		
+		protected function url($segment=null){
+			if($segment == null){
+				return $this->request;
+			}else{
+				$segments = explode('/', $this->request);
+				$seg = $segment - 1;
+				return $segments[$seg];
+			}
 		}
 	
 	}

@@ -13,3 +13,10 @@
 
 * all files with in content/config are loaded
 
+## 1.0.3
+
+* added send_404 method to send 404 error headers
+* 404's use send_404 method
+* updated htaccess to protect tfd and content folders if those folders are found in the public directory
+* added JavaScript class
+* added initialize hook
