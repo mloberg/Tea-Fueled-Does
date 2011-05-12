@@ -26,3 +26,7 @@
 * actually included the JavaScript library
 * added CSS library
 * added render hook
+
+## 1.0.5
+
+* CSS library extended (see content/www/style.php for examples)

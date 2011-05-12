@@ -15,6 +15,7 @@ logs/*
 # TFD specific files
 content/www/*.php
 !content/www/index.php
+!content/www/style.php
 content/masters/*.php
 !content/masters/master.php
 !content/masters/404.php
