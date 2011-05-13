@@ -36,3 +36,7 @@
 * Updated style CSS method
 * Added add_font method
 * Updated htaccess to point font(s) to a fonts folder
+
+## 1.0.7
+
+* ajax enhancements

@@ -35,6 +35,8 @@
 	// that means we are more acurate then other frameworks =P
 	
 	function timer(){
-		global $start_time;
-		echo "\n<script>console.log(\"Page rendered in ".(microtime(true) - $start_time)." seconds\");</script>";
+		if(!$_GET['ajax']){
+			global $start_time;
+			echo "\n<script>console.log(\"Page rendered in ".(microtime(true) - $start_time)." seconds\");</script>";
+		}
 	}

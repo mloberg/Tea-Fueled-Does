@@ -8,4 +8,4 @@ This is another major rewrite of TFD. The public files and app files are now in 
 
 ### Installation instructions
 
-Coming soon...
+Check out the wiki.

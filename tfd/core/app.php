@@ -63,11 +63,12 @@
 		
 		public function site(){
 			$this->hooks->initialize();
-			if(preg_match('/^tfd-ajax\//', $this->request)){
-				$file = preg_replace('/^tfd-ajax\//', '', $this->request);
-				if($file == '') $file = 'ajax';
+			if(preg_match('/^'.MAGIC_AJAX_PATH.'\//', $this->request)){
+				if(empty($_GET['ajax'])){
+					$_GET['ajax'] = preg_replace('/^'.MAGIC_AJAX_PATH.'\//', '', $this->request);
+				}
 				$ajax = array(
-					'file' => $file,
+					'file' => 'ajax',
 					'dir' => 'ajax'
 				);
 				return $this->partial($ajax);

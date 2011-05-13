@@ -23,6 +23,7 @@ define('MODELS_DIR', CONTENT_DIR . 'models/');
 define('WEB_DIR', CONTENT_DIR . 'www/');
 define('MASTERS_DIR', CONTENT_DIR . 'masters/');
 define('PARTIALS_DIR', CONTENT_DIR . 'partials/');
+define('AJAX_DIR', CONTENT_DIR . 'ajax/');
 
 define('EXT', '.php');
 
