@@ -252,7 +252,7 @@
 			}
 		}
 		
-		function flash($message,$type){
+		function flash($message,$type='error'){
 			$flash = <<<FLASH
 	<div id="message-flash" class="message-{$type}">
 		<p>{$message}</p>
@@ -260,7 +260,8 @@
 
 FLASH;
 			$this->css->flash();
-			return $flash;
+			$this->javascript->script('<script>setTimeout(function(){document.getElementById("message-flash").style.display = "none"}, 2000);</script>');
+			$this->render->flash = $flash;
 		}
 	
 	}

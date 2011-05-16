@@ -9,8 +9,10 @@
 	<![endif]-->
 </head>
 <body>
+<?php echo $this->render->flash;?>
 <div id="wrapper">
 <?php echo $content;?>
+
 </div>
 <?php $this->javascript->echo_scripts();?>
 </body>

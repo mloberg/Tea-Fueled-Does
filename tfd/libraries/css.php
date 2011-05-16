@@ -67,18 +67,23 @@ FONT;
 			self::$style_tag = <<<FLASH
 	#message-flash{
 		width: 100%;
-		position: absolute;
+		position: relative;
 		top: 0;
 		left: 0;
-		padding: 5px;
-		color: #fff;
+		padding: 5px 0;
 		text-align: center;
 	}
 	.message-success{
 		background-color: #008000;
+		color: #fff;
 	}
 	.message-error{
 		background-color: #b22222;
+		color: #fff;
+	}
+	.message-warning{
+		background-color: #ffd700;
+		color: #000;
 	}
 {$style}
 

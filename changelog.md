@@ -49,3 +49,9 @@
 
 * ajax is now a class
 * added script method to js class to load written scripts
+
+## 1.1.0
+
+* fixed flash overflowing issue
+* added render class
+* added flash styling and "fade out"
