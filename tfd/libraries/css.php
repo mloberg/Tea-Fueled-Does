@@ -61,6 +61,29 @@ STYLE;
 FONT;
 			self::$style_tag = $font.$style;
 		}
+		
+		function flash(){
+			$style = self::$style_tag;
+			self::$style_tag = <<<FLASH
+	#message-flash{
+		width: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		padding: 5px;
+		color: #fff;
+		text-align: center;
+	}
+	.message-success{
+		background-color: #008000;
+	}
+	.message-error{
+		background-color: #b22222;
+	}
+{$style}
+
+FLASH;
+		}
 	
 	}
 	

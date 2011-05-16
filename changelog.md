@@ -40,3 +40,7 @@
 ## 1.0.7
 
 * ajax enhancements
+
+## 1.0.8
+
+* added flash method to display errors

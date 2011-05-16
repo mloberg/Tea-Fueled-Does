@@ -246,5 +246,16 @@
 				return $segments[$seg];
 			}
 		}
+		
+		function flash($message,$type){
+			$flash = <<<FLASH
+	<div id="message-flash" class="message-{$type}">
+		<p>{$message}</p>
+	</div>
+
+FLASH;
+			$this->css->flash();
+			return $flash;
+		}
 	
 	}
