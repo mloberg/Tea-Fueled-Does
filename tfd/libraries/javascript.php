@@ -31,5 +31,9 @@
 		function load($src){
 			self::$scripts[] = '<script src="'.$src.'"></script>';
 		}
+		
+		function script($script){
+			self::$scripts[] = $script;
+		}
 	
 	}

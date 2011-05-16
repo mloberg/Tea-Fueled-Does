@@ -44,3 +44,8 @@
 ## 1.0.8
 
 * added flash method to display errors
+
+## 1.0.9
+
+* ajax is now a class
+* added script method to js class to load written scripts

@@ -9,8 +9,13 @@
 		
 		function __construct($autoload=''){
 			$this->testing = TESTING_MODE;
-			$this->request = $_GET['tfd_request'];
-			if($this->request == '') $this->request = 'index';
+			if($_GET['tfd_request'] == ''){
+				$this->request = 'index';
+			}elseif(preg_match('/\/$/', $_GET['tfd_request'])){
+				$this->request = $_GET['tfd_request'].'index';
+			}else{
+				$this->request = $_GET['tfd_request'];
+			}
 			if(is_array($autoload)){
 				foreach($autoload as $type => $name){
 					$this->load($name,$type);
@@ -47,6 +52,10 @@
 		}
 		
 		protected function load($name){
+			if($name == 'ajax'){
+				include_once(AJAX_DIR.'ajax'.EXT);
+				return true;
+			}
 			$dirs = array(CORE_DIR,LIBRARY_DIR,HELPER_DIR,MODELS_DIR);
 			for($i=0;$i <= count($dirs);$i++){
 				$file = glob($dirs[$i].$name.EXT);
@@ -67,11 +76,7 @@
 				if(empty($_GET['ajax'])){
 					$_GET['ajax'] = preg_replace('/^'.MAGIC_AJAX_PATH.'\//', '', $this->request);
 				}
-				$ajax = array(
-					'file' => 'ajax',
-					'dir' => 'ajax'
-				);
-				return $this->partial($ajax);
+				return $this->ajax->call();
 				exit;
 			}
 			// get routes
@@ -183,7 +188,7 @@
 			extract($options);
 			// get full path of the file
 			if($dir){
-				if($dir == 'admin' && !$this->admin->loggedin()){
+				if($dir == 'admin-dashboard' && !$this->admin->loggedin()){
 					$this->send_404();
 					$master = '404';
 				}else{

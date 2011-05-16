@@ -1,15 +1,17 @@
 <?php
 
-	if(function_exists($_GET['ajax'])){
-		echo $_GET['ajax']();
-	}elseif(file_exists(AJAX_DIR.$_GET['ajax'].EXT)){
-		include AJAX_DIR.$_GET['ajax'].EXT;
-	}
+	class Ajax extends TFD{
 	
-	/**
-	 * Add your calls below this line.
-	 */
+		function call(){
+			if(method_exists(__CLASS__, $_GET['ajax'])){
+				return $this->ajax->$_GET['ajax']();
+			}elseif(file_exists(AJAX_DIR.$_GET['ajax'].EXT)){
+				include AJAX_DIR.$_GET['ajax'].EXT;
+			}
+		}
+		
+		function test(){
+			return 'foobar';
+		}
 	
-	function ajax(){
-		return 'call from ajax';
 	}
