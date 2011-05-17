@@ -63,3 +63,10 @@
 ## 1.1.2
 
 * minor changes to the postmark library
+
+## 1.1.3
+
+* updated JavaScript Class
+  * load accepts an array or string
+  * script method that takes functions, vars, etc. to load in between script tags
+  * ready method that takes functions, vars, etc. to add between a dom ready function (mootools or jQuery only);
