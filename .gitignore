@@ -16,6 +16,7 @@ logs/*
 content/www/*.php
 !content/www/index.php
 !content/www/style.php
+!content/www/pagination.php
 content/masters/*.php
 !content/masters/master.php
 !content/masters/404.php
