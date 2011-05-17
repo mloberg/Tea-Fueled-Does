@@ -55,3 +55,11 @@
 * fixed flash overflowing issue
 * added render class
 * added flash styling and "fade out"
+
+## 1.1.1
+
+* added pagination class
+
+## 1.1.2
+
+* minor changes to the postmark library

@@ -55,12 +55,12 @@
 			return $this;
 		}
 		
-		function html_message($body){
+		function message_html($body){
 			$this->data["HtmlBody"] = "<html><body>{$body}</body></html>";
 			return $this;
 		}
 		
-		function text_message($msg){
+		function message_plain($msg){
 			$this->data["TextBody"] = $msg;
 			return $this;
 		}
