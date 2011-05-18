@@ -70,3 +70,7 @@
   * load accepts an array or string
   * script method that takes functions, vars, etc. to load in between script tags
   * ready method that takes functions, vars, etc. to add between a dom ready function (mootools or jQuery only);
+
+## 1.1.4
+
+* changed how ajax is called (can now be anything before it, as long as it matches the magic ajax path (e.g /post/tfd-ajax/function will work as well as /user/tfd-ajax/function))
