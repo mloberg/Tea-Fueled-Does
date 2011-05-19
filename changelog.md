@@ -74,3 +74,10 @@
 ## 1.1.4
 
 * changed how ajax is called (can now be anything before it, as long as it matches the magic ajax path (e.g /post/tfd-ajax/function will work as well as /user/tfd-ajax/function))
+
+## 1.1.5
+
+* fixed flash javascript error
+* fixed error with S3 exception
+* added math evaluation function
+* added Redis support

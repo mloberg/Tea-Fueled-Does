@@ -260,7 +260,7 @@
 
 FLASH;
 			$this->css->flash();
-			$this->javascript->script('<script>setTimeout(function(){document.getElementById("message-flash").style.display = "none"}, 2000);</script>');
+			$this->javascript->script('setTimeout(function(){document.getElementById("message-flash").style.display = "none"}, 2000);');
 			$this->render->flash = $flash;
 		}
 	
