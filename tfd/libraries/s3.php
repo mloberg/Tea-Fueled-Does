@@ -321,7 +321,7 @@ class S3Exception extends Exception {
 				throw new S3Exception('Unexpected HTTP status', $rest->response->code);
 	
 			if ($rest->response->error !== false)
-				throw new S3Exception($rest->response->error['message'], $rest->response->error['code']);
+				throw new S3Exception($rest->response->error['message'] . ' ' . $rest->response->error['code']);
 	
 			return true;
 		}
