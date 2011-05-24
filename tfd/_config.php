@@ -7,7 +7,7 @@
  */
 
 // main directories
-define('PUBLIC_DIR', $_SERVER['DOCUMENT_ROOT'] . '/');
+define('PUBLIC_DIR', preg_replace('/index\.php/', '', $_SERVER['SCRIPT_FILENAME']) . '/');
 define('APP_DIR', realpath(PUBLIC_DIR.$app_dir) . '/');
 define('BASE_DIR', realpath(APP_DIR.'..') . '/');
 define('CONTENT_DIR', realpath(PUBLIC_DIR.$content_dir) . '/');

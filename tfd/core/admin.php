@@ -82,6 +82,7 @@
 		public function dashboard($req=null){
 			if(is_null($req)) $req = $this->request;
 			if($this->loggedin()){
+				$this->hooks->admin();
 				$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', $req);
 				$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
 				if($request == '') $request = 'index';
