@@ -81,3 +81,8 @@
 * fixed error with S3 exception
 * added math evaluation function
 * added Redis support
+
+## 1.1.6
+
+* added admin (dashboard) hook
+* fixed error where if tfd wasn't installed in the root, it wouldn't load

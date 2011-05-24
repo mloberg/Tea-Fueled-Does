@@ -10,6 +10,10 @@
 			
 		}
 		
+		function admin(){
+		
+		}
+		
 		function render(){
 			$this->css->load('reset');
 		}
