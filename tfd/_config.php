@@ -18,12 +18,12 @@ define('HELPER_DIR', APP_DIR . 'helpers/');
 define('LIBRARY_DIR', APP_DIR . 'libraries/');
 
 // public directories
-//define('MODULE_DIR', CONTENT_DIR . 'modules/');
 define('MODELS_DIR', CONTENT_DIR . 'models/');
 define('WEB_DIR', CONTENT_DIR . 'www/');
 define('MASTERS_DIR', CONTENT_DIR . 'masters/');
 define('PARTIALS_DIR', CONTENT_DIR . 'partials/');
 define('AJAX_DIR', CONTENT_DIR . 'ajax/');
+define('TEMPLATES_DIR', CONTENT_DIR . 'templates/');
 
 define('EXT', '.php');
 

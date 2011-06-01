@@ -91,3 +91,7 @@
 
 * fixed default login page
 * minor pagination improvements
+
+## 1.1.8
+
+* added the mustache.php (template system)
