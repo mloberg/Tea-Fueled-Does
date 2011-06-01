@@ -10,7 +10,7 @@
 		}
 		
 		function sql($sql){
-			$tmp = $this->mysql->qry($sql);
+			$this->mysql->qry($sql);
 			self::$config['num_items'] = $this->mysql->num_rows();
 			$page = ($_GET['page']) ? $_GET['page'] - 1 : 0;
 			$offset = $page * self::$config['per_page'];
@@ -32,13 +32,14 @@
 		}
 		
 		function navigation(){
-			$pages = round(self::$config['num_items'] / self::$config['per_page']);
+			$pages = ceil(self::$config['num_items'] / self::$config['per_page']);
 			$next_page = ($_GET['page']) ? $_GET['page'] + 1 : 2;
 			if($next_page !== 2){
 				$previous_page = $_GET['page'] - 1;
 				$str = '<a href="?page='.$previous_page.'">Previous</a> ';
 			}
-			if($pages != $_GET['page']){
+			$page = ($_GET['page']) ? $_GET['page'] : 1;
+			if($pages != $page){
 				$str .= '<a href="?page='.$next_page.'">Next</a>';
 			}
 			return $str;

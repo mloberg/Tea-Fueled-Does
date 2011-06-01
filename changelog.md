@@ -86,3 +86,8 @@
 
 * added admin (dashboard) hook
 * fixed error where if tfd wasn't installed in the root, it wouldn't load
+
+## 1.1.7
+
+* fixed default login page
+* minor pagination improvements
