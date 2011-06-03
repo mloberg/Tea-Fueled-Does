@@ -1,5 +1,9 @@
 <?php
 
+	/**
+	 * This mysql class is loosely based of of Jon Henderson's IDL database class (http://idlworks.com)
+	 */
+
 	class Database extends App{
 	
 		static private $link;
