@@ -36,193 +36,145 @@
  * @license http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
-if ( ! defined('CRLF'))
-{
-    define('CRLF', sprintf('%s%s', chr(13), chr(10)));
+/**
+ * This Redis class was modified by Matthew Loberg to work with Tea-Fueled Does
+ */
+
+if(!defined('CRLF')){
+	define('CRLF', sprintf('%s%s', chr(13), chr(10)));
 }
 
-class Redis {
+class Redis{
 
-    const ERROR = '-';
-    const INLINE = '+';
-    const BULK = '$';
-    const MULTIBULK = '*';
-    const INTEGER = ':';
+	const ERROR = '-';
+	const INLINE = '+';
+	const BULK = '$';
+	const MULTIBULK = '*';
+	const INTEGER = ':';
 
-    protected $connection = false;
+	protected $connection = false;
 
-    /**
-     * Open the connection to the Redis server.
-     * 
-     * @param   array   $config     the config array
-     * @throws  RedisException
-     */
-    public function  __construct()
-    {
-        $config = array('hostname' => REDIS_HOST, 'port' => REDIS_PORT);
-        $this->connection = @fsockopen($config['hostname'], $config['port'], $errno, $errstr);
+	/**
+	 * Open the connection to the Redis server.
+	 */
+	public function  __construct(){
+		$config = array('hostname' => REDIS_HOST, 'port' => REDIS_PORT);
+		$this->connection = @fsockopen($config['hostname'], $config['port'], $errno, $errstr);
 
-        if ( ! $this->connection)
-        {
-            throw new RedisException($errstr, $errno);
-        }
-    }
+		if(!$this->connection){
+			throw new RedisException($errstr, $errno);
+		}elseif(REDIS_PASS !== ''){
+			// if Redis has a password, send the auth command
+			$this->auth(REDIS_PASS);
+		}
+	}
 
-    /**
-     * Closes the connection to the Redis server.
-     */
-    public function  __destruct()
-    {
-        fclose($this->connection);
-    }
+	/**
+	 * Closes the connection to the Redis server.
+	 */
+	public function  __destruct(){
+		fclose($this->connection);
+	}
+	
+	public function __call($name, $args){
+		$cmd = $this->buildCommand($name, $args);
+		$this->sendCommand($cmd);
 
-    /**
-     * Runs the given command ($name) with any number of arguments.
-     * 
-     * @param   string   $name  the method (command)
-     * @param   array    $args  the method (command) arguments
-     * @return  string   the response
-     * @throws  RedisException
-     */
-    public function __call($name, $args)
-    {
-        $cmd = $this->buildCommand($name, $args);
-        $this->sendCommand($cmd);
+		return $this->readReply();
+	}
+	
+	public function buildCommand($cmd, $args){
+		// Start building the command
+		$command = '*'.(count($args) + 1).CRLF;
+		$command .= '$'.strlen($cmd).CRLF;
+		$command .= strtoupper($cmd).CRLF;
 
-        return $this->readReply();
-    }
+		// Add all the arguments to the command
+		foreach($args as $arg){
+			$command .= '$'.strlen($arg).CRLF;
+			$command .= $arg.CRLF;
+		}
+		
+		return $command;
+	}
+	
+	public function sendCommand($command){
+		if(!$this->connection){
+			throw new RedisException('You must be connected to a Redis server to send a command.');
+		}
 
-    /**
-     * Builds the given command with any number of arguments.
-     * 
-     * @param   string   $cmd   the command
-     * @param   array    $args  the arguments
-     * @return  string   the full command
-     */
-    public function buildCommand($cmd, $args)
-    {
-        // Start building the command
-        $command = '*'.(count($args) + 1).CRLF;
-        $command .= '$'.strlen($cmd).CRLF;
-        $command .= strtoupper($cmd).CRLF;
+		fwrite($this->connection, $command);
+	}
+	
+	public function readReply(){
+		if(!$this->connection){
+			throw new RedisException('You must be connected to a Redis server to send a command.');
+		}
 
-        // Add all the arguments to the command
-        foreach ($args as $arg)
-        {
-            $command .= '$'.strlen($arg).CRLF;
-            $command .= $arg.CRLF;
-        }
-        
-        return $command;
-    }
+		$reply = trim(fgets($this->connection, 512));
 
-    /**
-     * Sends the given command to the Redis server.
-     * 
-     * @param   string   $command   the command to send
-     * @throws  RedisException
-     */
-    public function sendCommand($command)
-    {
-        if ( ! $this->connection)
-        {
-            throw new RedisException('You must be connected to a Redis server to send a command.');
-        }
+		switch(substr($reply, 0, 1)){
+			case Redis::ERROR:
+				throw new RedisException(substr(trim($reply), 4));
+			break;
 
-        fwrite($this->connection, $command);
-    }
+			case Redis::INLINE:
+				$response = substr(trim($reply), 1);
+			break;
 
-    /**
-     * Reads in a reply from the Redis server.
-     * 
-     * @return  string  the reply
-     * @throws  RedisException
-     */
-    public function readReply()
-    {
-        if ( ! $this->connection)
-        {
-            throw new RedisException('You must be connected to a Redis server to send a command.');
-        }
+			case Redis::BULK:
+				if($reply == '$-1'){
+					break;
+				}
+				$response = $this->readBulkReply($reply);
+			break;
 
-        $reply = trim(fgets($this->connection, 512));
+			case Redis::MULTIBULK:
+				$count = substr($reply, 1);
+				if($count == '-1'){
+					return null;
+				}
 
-        switch (substr($reply, 0, 1))
-        {
-            case Redis::ERROR:
-                throw new RedisException(substr(trim($reply), 4));
-            break;
+				$response = array();
+				for($i = 0; $i < $count; $i++){
+					$bulk_head = trim(fgets($this->connection, 512));
+					$response[] = $this->readBulkReply($bulk_head);
+				}
+			break;
 
-            case Redis::INLINE:
-                $response = substr(trim($reply), 1);
-            break;
+			case Redis::INTEGER:
+				$response = substr(trim($reply), 1);
+			break;
 
-            case Redis::BULK:
-                if ($reply == '$-1')
-                {
-                    break;
-                }
-                $response = $this->readBulkReply($reply);
-            break;
+			default:
+				throw new RedisException("invalid server response: {$reply}");
+			break;
+		}
+		
+		return $response;
+	}
+	
+	protected function readBulkReply($reply){
+		if(!$this->connection){
+			throw new RedisException('You must be connected to a Redis server to send a command.');
+		}
 
-            case Redis::MULTIBULK:
-                $count = substr($reply, 1);
-                if ($count == '-1')
-                {
-                    return null;
-                }
+		$response = null;
 
-                $response = array();
-                for ($i = 0; $i < $count; $i++)
-                {
-                    $bulk_head = trim(fgets($this->connection, 512));
-                    $response[] = $this->readBulkReply($bulk_head);
-                }
-            break;
+		$read = 0;
+		$size = substr($reply, 1);
 
-            case Redis::INTEGER:
-                $response = substr(trim($reply), 1);
-            break;
-
-            default:
-                throw new RedisException("invalid server response: {$reply}");
-            break;
-        }
-        
-        return $response;
-    }
-
-    /**
-     * Reads in a bulk reply from the Redis server.
-     * 
-     * @param   string   $reply     the reply
-     * @return  string   the bulk reply
-     * @throws  RedisException
-     */
-    protected function readBulkReply($reply)
-    {
-        if ( ! $this->connection)
-        {
-            throw new RedisException('You must be connected to a Redis server to send a command.');
-        }
-
-        $response = null;
-
-        $read = 0;
-        $size = substr($reply, 1);
-
-        while ($read < $size)
-        {
-            // If the amount left to read is less than 1024 then just read the rest, else read 1024
-            $block_size = ($size - $read) > 1024 ? 1024 : ($size - $read);
-            $response .= fread($this->connection, $block_size);
-            $read += $block_size;
-        }
-        // Get rid of the CRLF at the end
-        fread($this->connection, 2);
-        
-        return $response;
-    }
+		while($read < $size){
+			// If the amount left to read is less than 1024 then just read the rest, else read 1024
+			$block_size = ($size - $read) > 1024 ? 1024 : ($size - $read);
+			$response .= fread($this->connection, $block_size);
+			$read += $block_size;
+		}
+		// Get rid of the CRLF at the end
+		fread($this->connection, 2);
+		
+		return $response;
+	}
 
 }
 

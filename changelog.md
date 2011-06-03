@@ -94,4 +94,10 @@
 
 ## 1.1.8
 
-* added the mustache.php (template system)
+* added the mustache.php template system
+
+## 1.1.9
+
+* Redis will automatically run the auth call if you have a password setup
+* Other Redis improvements
+* Add user method

@@ -20,10 +20,10 @@ if(ENVIRONMENT === 'DEVELOPMENT'){
 	// tfd error reporting
 	define('TESTING_MODE', true);
 	// MySQL
-	define('DB_HOST', '');
-	define('DB_USER', '');
-	define('DB_PASS', '');
-	define('DB', '');
+	define('DB_HOST', 'localhost');
+	define('DB_USER', 'root');
+	define('DB_PASS', 'root');
+	define('DB', 'tfd');
 }elseif(ENVIRONMENT === 'TESTING'){
 	// php error reporting
 	error_reporting(E_ERROR | E_WARNING);

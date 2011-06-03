@@ -11,3 +11,7 @@ There is a need admin hook in hooks.php, please update this file
 
 There is a new folder inside of content called templates. This is used for the new templating system.
 Please move this folder into your content folder, or create a folder called 'templates' inside your content folder
+
+## 1.1.9
+
+Redis config file in content/_config has been updated. This is not a required change, but brings some improvements.
