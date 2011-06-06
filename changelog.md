@@ -101,3 +101,7 @@
 * Redis will automatically run the auth call if you have a password setup
 * Other Redis improvements
 * Add user method
+
+## 1.1.9.1
+
+* upload class fixes/enhancements
