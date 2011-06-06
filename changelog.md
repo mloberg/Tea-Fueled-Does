@@ -109,3 +109,7 @@
 ## 1.1.9.2
 
 * upload class fixes
+
+## 1.1.9.3
+
+* flash enhancements (sticky, edit time)
