@@ -95,9 +95,6 @@
 						setcookie('redirect', $this->request, time() + 3600);
 						return $this->admin->login();
 					}
-					$route = str_replace(array('[:any]', '[:num]'), '', $this->info['route']);
-					$route = str_replace('/', '\/', $route);
-					$route = preg_replace('/'.$route.'/', '', $this->request);
 					return $this->admin->dashboard($route);
 				}
 				// check to see if it's a module or redirect
