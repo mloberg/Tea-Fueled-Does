@@ -106,7 +106,7 @@
 					);
 					return $this->render($options);
 				}else{
-					if(empty($render['dir']) $render['dir'] = 'admin-dashboard';
+					if(empty($render['dir'])) $render['dir'] = 'admin-dashboard';
 					return $this->render($render);
 				}
 			}else{
