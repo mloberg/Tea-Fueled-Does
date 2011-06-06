@@ -3,13 +3,14 @@
 	class Upload extends App{
 		
 		function save($file, $path, $name=null, $ext=null){
-			if(is_null($name)){
+			if(is_null($name) && is_null($ext)){
 				$name = basename($_FILES[$file]['name']);
+			}elseif(!is_null($name) && !is_null($ext)){
+				$name = $name.'.'.$ext;
+			}elseif(!is_null($name) && is_null($ext)){
+				$name = $name.'.'.end(explode('.', $_FILES[$file]['name']));
 			}
-			if(is_null($ext)){
-				$ext = end(explode('.', $_FILES[$file]['name']));
-			}
-			$target = PUBLIC_DIR.$path.'/'.$name.'.'.$ext;
+			$target = PUBLIC_DIR.$path.'/'.$name;
 			if(move_uploaded_file($_FILES[$file]['tmp_name'], $target)){
 				return true;
 			}else{

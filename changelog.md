@@ -105,3 +105,7 @@
 ## 1.1.9.1
 
 * upload class fixes/enhancements
+
+## 1.1.9.2
+
+* upload class fixes
