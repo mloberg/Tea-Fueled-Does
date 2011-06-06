@@ -249,7 +249,12 @@
 			}
 		}
 		
-		function flash($message,$type='error'){
+		function flash($message, $type='error', $options=array()){
+			$default_options = array(
+				'time' => '2',
+				'sticky' => false
+			);
+			$options = $options + $default_options;
 			$flash = <<<FLASH
 	<div id="message-flash" class="message-{$type}">
 		<p>{$message}</p>
@@ -257,7 +262,9 @@
 
 FLASH;
 			$this->css->flash();
-			$this->javascript->script('setTimeout(function(){document.getElementById("message-flash").style.display = "none"}, 2000);');
+			if($options['sticky'] === false){
+				$this->javascript->script('setTimeout(function(){document.getElementById("message-flash").style.display = "none"}, ' . $options['time']*1000 . ');');
+			}
 			$this->render->flash = $flash;
 		}
 	
