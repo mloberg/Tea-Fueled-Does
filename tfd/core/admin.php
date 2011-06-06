@@ -93,18 +93,22 @@
 			return false;
 		}
 		
-		public function dashboard($req=null){
-			if(is_null($req)) $req = $this->request;
+		public function dashboard($render=null){
 			if($this->loggedin()){
 				$this->hooks->admin();
-				$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', $req);
-				$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
-				if($request == '') $request = 'index';
-				$options = array(
-					'dir' => 'admin-dashboard',
-					'file' => $request
-				);
-				return $this->render($options);
+				if(is_null($render)){
+					$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', $this->request);
+					$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
+					if($request == '') $request = 'index';
+					$options = array(
+						'dir' => 'admin-dashboard',
+						'file' => $request
+					);
+					return $this->render($options);
+				}else{
+					if(empty($render['dir']) $render['dir'] = 'admin-dashboard';
+					return $this->render($render);
+				}
 			}else{
 				setcookie('redirect', $req, time() + 3600);
 				header('Location: '.BASE_URL.LOGIN_PATH);
