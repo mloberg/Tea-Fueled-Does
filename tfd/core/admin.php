@@ -21,10 +21,10 @@
 		
 		public function login(){
 			if($_POST['submit'] && $this->validate() || $this->loggedin()){
-				if($_COOKIE['redirect']){
+				if($_SESSION['redirect']){
 					// unset cookie
-					$redirect = $_COOKIE['redirect'];
-					setcookie('redirect', '', time() - 3600);
+					$redirect = $_SESSION['redirect'];
+					unset($_SESSION['redirect']);
 					// redirect
 					header('Location: '.BASE_URL.$redirect);
 					exit;
@@ -110,7 +110,7 @@
 					return $this->render($render);
 				}
 			}else{
-				setcookie('redirect', $req, time() + 3600);
+				$_SESSION['redirect'] = $this->request;
 				header('Location: '.BASE_URL.LOGIN_PATH);
 			}
 		}
