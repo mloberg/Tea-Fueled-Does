@@ -113,3 +113,7 @@
 ## 1.1.9.3
 
 * flash enhancements (sticky, edit time)
+
+## 1.1.9.4
+
+* image class fixes

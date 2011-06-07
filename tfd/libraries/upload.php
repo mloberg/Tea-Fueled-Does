@@ -1,6 +1,6 @@
 <?php
 
-	class Upload extends App{
+	class Upload{
 		
 		function save($file, $path, $name=null, $ext=null){
 			if(is_null($name) && is_null($ext)){

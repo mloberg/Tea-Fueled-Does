@@ -21,3 +21,6 @@ content/masters/*.php
 content/admin-dashboard/*.php
 !content/admin-dashboard/index.php
 content/routes.json
+
+# Some testing files
+public/uploads/*
