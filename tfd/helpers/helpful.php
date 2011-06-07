@@ -43,6 +43,17 @@
 		echo '</pre>';
 	}
 	
+	function href($a, $text, $admin=false){
+		if(preg_match('/^http/', $a)){
+			return '<a href="'.$a.'">'.$text.'</a>';
+		}else{
+			$href = BASE_URL;
+			if($admin) $href .= ADMIN_PATH.'/';
+			$href .= $a;
+			return '<a href="'.$href.'">'.$text.'</a>';
+		}
+	}
+	
 	function matheval($equation){
 		$equation = preg_replace('/[^0-9+\-.*\/()%]/', '', $equation);
 		$equation = preg_replace('/([+-])([0-9]{1})(%)/', '*(1\$1.0\$2)', $equation);
