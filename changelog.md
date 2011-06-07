@@ -121,3 +121,7 @@
 ## 1.1.9.5
 
 * save_as method added to image class
+
+## 1.1.9.6
+
+* added link (href) helper
