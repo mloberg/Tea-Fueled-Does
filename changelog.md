@@ -117,3 +117,7 @@
 ## 1.1.9.4
 
 * image class fixes
+
+## 1.1.9.5
+
+* save_as method added to image class

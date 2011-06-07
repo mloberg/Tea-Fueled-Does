@@ -140,5 +140,14 @@
 			$this->new_image = imagerotate($this->image,$degrees,0);
 			return $this->save($output);
 		}
+		
+		function save_as($file, $output){
+			$this->open($file);
+			$width = $this->info['width'];
+			$height = $this->info['height'];
+			$this->new_image = imagecreatetruecolor($width, $height);
+			imagecopyresampled($this->new_image, $this->image, 0, 0, 0, 0, $width, $height, $width, $height);
+			return $this->save($output);
+		}
 	
 	}
