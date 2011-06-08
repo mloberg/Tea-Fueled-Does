@@ -18,6 +18,7 @@ content/www/*.php
 content/masters/*.php
 !content/masters/master.php
 !content/masters/404.php
+!content/masters/admin.php
 content/admin-dashboard/*.php
 !content/admin-dashboard/index.php
 content/routes.json
