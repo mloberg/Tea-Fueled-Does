@@ -109,11 +109,11 @@
 			if(is_array($by)){
 				// multi
 				foreach($by as $b){
-					$order .= $b.', ';
+					$order .= '\''.$b.'\', ';
 				}
 				$order = preg_replace('/, $/','',$order);
 			}else{
-				$order .= $by;
+				$order .= '\''.$by.'\'';
 			}
 			$this->order_by = $order.' '.$type;
 			return $this;
