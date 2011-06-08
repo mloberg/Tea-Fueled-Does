@@ -102,11 +102,13 @@
 					if($request == '') $request = 'index';
 					$options = array(
 						'dir' => 'admin-dashboard',
-						'file' => $request
+						'file' => $request,
+						'master' => 'admin'
 					);
 					return $this->render($options);
 				}else{
 					if(empty($render['dir'])) $render['dir'] = 'admin-dashboard';
+					if(empty($render['master'])) $render['master'] = 'admin';
 					return $this->render($render);
 				}
 			}else{

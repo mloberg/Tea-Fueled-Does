@@ -125,3 +125,7 @@
 ## 1.1.9.6
 
 * added link (href) helper
+
+## 1.2
+
+* added admin master

@@ -15,3 +15,8 @@ Please move this folder into your content folder, or create a folder called 'tem
 ## 1.1.9
 
 Redis config file in content/_config has been updated. This is not a required change, but brings some improvements.
+
+## 1.2
+
+The admin backend has it's own master. It's in content/masters/admin.php.
+Please copy this file over to your masters folder, or create a file called admin.php within your masters directory.
