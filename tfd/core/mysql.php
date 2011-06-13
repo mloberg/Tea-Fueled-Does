@@ -68,9 +68,9 @@
 			$where = self::$where;
 			foreach($info as $row => $value){
 				if($where === null){
-					$where = sprintf("WHERE %s='%s'", mysql_real_escape_string($row), mysql_real_escape_string($value));
+					$where = sprintf("WHERE `%s`='%s'", mysql_real_escape_string($row), mysql_real_escape_string($value));
 				}else{
-					$where .= sprintf(" %s %s='%s'", $type, mysql_real_escape_string($row), mysql_real_escape_string($value));
+					$where .= sprintf(" %s `%s`='%s'", $type, mysql_real_escape_string($row), mysql_real_escape_string($value));
 				}
 			}
 			self::$where = $where;
@@ -109,11 +109,11 @@
 			if(is_array($by)){
 				// multi
 				foreach($by as $b){
-					$order .= '\''.$b.'\', ';
+					$order .= '`'.$b.'`, ';
 				}
 				$order = preg_replace('/, $/','',$order);
 			}else{
-				$order .= '\''.$by.'\'';
+				$order .= '`'.$by.'`';
 			}
 			$this->order_by = $order.' '.$type;
 			return $this;
@@ -193,15 +193,15 @@
 		function update($table,$info,$where=''){
 			$link = self::connection();
 			foreach($info as $key => $val){
-				$update .= sprintf("%s='%s', ", mysql_real_escape_string($key), mysql_real_escape_string($val));
+				$update .= sprintf("`%s`='%s', ", mysql_real_escape_string($key), mysql_real_escape_string($val));
 			}
 			$update = preg_replace('/, $/', '', $update);
 			if(is_array($where)){
 				foreach($where as $key => $value){
 					if(!$temp){
-						$temp = sprintf("WHERE %s='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
+						$temp = sprintf("WHERE `%s`='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
 					}else{
-						$temp .= sprintf(" AND %s='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
+						$temp .= sprintf(" AND `%s`='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
 					}
 				}
 				$where = $temp;
@@ -223,9 +223,9 @@
 			if(is_array($where)){
 				foreach($where as $key => $value){
 					if(!$temp){
-						$temp = sprintf("WHERE %s='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
+						$temp = sprintf("WHERE `%s`='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
 					}else{
-						$temp .= sprintf(" AND %s='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
+						$temp .= sprintf(" AND `%s`='%s'", mysql_real_escape_string($key), mysql_real_escape_string($value));
 					}
 				}
 				$where = $temp;
