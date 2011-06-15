@@ -1,6 +1,5 @@
 <?php
 
-define('BASE_URL', 'http://localhost/'); // with trailing slash
 define('SITE_TITLE', 'Tea-Fueled Does');
 define('ADMIN_EMAIL', '');
 define('LOGIN_PATH', 'login');

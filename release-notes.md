@@ -20,3 +20,11 @@ Redis config file in content/_config has been updated. This is not a required ch
 
 The admin backend has it's own master. It's in content/masters/admin.php.
 Please copy this file over to your masters folder, or create a file called admin.php within your masters directory.
+
+## 1.2.1
+
+Amazon S3 changes. Please update your code to fit these changes. (http://teafueleddoes.com/docs/amazon-s3)
+
+## 1.2.2
+
+Partials can only be rendered from the partials folder.
