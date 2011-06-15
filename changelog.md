@@ -137,3 +137,7 @@
 ## 1.2.2
 
 * Partial method updated
+
+## 1.2.3
+
+* Changed how environments are set/work
