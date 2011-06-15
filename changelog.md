@@ -129,3 +129,7 @@
 ## 1.2
 
 * added admin master
+
+## 1.2.1
+
+* Amazon S3 library improvements
