@@ -133,3 +133,7 @@
 ## 1.2.1
 
 * Amazon S3 library improvements
+
+## 1.2.2
+
+* Partial method updated

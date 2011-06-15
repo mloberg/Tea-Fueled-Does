@@ -155,29 +155,19 @@
 			}
 		}
 		
-		function partial($options,$extra=null){
+		function partial($file, $extra=null){
 			if(is_array($extra)) extract($extra);
-			if(is_array($options)){
-				extract($options);
-			}else{
-				$file = $options;
-			}
-			// cannot render partials from admin
-			if($dir && $dir !== 'admin'){
-				$file = CONTENT_DIR.$dir.'/'.$file.EXT;
-			}else{
-				$file = PARTIALS_DIR.$file.EXT;
-			}
-			ob_start();
+			$file = PARTIALS_DIR.$file.EXT;
 			if(file_exists($file)){
+				ob_start();
 				include($file);
 				$partial = ob_get_contents();
-				ob_clean();
+				ob_end_clean();
+				return $partial;
 			}elseif($this->testing){
 				$this->error->report("Partial: {$file} doesn't exist");
 			}
-			ob_end_clean();
-			return $partial;
+			return;
 		}
 		
 		protected function render($options){
