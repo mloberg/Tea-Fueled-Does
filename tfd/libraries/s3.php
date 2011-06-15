@@ -94,13 +94,13 @@ class S3Exception extends Exception {
 		 BUCKET METHODS
 		********************/
 		
-		public static function listBuckets($detailed = false) {
+		public static function list_buckets($detailed=false) {
 			$rest = new S3Request('GET', '', '');
 			$rest = $rest->getResponse();
 			if ($rest->error === false && $rest->code !== 200)
 				$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 			if ($rest->error !== false) {
-				trigger_error(sprintf("S3::listBuckets(): [%s] %s", $rest->error['code'], $rest->error['message']), E_USER_WARNING);
+				trigger_error(sprintf("S3::list_buckets(): [%s] %s", $rest->error['code'], $rest->error['message']), E_USER_WARNING);
 				return false;
 			}
 			$results = array();
@@ -122,7 +122,7 @@ class S3Exception extends Exception {
 			return $results;
 		}
 
-		public static function getBucket($prefix = null, $marker = null, $maxKeys = null, $delimiter = null, $returnCommonPrefixes = false){
+		public static function list_items($prefix = null, $marker = null, $maxKeys = null, $delimiter = null, $returnCommonPrefixes = false){
 			$bucket = self::get_bucket();
 			
 			$rest = new S3Request('GET', $bucket, '');
@@ -134,7 +134,7 @@ class S3Exception extends Exception {
 			if ($response->error === false && $response->code !== 200)
 				$response->error = array('code' => $response->code, 'message' => 'Unexpected HTTP status');
 			if ($response->error !== false) {
-				trigger_error(sprintf("S3::getBucket(): [%s] %s", $response->error['code'], $response->error['message']), E_USER_WARNING);
+				trigger_error(sprintf("S3::get_bucket_items(): [%s] %s", $response->error['code'], $response->error['message']), E_USER_WARNING);
 				return false;
 			}
 	
@@ -195,37 +195,27 @@ class S3Exception extends Exception {
 			return $results;
 		}
 
-		public static function putBucket($bucket = null, $location = false) {
-			if(!$bucket) $bucket = self::get_bucket();
+		public static function create_bucket($bucket = null) {
+			if(is_null($bucket)) $bucket = self::get_bucket();
 			$acl = self::get_acl();
 			
 			$rest = new S3Request('PUT', $bucket, '');
 			$rest->setAmzHeader('x-amz-acl', $acl);
-	
-			if ($location !== false) {
-				$dom = new DOMDocument;
-				$createBucketConfiguration = $dom->createElement('CreateBucketConfiguration');
-				$locationConstraint = $dom->createElement('LocationConstraint', strtoupper($location));
-				$createBucketConfiguration->appendChild($locationConstraint);
-				$dom->appendChild($createBucketConfiguration);
-				$rest->data = $dom->saveXML();
-				$rest->size = strlen($rest->data);
-				$rest->setHeader('Content-Type', 'application/xml');
-			}
+			
 			$rest = $rest->getResponse();
 	
 			if ($rest->error === false && $rest->code !== 200)
 				$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 			if ($rest->error !== false) {
-				trigger_error(sprintf("S3::putBucket({$bucket}, {$acl}, {$location}): [%s] %s",
+				trigger_error(sprintf("S3::create_bucket({$bucket}, {$acl}, {$location}): [%s] %s",
 				$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 				return false;
 			}
 			return true;
 		}
 
-		public static function deleteBucket(){
-			$bucket = self::get_bucket();
+		public static function delete_bucket($bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
 			
 			$rest = new S3Request('DELETE', $bucket);
 			$rest = $rest->getResponse();
@@ -239,8 +229,8 @@ class S3Exception extends Exception {
 			return true;
 		}
 		
-		public static function getBucketLocation(){
-			$bucket = self::get_bucket();
+		public static function get_bucket_location($bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
 			
 			$rest = new S3Request('GET', $bucket, '');
 			$rest->setParameter('location', null);
@@ -249,7 +239,7 @@ class S3Exception extends Exception {
 				$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 			}
 			if($rest->error !== false){
-				trigger_error(sprintf("S3::getBucketLocation({$bucket}): [%s] %s",
+				trigger_error(sprintf("S3::get_bucket_location({$bucket}): [%s] %s",
 				$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 				return false;
 			}
@@ -261,7 +251,7 @@ class S3Exception extends Exception {
 		 OBJECT METHODS
 		********************/
 		
-		public static function putObject($input, $uri, $metaHeaders = array(), $requestHeaders = array()) {
+		protected static function putObject($input, $uri, $metaHeaders = array(), $requestHeaders = array()) {
 			$bucket = self::get_bucket();
 			$acl = self::get_acl();
 			
@@ -326,8 +316,8 @@ class S3Exception extends Exception {
 			return true;
 		}
 
-		public static function putObjectFile($file, $uri, $metaHeaders = array(), $contentType = null) {
-			return self::putObject(self::inputFile($file), $uri, $metaHeaders, $contentType);
+		public static function put_object($file, $uri, $metaHeaders = array(), $requestHeaders = array()) {
+			return self::putObject(self::inputFile($file), $uri, $metaHeaders, $requestHeaders);
 		}
 
 		public static function get_object($uri, $saveTo = false){
@@ -348,14 +338,14 @@ class S3Exception extends Exception {
 			if ($rest->response->error === false && $rest->response->code !== 200)
 				$rest->response->error = array('code' => $rest->response->code, 'message' => 'Unexpected HTTP status');
 			if ($rest->response->error !== false) {
-				trigger_error(sprintf("S3::getObject({$bucket}, {$uri}): [%s] %s",
+				trigger_error(sprintf("S3::get_object({$bucket}, {$uri}): [%s] %s",
 				$rest->response->error['code'], $rest->response->error['message']), E_USER_WARNING);
 				return false;
 			}
 			return $rest->response;
 		}
 
-		public static function getObjectInfo($uri, $returnInfo = true){
+		public static function get_object_info($uri, $returnInfo = true){
 			$bucket = self::get_bucket();
 			
 			$request = new S3Request('HEAD', $bucket, $uri);
@@ -373,7 +363,7 @@ class S3Exception extends Exception {
 			return false;
 		}
 
-		public static function copyObject($srcBucket, $srcUri, $uri, $metaHeaders = array(), $requestHeaders = array()){
+		public static function copy_object($srcBucket, $srcUri, $uri, $metaHeaders = array(), $requestHeaders = array()){
 			$bucket = self::get_bucket();
 			$acl = self::get_acl();
 			
@@ -390,7 +380,7 @@ class S3Exception extends Exception {
 			if($rest->error === false && $rest->code !== 200)
 				$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 			if($rest->error !== false){
-				trigger_error(sprintf("S3::copyObject({$srcBucket}, {$srcUri}, {$bucket}, {$uri}): [%s] %s",
+				trigger_error(sprintf("S3::copy_object({$srcBucket}, {$srcUri}, {$bucket}, {$uri}): [%s] %s",
 				$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 				return false;
 			}
@@ -400,7 +390,7 @@ class S3Exception extends Exception {
 			) : false;
 		}
 
-		public static function deleteObject($object) {
+		public static function delete_object($object) {
 			$bucket = self::get_bucket();
 			
 			$rest = new S3Request('DELETE', $bucket, $object);
@@ -409,14 +399,14 @@ class S3Exception extends Exception {
 				$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 			}
 			if ($rest->error !== false){
-				trigger_error(sprintf("S3::deleteObject(): [%s] %s",
+				trigger_error(sprintf("S3::delete_object(): [%s] %s",
 				$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 				return false;
 			}
 			return true;
 		}
 
-		public static function getAuthenticatedURL($uri, $lifetime, $hostBucket = false, $https = false){
+		public static function get_authenticated_url($uri, $lifetime, $hostBucket = false, $https = false){
 			$bucket = self::get_bucket();
 			$expires = time() + $lifetime;
 			$uri = str_replace('%2F', '/', rawurlencode($uri)); // URI should be encoded (thanks Sean O'Dea)
