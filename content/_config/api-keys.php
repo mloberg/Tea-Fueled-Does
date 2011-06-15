@@ -16,4 +16,5 @@ define('POSTMARK_REPLY_TO', ''); // not required
 // Amazon S3 - http://aws.amazon.com/s3/
 define('S3_ACCESS_KEY', '');
 define('S3_SECRET_KEY', '');
+define('S#_DEAULT_BUCKET', '');
 define('S3_DEFAULT_ACL', 'public-read');
