@@ -146,3 +146,10 @@
 
 * updated form open_upload element to not require method (default is post)
 * JavaScript library fixes/enhancements/updates
+
+## 1.2.5
+
+* JavaScript fixes
+* add admin user enhancements
+* Postmark library enhancements
+* Added user agent parser helper

@@ -79,15 +79,12 @@
 			}
 		}
 		
-		/**
-		 * This is a basic method to add a user to the database.
-		 * Right now, it only adds a username and a hashed password
-		 */
-		protected function add_user($username, $password){
+		protected function add_user($username, $password, $info = array()){
+			$info['username'] = $username;
 			// hash the pass
-			$salt = AdminValidation::hash($password);
+			$info['salt'] = AdminValidation::hash($password);
 			// add to database
-			if($this->mysql->insert(USERS_TABLE, array('username' => $username, 'salt' => $salt))){
+			if($this->mysql->insert(USERS_TABLE, $info)){
 				return true;
 			}
 			return false;
