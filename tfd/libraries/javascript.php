@@ -38,7 +38,7 @@
 				}elseif(self::$config['library'] == 'jquery'){
 					$ready = "\$(document).ready(function(){\n";
 				}else{
-					$ready = "window.onload = (function(){\n";
+					$ready = "window.onready = (function(){\n";
 				}
 				foreach(self::$ready as $s){
 					$ready .= "{$s}\n";

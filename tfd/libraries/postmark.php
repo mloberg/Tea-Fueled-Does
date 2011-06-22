@@ -3,7 +3,7 @@
 	/**
 	 * This is a simple library for sending emails with Postmark
 	 *
-	 * Usage: $this->postmark->to(email)->subject(subject)->message_type(message)->send();
+	 * Usage: $this->postmark->to(email)->subject(subject)->message(message, type)->send();
 	 */
 	
 	class Postmark{
@@ -18,11 +18,12 @@
 			return self::$errors;
 		}
 		
-		function send(){
+		function send($data = array()){
+			$this->data = $this->data + $data;
 			$headers = array(
-				"Accept: application/json",
-				"Content-Type: application/json",
-				"X-Postmark-Server-Token: {$this->api_key}"
+				'Accept: application/json',
+				'Content-Type: application/json',
+				'X-Postmark-Server-Token: '.$this->api_key
 			);
 			$data = $this->prepare_data();
 			$ch = curl_init('http://api.postmarkapp.com/email');
@@ -46,27 +47,26 @@
 		}
 		
 		function to($to){
-			$this->data["To"] = $to;
+			$this->data['To'] = $to;
 			return $this;
 		}
 		
 		function subject($subject){
-			$this->data["Subject"] = $subject;
+			$this->data['Subject'] = $subject;
 			return $this;
 		}
 		
-		function message_html($body){
-			$this->data["HtmlBody"] = "<html><body>{$body}</body></html>";
-			return $this;
-		}
-		
-		function message_plain($msg){
-			$this->data["TextBody"] = $msg;
+		function message($message, $type = 'text'){
+			if($type == 'html'){
+				$this->data['HtmlBody'] = '<html><body>'.$body.'</body></html>';
+			}else{
+				$this->data['TextBody'] = $message;
+			}
 			return $this;
 		}
 		
 		function tag($tag){
-			$this->data["Tag"] = $tag;
+			$this->data['Tag'] = $tag;
 			return $this;
 		}
 		
