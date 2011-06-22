@@ -141,3 +141,8 @@
 ## 1.2.3
 
 * Changed how environments are set/work
+
+## 1.2.4
+
+* updated form open_upload element to not require method (default is post)
+* JavaScript library fixes/enhancements/updates

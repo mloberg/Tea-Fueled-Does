@@ -58,13 +58,13 @@
 			return "<form action=\"{$action}\" method=\"{$method}\"{$extra}>\n";
 		}
 		
-		static function open_upload($action,$method='post',$extra=''){
+		static function open_upload($action,$extra=''){
 			if($extra !== ''){
 				$extra = $extra . 'enctype="multipart/form-data"';
 			}else{
 				$extra = 'enctype="multipart/form-data"';
 			}
-			return self::open($action,$method,$extra);
+			return self::open($action,'post',$extra);
 		}
 		
 		static function label($for,$text){return "<label for=\"{$for}\">{$text}</label>";}
