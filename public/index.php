@@ -10,7 +10,7 @@
 	$start_time = microtime(true);
 	register_shutdown_function('timer');
 	
-	// define the location of the app and content dir. With the trailing slash (/)
+	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
 	
 	$app_dir = '../tfd/';
 	$content_dir = '../content/';

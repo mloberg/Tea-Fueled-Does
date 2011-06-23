@@ -229,7 +229,7 @@
 			header('HTTP/1.1 404 Not Found');
 		}
 		
-		protected function url($segment=null){
+		protected function url($segment = null){
 			if($segment == null){
 				return $this->request;
 			}else{
@@ -239,7 +239,7 @@
 			}
 		}
 		
-		function flash($message, $type='error', $options=array()){
+		function flash($message, $type = 'error', $options = array()){
 			$default_options = array(
 				'time' => '2',
 				'sticky' => false

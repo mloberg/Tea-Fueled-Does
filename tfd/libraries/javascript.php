@@ -65,7 +65,7 @@
 			}
 		}
 		
-		function library($lib, $order = null, $load = true){
+		function library($lib, $load = true, $order = null){
 			// if no library, return false
 			if(!array_key_exists($lib, self::$libraries)) return false;
 			if($load && !in_array($src, self::$scripts)){
