@@ -153,3 +153,9 @@
 * add admin user enhancements
 * Postmark library enhancements
 * Added user agent parser helper
+
+## 1.2.6
+
+* CSS and JavaScript will load using BASE_URL if http(s) is not in the source
+* other CSS enhancements
+* deleted htaccess rules that point urls ending in css/*, js/* and font(s)/*

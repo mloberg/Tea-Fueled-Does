@@ -13,6 +13,13 @@
 		private static $ready = array();
 		private static $config = array();
 		
+		private static function prepare($src){
+			if(!preg_match('/^http(s*)\:\/\//', $src)){
+				$src = BASE_URL.$src;
+			}
+			return '<script src="'.$src.'"></script>';
+		}
+		
 		function echo_scripts(){
 			if(!empty(self::$scripts)){
 				ksort(self::$scripts);
@@ -51,47 +58,52 @@
 			}
 		}
 		
-		function add_library($name, $src, $load = false){
+		function add_library($name, $src, $load = false, $order = null){
 			self::$libraries[$name] = $src;
+			if($load){
+				$this->library($name, $order, true);
+			}
 		}
 		
-		function library($lib, $number = null, $load = true){
-			if(!array_key_exists($lib, self::$libraries)) return;
-			$src = '<script src="'.self::$libraries[$lib].'"></script>';
+		function library($lib, $order = null, $load = true){
+			// if no library, return false
+			if(!array_key_exists($lib, self::$libraries)) return false;
 			if($load && !in_array($src, self::$scripts)){
-				if(is_null($number)) $number = count(self::$scripts) + 1;
-				self::$scripts[$number] = $src;
+				if(is_null($order)) $order = count(self::$scripts) + 1;
+				self::$scripts[$order] = self::prepare(self::$libraries[$lib]);;
 			}
 			if($lib == 'mootools'){
 				self::$config['library'] = 'mootools';
 			}elseif($lib == 'jquery'){
 				self::$config['library'] = 'jquery';
 			}
+			return true;
 		}
 		
-		function load($src, $number = null){
+		function load($src, $order = null){
 			if(is_array($src)){
+				ksort($src);
 				foreach($src as $index => $s){
-					self::$scripts[$index] = '<script src="'.$s.'"></script>';
+					self::$scripts[$index + $order] = self::prepare($s);
 				}
 			}else{
-				if(is_null($number)) $number = count(self::$scripts) + 1;
-				self::$scripts[$number] = '<script src="'.$src.'"></script>';
+				if(is_null($order)) $order = count(self::$scripts) + 1;
+				self::$scripts[$order] = self::prepare($src);
 			}
 		}
 		
 		// functions, vars, etc. that go outside of the domready function
 		
-		function script($script, $number = null){
-			if(is_null($number)) $number = count(self::$script) + 1;
-			self::$script[$number] = $script;
+		function script($script, $order = null){
+			if(is_null($order)) $order = count(self::$script) + 1;
+			self::$script[$order] = $script;
 		}
 		
 		// function, vars, etc. that go inside of the domready function
 		
-		function ready($script, $number = null){
-			if(is_null($number)) $number = count(self::$ready) + 1;
-			self::$ready[$number] = $script;
+		function ready($script, $order = null){
+			if(is_null($order)) $order = count(self::$ready) + 1;
+			self::$ready[$order] = $script;
 		}
 	
 	}
