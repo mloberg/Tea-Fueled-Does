@@ -37,7 +37,11 @@
 		}
 		
 		private function save($options){
-			$output = PUBLIC_DIR.$options['path'].'/'.$options['name'];
+			$output = PUBLIC_DIR;
+			if($options['path']){
+				$output .= $options['path'].'/';
+			}
+			$output .= $options['name'];
 			// figure out the extension and type to save it as
 			if($options['type']){
 				$output .= '.'.$options['type'];
@@ -147,6 +151,58 @@
 			$height = $this->info['height'];
 			$this->new_image = imagecreatetruecolor($width, $height);
 			imagecopyresampled($this->new_image, $this->image, 0, 0, 0, 0, $width, $height, $width, $height);
+			return $this->save($output);
+		}
+		
+		function watermark($file, $watermark, $output, $options = array()){
+			$options = $options + array('x' => 0, 'y' => 0);
+			$this->open($watermark);
+			switch(end(explode('.', $file))){
+				case 'gif':
+					$this->new_image = imagecreatefromgif($file);
+					break;
+				case 'jpg':
+				case 'jpeg':
+					$this->new_image = imagecreatefromjpeg($file);
+					break;
+				case 'png':
+					$this->new_image = imagecreatefrompng($file);
+					break;
+				default:
+					echo 'Not a valid image type.';
+					exit;
+			}
+			
+			$width = imagesx($this->new_image);
+			$height = imagesy($this->new_image);
+			
+			switch($options['x']){
+				case 'left':
+					$x = 0;
+					break;
+				case 'center':
+					$x = (($width - $this->info['width']) / 2);
+					break;
+				case 'right':
+					$x = ($width - $this->info['width']);
+				default:
+					$x = $options['x'];
+			}
+			switch($options['y']){
+				case 'top':
+					$y = 0;
+					break;
+				case 'center':
+					$y = (($height - $this->info['height']) / 2);
+					break;
+				case 'bottom':
+					$y = ($height - $this->info['height']);
+				default:
+					$y = $options['y'];
+			}
+			
+			imagecopy($this->new_image, $this->image, $x, $y, 0, 0, $this->info['width'], $this->info['height']);
+			
 			return $this->save($output);
 		}
 	
