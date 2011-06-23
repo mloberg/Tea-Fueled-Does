@@ -158,4 +158,4 @@
 
 * CSS and JavaScript will load using BASE_URL if http(s) is not in the source
 * other CSS enhancements
-* deleted htaccess rules that point urls ending in css/*, js/* and font(s)/*
+* deleted htaccess rules that point urls ending in css/, js/ and font(s)/
