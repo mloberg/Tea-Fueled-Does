@@ -92,7 +92,7 @@
 		
 		function or_where($field,$equal=null){
 			if(is_array($field)){
-				self::_where($field,'OR');
+				self::_where($field, 'OR');
 			}else{
 				self::_where(array($field => $equal), 'OR');
 			}
@@ -174,7 +174,7 @@
 			$link = self::connection();
 			$qry = sprintf('INSERT INTO %s', mysql_escape_string($table));
 			foreach($data as $key => $val){
-				$fields .= mysql_real_escape_string($key) . ',';
+				$fields .= '`'.mysql_real_escape_string($key) . '`,';
 				$values .= "'" . mysql_real_escape_string($val) . "',";
 			}
 			$fields = preg_replace('/,$/', '', $fields);
