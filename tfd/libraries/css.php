@@ -8,8 +8,16 @@
 		private static $styles = array();
 		private static $style_tag = null;
 		
+		private static function prepare($src){
+			if(!preg_match('/^http(s*)\:\/\//', $src)){
+				$src = BASE_URL.$src;
+			}
+			return '<link rel="stylesheet" href="'.$src.'" />';
+		}
+		
 		function echo_stylesheets(){
 			if(is_array(self::$styles)){
+				ksort(self::$styles);
 				foreach(self::$styles as $s){
 					$sheets .= "{$s}\n";
 				}
@@ -20,15 +28,25 @@
 			}
 		}
 		
-		function add_sheet($name, $src){
+		function add_sheet($name, $src, $load = false, $order = null){
 			self::$sheets[$name] = $src;
+			if($load){
+				$this->load($name, $order);
+			}
 		}
 		
-		function load($src){
-			if(array_key_exists($src, self::$sheets)){
-				$src = self::$sheets[$src];
+		function load($src, $order = null){
+			if(is_null($order)) $order = count(self::$styles) + 1;
+			if(is_array($src)){
+				ksort($src);
+				foreach($src as $index => $style){
+					self::$styles[$index + $order] = self::prepare($style);
+				}
+			}elseif(array_key_exists($src, self::$sheets)){
+				self::$styles[$order] = self::prepare(self::$sheets[$src]);
+			}else{
+				self::$styles[$order] = self::prepare($src);
 			}
-			self::$styles[] = '<link rel="stylesheet" href="'.$src.'" />';
 		}
 		
 		function style($styles){
