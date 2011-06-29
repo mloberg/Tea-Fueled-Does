@@ -194,6 +194,7 @@
 				// clean the output buffer
 				ob_clean();
 			}elseif($this->testing && $this->request !== '404'){
+				$this->send_404();
 				$this->error->report("{$file} not found!");
 			}else{
 				// if the file wasn't found, 404
