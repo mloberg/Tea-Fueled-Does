@@ -58,7 +58,7 @@
 		
 		function message($message, $type = 'text'){
 			if($type == 'html'){
-				$this->data['HtmlBody'] = '<html><body>'.$body.'</body></html>';
+				$this->data['HtmlBody'] = '<html><body>'.$message.'</body></html>';
 			}else{
 				$this->data['TextBody'] = $message;
 			}
