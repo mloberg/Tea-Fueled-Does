@@ -4,6 +4,7 @@
 	
 		public $request;
 		protected $testing;
+		protected $is_admin = false;
 		protected $classes = array();
 		protected $info = array();
 		
@@ -112,6 +113,7 @@
 			}elseif(file_exists(WEB_DIR.$this->request.EXT) && !$this->admin->loggedin()){
 				return $this->render(array('file' => $this->request));
 			}elseif(preg_match('/^'.ADMIN_PATH.'/', $this->request)){
+				$this->is_admin = true;
 				return $this->admin->dashboard();
 			}else{
 				return $this->render(array('file' => $this->request));
@@ -171,6 +173,7 @@
 		}
 		
 		protected function render($options){
+			if(!$this->is_admin) $this->hooks->front();
 			$this->hooks->render();
 			extract($options);
 			// get full path of the file

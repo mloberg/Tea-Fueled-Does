@@ -11,7 +11,11 @@
 		}
 		
 		function admin(){
+			
+		}
 		
+		function front(){
+			
 		}
 		
 		function render(){
