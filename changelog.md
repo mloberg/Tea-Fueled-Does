@@ -164,3 +164,8 @@
 
 * MySQL fixes
 * added watermark image method to image manipulation library
+
+## 1.2.8
+
+* Added front end hook
+* added $this->is_admin
