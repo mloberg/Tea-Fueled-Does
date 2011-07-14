@@ -28,3 +28,7 @@ Amazon S3 changes. Please update your code to fit these changes. (http://teafuel
 ## 1.2.2
 
 Partials can only be rendered from the partials folder.
+
+## 1.2.9
+
+Updated *content/ajax/ajax.php* call method to send 404 if no file or method is found.
