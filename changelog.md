@@ -169,3 +169,7 @@
 
 * Added front end hook
 * added $this->is_admin
+
+## 1.2.9
+
+* if no AJAX method or file, it now 404's

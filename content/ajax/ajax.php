@@ -7,6 +7,8 @@
 				return $this->ajax->$_GET['ajax']();
 			}elseif(file_exists(AJAX_DIR.$_GET['ajax'].EXT)){
 				include AJAX_DIR.$_GET['ajax'].EXT;
+			}else{
+				$this->send_404();
 			}
 		}
 		
