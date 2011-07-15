@@ -9,7 +9,7 @@
 	<![endif]-->
 </head>
 <body>
-<?php echo $this->render->flash;?>
+<?php echo $this->flash->render();?>
 <div id="wrapper">
 <?php echo $content;?>
 

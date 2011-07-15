@@ -173,3 +173,14 @@
 ## 1.2.9
 
 * if no AJAX method or file, it now 404's
+
+## 1.3.0
+
+* flash method now class
+* removed *$this->css->flash()* method
+* updated flash css
+* removed htaccess rules that pointed *img* and *image* to their respective folder wherever you are
+* removed *img/* from the image_tag source helper
+* local copies of jQuery and jQuery UI
+* added jQuery UI's ui-lightness to the css library
+* updated redis class

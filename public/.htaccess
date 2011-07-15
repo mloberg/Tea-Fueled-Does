@@ -16,11 +16,6 @@
 	RewriteRule ^content/(.*)$ 404 [L]
 	RewriteRule ^tfd/(.*)$ 404 [L]
 
-### points all requests that end in image/* or img/* to their respective folders. ###
-### These rules will be deleted in an upcoming version ###
-	RewriteRule img/(.*)$ img/$1 [L]
-	RewriteRule image/(.*)$ image/$1 [L]
-
 ### Point all non-existing requests to index.php ###
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d

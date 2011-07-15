@@ -35,7 +35,7 @@
  * @copyright 2009 Justin Poliey <jdp34@njit.edu>
  * @license http://www.opensource.org/licenses/mit-license.php The MIT License
  */
-
+ 
 /**
  * This Redis class was modified by Matthew Loberg to work with Tea-Fueled Does
  */
@@ -44,7 +44,7 @@ if(!defined('CRLF')){
 	define('CRLF', sprintf('%s%s', chr(13), chr(10)));
 }
 
-class Redis{
+class redis{
 
 	const ERROR = '-';
 	const INLINE = '+';
@@ -79,7 +79,7 @@ class Redis{
 	public function __call($name, $args){
 		$cmd = $this->buildCommand($name, $args);
 		$this->sendCommand($cmd);
-
+		
 		return $this->readReply();
 	}
 	
@@ -88,7 +88,7 @@ class Redis{
 		$command = '*'.(count($args) + 1).CRLF;
 		$command .= '$'.strlen($cmd).CRLF;
 		$command .= strtoupper($cmd).CRLF;
-
+		
 		// Add all the arguments to the command
 		foreach($args as $arg){
 			$command .= '$'.strlen($arg).CRLF;
@@ -110,44 +110,39 @@ class Redis{
 		if(!$this->connection){
 			throw new RedisException('You must be connected to a Redis server to send a command.');
 		}
-
+		
 		$reply = trim(fgets($this->connection, 512));
-
+		
 		switch(substr($reply, 0, 1)){
-			case Redis::ERROR:
+			case redis::ERROR:
 				throw new RedisException(substr(trim($reply), 4));
 			break;
-
-			case Redis::INLINE:
+			case redis::INLINE:
 				$response = substr(trim($reply), 1);
 			break;
-
-			case Redis::BULK:
+			case redis::BULK:
 				if($reply == '$-1'){
-					break;
+					return null;
 				}
 				$response = $this->readBulkReply($reply);
 			break;
-
-			case Redis::MULTIBULK:
+			case redis::MULTIBULK:
 				$count = substr($reply, 1);
 				if($count == '-1'){
 					return null;
 				}
-
+				
 				$response = array();
 				for($i = 0; $i < $count; $i++){
 					$bulk_head = trim(fgets($this->connection, 512));
 					$response[] = $this->readBulkReply($bulk_head);
 				}
 			break;
-
-			case Redis::INTEGER:
+			case redis::INTEGER:
 				$response = substr(trim($reply), 1);
 			break;
-
 			default:
-				throw new RedisException("invalid server response: {$reply}");
+				throw new RedisException("invalid server response:{$reply}");
 			break;
 		}
 		
@@ -158,13 +153,12 @@ class Redis{
 		if(!$this->connection){
 			throw new RedisException('You must be connected to a Redis server to send a command.');
 		}
-
 		$response = null;
-
+		
 		$read = 0;
 		$size = substr($reply, 1);
-
-		while($read < $size){
+		
+		while ($read < $size){
 			// If the amount left to read is less than 1024 then just read the rest, else read 1024
 			$block_size = ($size - $read) > 1024 ? 1024 : ($size - $read);
 			$response .= fread($this->connection, $block_size);
@@ -178,4 +172,4 @@ class Redis{
 
 }
 
-class RedisException extends Exception { }
+class RedisException extends Exception{ }

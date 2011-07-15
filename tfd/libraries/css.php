@@ -3,7 +3,8 @@
 	class CSS{
 	
 		private static $sheets = array(
-			'reset' => 'css/reset.css'
+			'reset' => 'css/reset.css',
+			'jquery-ui' => 'css/ui-lightness/jquery-ui-1.8.14.css'
 		);
 		private static $styles = array();
 		private static $style_tag = null;
@@ -78,34 +79,6 @@ STYLE;
 
 FONT;
 			self::$style_tag = $font.$style;
-		}
-		
-		function flash(){
-			$style = self::$style_tag;
-			self::$style_tag = <<<FLASH
-	#message-flash{
-		width: 100%;
-		position: relative;
-		top: 0;
-		left: 0;
-		padding: 5px 0;
-		text-align: center;
-	}
-	.message-success{
-		background-color: #008000;
-		color: #fff;
-	}
-	.message-error{
-		background-color: #b22222;
-		color: #fff;
-	}
-	.message-warning{
-		background-color: #ffd700;
-		color: #000;
-	}
-{$style}
-
-FLASH;
 		}
 	
 	}
