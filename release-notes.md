@@ -32,3 +32,11 @@ Partials can only be rendered from the partials folder.
 ## 1.2.9
 
 Updated *content/ajax/ajax.php* call method to send 404 if no file or method is found.
+
+## 1.3.0
+
+Flash method is now a class. You can still call flashes like you used to before (*$this->flash()*), but it's recommended to change to the new format *$this->flash->message(message, type, options)*
+
+The render class was removed. For flash renders now use *$this->flash->render()* instead of *$this->render->flash*
+
+Removed *js/form.js*. Use placeholder (or write your own function) instead.

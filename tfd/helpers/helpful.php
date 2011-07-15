@@ -24,7 +24,7 @@
 	}
 	
 	function image_tag($src,$alt){
-		$img = BASE_URL.'img/'.$src;
+		$img = BASE_URL.$src;
 		list($w,$h,$type,$attr) = getimagesize($img);
 		return '<img src="'.$img.'" alt="'.$alt.'" '.$attr.' />'."\n";
 	}

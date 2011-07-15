@@ -5,8 +5,8 @@
 		private static $libraries = array(
 			'mootools' => 'js/mootools-core-1.3.1.min.js',
 			'mootools-more' => 'js/mootools-more-1.3.1.1.min.js',
-			'jquery' => 'https://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js',
-			'jquery-ui' => 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js'
+			'jquery' => 'js/jquery-1.6.2.min.js',
+			'jquery-ui' => 'js/jquery-ui-1.8.14.min.js'
 		);
 		private static $scripts = array();
 		private static $script = array();
