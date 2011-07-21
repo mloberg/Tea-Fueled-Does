@@ -184,3 +184,9 @@
 * local copies of jQuery and jQuery UI
 * added jQuery UI's ui-lightness to the css library
 * updated redis class
+
+## 1.3.1
+
+* see release-notes.md
+* $this->flash->message() matches $this->flash()
+* new default index.php file
