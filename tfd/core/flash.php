@@ -4,7 +4,7 @@
 		
 		static private $flash = array();
 		
-		function message($message, $type, $options){
+		function message($message, $type = 'message', $options = array()){
 			self::$flash['message'] = $message;
 			$default_options = array(
 				'time' => '2',
@@ -68,6 +68,7 @@ SCRIPT;
 		}
 		
 		function render(){
+			if(empty(self::$flash)) return;
 			if(self::$flash['options']['sticky'] === false){
 				$this->js();
 			}

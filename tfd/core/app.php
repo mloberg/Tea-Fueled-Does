@@ -210,6 +210,11 @@
 			}elseif($options['title']){
 				$title = $options['title'];
 			}
+			if(!empty($replace)){
+				foreach($replace as $item => $value){
+					$content = str_replace($item, $value, $content);
+				}
+			}
 			// get the full path to the master
 			$master = MASTERS_DIR . $master . EXT;
 			if(!file_exists($master)){
@@ -245,6 +250,13 @@
 		
 		function flash($message, $type = 'message', $options = array()){
 			$this->flash->message($message, $type, $options);
+		}
+		
+		function profile(){
+			return array(
+				round(microtime(true) - START_TIME, 4),
+				round((memory_get_peak_usage() - START_MEM) / pow(1024, 2), 3)
+			);
 		}
 	
 	}

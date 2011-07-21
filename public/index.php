@@ -3,12 +3,11 @@
 	/**
 	 * Tea-Fueled Does is a php framework developed by Matthew Loberg (http://mloberg.com).
 	 * Tea-Fueled Does is designed to be fast, in both development and performance.
-	 * 
 	 */
 	
 	// start the timer!
-	$start_time = microtime(true);
-	register_shutdown_function('timer');
+	define('START_TIME', microtime(true));
+	define('START_MEM', memory_get_usage());
 	
 	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
 	
@@ -17,7 +16,7 @@
 	
 	// then include the config file
 	
-	include_once($app_dir.'_config.php');
+	include_once($app_dir.'bootstrap.php');
 	
 	$autoload = array(
 		"helper" => "helpful"
@@ -30,13 +29,3 @@
 	// and finally echo the site output
 	
 	echo $app->site();
-	
-	// instead of echoing the time in the view, we do it once we are all done
-	// that means we are more acurate then other frameworks =P
-	
-	function timer(){
-		if(!$_GET['ajax']){
-			global $start_time;
-			echo "\n<script>console.log(\"Page rendered in ".(microtime(true) - $start_time)." seconds\");</script>";
-		}
-	}
