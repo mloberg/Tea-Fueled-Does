@@ -17,11 +17,6 @@
 			}else{
 				return false;
 			}
-			if($_COOKIE['sid'] === session_id() && $_SESSION['logged_in'] == true && $_COOKIE[$_SESSION['cid']] = md5($_SESSION['username'].AUTH_KEY)){
-				return true;
-			}else{
-				return false;
-			}
 		}
 		
 		private function validate_session_fingerprint(){
