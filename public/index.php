@@ -19,7 +19,7 @@
 	include_once($app_dir.'bootstrap.php');
 	
 	$autoload = array(
-		"helper" => "helpful"
+		'helper' => 'helpful'
 	);
 	
 	// make a new instance of our app class
