@@ -111,7 +111,7 @@
 				$this->admin->add_user($_GET['username'], $_GET['password']);
 				return 'user "'.$_GET['user'].'" added';
 			}elseif(preg_match('/^('.ADMIN_PATH.'\/)?logout$/', $this->request)){
-				$this->admin->logout();
+				return $this->admin->logout();
 			}elseif(preg_match('/^'.LOGIN_PATH.'/', $this->request)){
 				return $this->admin->login();
 			}elseif(file_exists(WEB_DIR.$this->request.EXT) && !$this->admin->loggedin()){

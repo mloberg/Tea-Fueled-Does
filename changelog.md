@@ -202,3 +202,7 @@
 * admin security updates
 * added some extra config options
 * added special add_user url (see docs)
+
+## 1.3.4
+
+* fixed logout bug
