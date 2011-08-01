@@ -17,6 +17,11 @@
 			}else{
 				return false;
 			}
+			if($_COOKIE['sid'] === session_id() && $_SESSION['logged_in'] == true && $_COOKIE[$_SESSION['cid']] = md5($_SESSION['username'].AUTH_KEY)){
+				return true;
+			}else{
+				return false;
+			}
 		}
 		
 		private function validate_session_fingerprint(){
@@ -38,10 +43,10 @@
 		
 		public function login(){
 			if($_POST['submit'] && $this->validate() || $this->loggedin()){
-				if($_SESSION['redirect']){
+				if($_COOKIE['redirect']){
 					// unset cookie
-					$redirect = $_SESSION['redirect'];
-					unset($_SESSION['redirect']);
+					$redirect = $_COOKIE['redirect'];
+					setcookie('redirect', '', time() - 3600, '/');
 					// redirect
 					header('Location: '.BASE_URL.$redirect);
 					exit;
@@ -65,9 +70,9 @@
 		
 		public function logout(){
 			$this->hooks->logout();
-			setcookie('loggedin', false, time() - 3600);
-			setcookie('fingerprint', '', time() - 3600);
-			setcookie('uid', '', time() - 3600);
+			setcookie('loggedin', '', time() - 3600, '/');
+			setcookie('fingerprint', '', time() - 3600, '/');
+			setcookie('uid', '', time() - 3600, '/');
 			session_destroy();
 			header('Location: ' . BASE_URL);
 		}
@@ -130,7 +135,7 @@
 					return $this->render($render);
 				}
 			}else{
-				$_SESSION['redirect'] = $this->request;
+				setcookie('redirect', $this->request, time() + 3600, '/');
 				header('Location: '.BASE_URL.LOGIN_PATH);
 			}
 		}
