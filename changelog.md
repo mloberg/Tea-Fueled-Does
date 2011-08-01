@@ -196,3 +196,9 @@
 * session_start() called when app is setup
 * updated load() function
 * MySQL enhancements
+
+## 1.3.3
+
+* admin security updates
+* added some extra config options
+* added special add_user url (see docs)

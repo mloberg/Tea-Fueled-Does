@@ -48,3 +48,12 @@ BASE_DIR is now the directory outside of the PUBLIC_DIR not APP_DIR.
 *tfd/_config.php* is now *tfd/bootstrap.php*. Other changes to *public/index.php* have also been made as well. I recommend replacing the old index.php with the new one.
 
 The time isn't rendered to the page every call anymore. You will have to use *$this->profile()* to get an array of time and memory usage.
+
+## 1.3.3
+
+Added some options to config files.
+
+* LOGIN_TIME in *general.php*
+* ADD_USER in *environments.php*
+
+Logins uses a user secret key, which is a key unique to each user. Add a column to you user table called secret.

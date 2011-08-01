@@ -107,6 +107,9 @@
 					return $this->module->load_module($route['module']);
 				}
 				return $this->render($route);
+			}elseif(ADD_USER && $this->request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
+				$this->admin->add_user($_GET['username'], $_GET['password']);
+				return 'user "'.$_GET['user'].'" added';
 			}elseif(preg_match('/^('.ADMIN_PATH.'\/)?logout$/', $this->request)){
 				$this->admin->logout();
 			}elseif(preg_match('/^'.LOGIN_PATH.'/', $this->request)){

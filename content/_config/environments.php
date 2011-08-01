@@ -21,6 +21,8 @@ if(ENVIRONMENT === 'DEVELOPMENT'){
 	error_reporting(E_ERROR | E_WARNING | E_PARSE);
 	// tfd error reporting
 	define('TESTING_MODE', true);
+	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+	define('ADD_USER', true);
 	// MySQL
 	define('DB_HOST', 'localhost');
 	define('DB_USER', 'root');
@@ -32,6 +34,8 @@ if(ENVIRONMENT === 'DEVELOPMENT'){
 	error_reporting(E_ERROR | E_WARNING);
 	// tfd error reporting
 	define('TESTING_MODE', true);
+	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+	define('ADD_USER', false);
 	// MySQL
 	define('DB_HOST', '');
 	define('DB_USER', '');
@@ -43,6 +47,8 @@ if(ENVIRONMENT === 'DEVELOPMENT'){
 	error_reporting(0); // no reporting
 	// tfd error reporting
 	define('TESTING_MODE', false);
+	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+	define('ADD_USER', false);
 	// MySQL
 	define('DB_HOST', '');
 	define('DB_USER', '');
