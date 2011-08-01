@@ -6,13 +6,31 @@
 		
 		function __construct(){
 			parent::__construct();
-			$this->login_time = time() + 3600;
+			$this->login_time = time() + LOGIN_TIME;
 		}
 		
 		public function loggedin(){
-			// check for cookie log in
-			if($_COOKIE['sid'] === session_id() && $_SESSION['logged_in'] == true && $_COOKIE[$_SESSION['cid']] = md5($_SESSION['username'].AUTH_KEY)){
+			if($_SESSION['logged_in'] && $this->validate_session_fingerprint()){
 				return true;
+			}elseif($_COOKIE['loggedin'] && $this->validate_cookie_fingerprint()){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		
+		private function validate_session_fingerprint(){
+			$fingerprint = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
+			return ($fingerprint === $_SESSION['fingerprint']);
+		}
+		
+		private function validate_cookie_fingerprint(){
+			$secret = $this->mysql->where('id', $_COOKIE['uid'])->limit(1)->get(USERS_TABLE, 'secret');
+			if(empty($secret)) return false;
+			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$secret[0]['secret']);
+			if($fingerprint === $_COOKIE['fingerprint']){
+				$_SESSION['logged_in'] = true;
+				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
 			}else{
 				return false;
 			}
@@ -47,7 +65,9 @@
 		
 		public function logout(){
 			$this->hooks->logout();
-			setcookie($_SESSION['cid'], '', time() - 3600);
+			setcookie('loggedin', false, time() - 3600);
+			setcookie('fingerprint', '', time() - 3600);
+			setcookie('uid', '', time() - 3600);
 			session_destroy();
 			header('Location: ' . BASE_URL);
 		}
@@ -56,18 +76,18 @@
 			$user = $_POST['username'];
 			$pass = $_POST['password'];
 			// get user info
-			$user_info = $this->mysql->where('username',$user)->limit(1)->get(USERS_TABLE);
-			if($user_info == '') return false;
+			$user_info = $this->mysql->where('username', $user)->limit(1)->get(USERS_TABLE);
+			if(empty($user_info)) return false;
 			$salt = $user_info[0]['salt'];
 			// check password
 			if(AdminValidation::check_password($salt, $pass)){
 				// set session vars
-				$_SESSION['username'] = $user;
 				$_SESSION['logged_in'] = true;
-				// set some cookies
-				$unique_cookie = uniqid('user_', true);
-				setcookie($unique_cookie, md5($user.AUTH_KEY), $this->login_time);
-				$_SESSION['cid'] = $unique_cookie;
+				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
+				// set cookie
+				setcookie('loggedin', true, $this->login_time);
+				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$user_info[0]['secret']), $this->login_time);
+				setcookie('uid', $user_info[0]['id'], $this->login_time);
 				// run user hook
 				$this->hooks->login($user_info[0]);
 				// validated
@@ -82,6 +102,8 @@
 			$info['username'] = $username;
 			// hash the pass
 			$info['salt'] = AdminValidation::hash($password);
+			// generate a secret key
+			$info['secret'] = uniqid('', true);
 			// add to database
 			if($this->mysql->insert(USERS_TABLE, $info)){
 				return true;
