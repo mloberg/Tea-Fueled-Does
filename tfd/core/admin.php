@@ -36,6 +36,7 @@
 			if($fingerprint === $_COOKIE['fingerprint']){
 				$_SESSION['logged_in'] = true;
 				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
+				return true;
 			}else{
 				return false;
 			}
