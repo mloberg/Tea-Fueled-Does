@@ -6,12 +6,11 @@
 		
 		function __construct(){
 			parent::__construct();
-			session_start();
-			setcookie('sid', session_id());
 			$this->login_time = time() + 3600;
 		}
 		
 		public function loggedin(){
+			// check for cookie log in
 			if($_COOKIE['sid'] === session_id() && $_SESSION['logged_in'] == true && $_COOKIE[$_SESSION['cid']] = md5($_SESSION['username'].AUTH_KEY)){
 				return true;
 			}else{

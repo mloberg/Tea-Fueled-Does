@@ -190,3 +190,9 @@
 * see release-notes.md
 * $this->flash->message() matches $this->flash()
 * new default index.php file
+
+## 1.3.2
+
+* session_start() called when app is setup
+* updated load() function
+* MySQL enhancements

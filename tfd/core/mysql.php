@@ -64,7 +64,7 @@
 		}
 		
 		private static function _where($info,$type='AND'){
-			$link = self::connection();
+			$link =& self::connection();
 			$where = self::$where;
 			foreach($info as $row => $value){
 				if($where === null){
@@ -129,7 +129,7 @@
 		}
 		
 		function qry($qry,$return=false){
-			$link = self::connection();
+			$link =& self::connection();
 			self::$last_query = $qry;
 			$result = mysql_query($qry);
 			if(is_resource($result)){
@@ -144,11 +144,10 @@
 				return $data;
 			}
 			return null;
-			mysql_close($link);
 		}
 		
 		function get($table,$select='*'){
-			$link = self::connection();
+			$link =& self::connection();
 			$data = array();
 			$qry = sprintf('SELECT %s FROM %s %s', mysql_real_escape_string($select), mysql_escape_string($table), $this->extra());
 			$result = mysql_query($qry) or self::errors($qry);
@@ -167,11 +166,10 @@
 			}else{
 				return false;
 			}
-			mysql_close($link);
 		}
 		
 		function insert($table,$data){
-			$link = self::connection();
+			$link =& self::connection();
 			$qry = sprintf('INSERT INTO %s', mysql_escape_string($table));
 			foreach($data as $key => $val){
 				$fields .= '`'.mysql_real_escape_string($key) . '`,';
@@ -187,11 +185,10 @@
 				self::$insert_id = mysql_insert_id();
 				return true;
 			}
-			mysql_close($link);
 		}
 		
 		function update($table,$info,$where=''){
-			$link = self::connection();
+			$link =& self::connection();
 			foreach($info as $key => $val){
 				$update .= sprintf("`%s`='%s', ", mysql_real_escape_string($key), mysql_real_escape_string($val));
 			}
@@ -215,11 +212,10 @@
 			}else{
 				return true;
 			}
-			mysql_close($link);
 		}
 		
 		function delete($table,$where=''){
-			$link = self::connection();
+			$link =& self::connection();
 			if(is_array($where)){
 				foreach($where as $key => $value){
 					if(!$temp){
@@ -239,7 +235,6 @@
 			}else{
 				return true;
 			}
-			mysql_close($link);
 		}
 	
 	}

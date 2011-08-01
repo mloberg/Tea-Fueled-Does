@@ -9,6 +9,7 @@
 		protected $info = array();
 		
 		function __construct($autoload=''){
+			session_start();
 			$this->testing = TESTING_MODE;
 			if($_GET['tfd_request'] == ''){
 				$this->request = 'index';
@@ -59,9 +60,9 @@
 			}
 			$dirs = array(CORE_DIR,LIBRARY_DIR,HELPER_DIR,MODELS_DIR);
 			for($i=0;$i <= count($dirs);$i++){
-				$file = glob($dirs[$i].$name.EXT);
-				if(!empty($file)){
-					include_once($dirs[$i].$name.EXT);
+				$file = $dirs[$i].$name.EXT;
+				if(file_exists($file)){
+					include_once($file);
 					return true;
 					break;
 				}elseif($i == count($dirs)){
