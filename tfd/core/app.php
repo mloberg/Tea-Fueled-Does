@@ -80,6 +80,11 @@
 				}
 				return $this->ajax->call();
 				exit;
+			}else{
+				if(!empty($_SESSION['flash']['message'])){
+					$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $_SESSION['flash']['options']);
+					unset($_SESSION['flash']);
+				}
 			}
 			// get routes
 			$route = $this->routes();

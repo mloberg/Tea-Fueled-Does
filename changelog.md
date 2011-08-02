@@ -206,3 +206,7 @@
 ## 1.3.4
 
 * fixed logout bug
+
+## 1.3.5
+
+* $this->flash->redirect() method to display flash message after a redirect

@@ -17,6 +17,10 @@
 			$this->css();
 		}
 		
+		function redirect($message, $type = 'message', $options = array()){
+			$_SESSION['flash'] = array('message' => $message, 'type' => $type, 'options' => $options);
+		}
+		
 		private function css(){
 			$styles = array(
 				'body' => array(
