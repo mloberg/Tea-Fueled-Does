@@ -73,6 +73,12 @@
 		}
 		
 		public function site(){
+			if(MAINTENANCE_MODE){
+				ob_start();
+				include(MAINTENANCE_PAGE);
+				ob_end_flush();
+				return;
+			}
 			$this->hooks->initialize();
 			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request)){
 				if(empty($_GET['ajax'])){

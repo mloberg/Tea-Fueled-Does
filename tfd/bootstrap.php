@@ -30,6 +30,7 @@ define('EXT', '.php');
 // define some file paths
 define('DEFAULT_MASTER', MASTERS_DIR.'master'.EXT);
 define('HOOKS_FILE', CONTENT_DIR.'hooks'.EXT);
+define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
 
 // include all the other config files
 define('CONF_DIR', CONTENT_DIR . '_config/');

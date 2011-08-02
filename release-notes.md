@@ -57,3 +57,7 @@ Added some options to config files.
 * ADD_USER in *environments.php*
 
 Logins uses a user secret key, which is a key unique to each user. Add a column to you user table called secret.
+
+## 1.3.6
+
+Added maintenance mode. This adds a master called *maintenance.php*. Also adds another config option in *content/_config/general.php*.
