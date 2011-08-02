@@ -1,7 +1,7 @@
 <?php
 
 // display the maintenance page
-define('MAINTENANCE_MODE', true);
+define('MAINTENANCE_MODE', false);
 
 // general site config
 define('SITE_TITLE', 'Tea-Fueled Does');
