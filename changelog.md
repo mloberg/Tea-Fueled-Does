@@ -210,3 +210,7 @@
 ## 1.3.5
 
 * $this->flash->redirect() method to display flash message after a redirect
+
+## 1.3.6
+
+* added maintenance mode
