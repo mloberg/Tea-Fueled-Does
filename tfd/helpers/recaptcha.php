@@ -149,17 +149,16 @@ class ReCaptchaResponse {
   * @param array $extra_params an array of extra variables to post to the server
   * @return ReCaptchaResponse
   */
-function recaptcha_check_answer ($remoteip, $challenge, $response, $privkey = RECAPTCHA_PRIVATE_KEY, $extra_params = array())
+function recaptcha_check_answer ($remoteip = '', $challenge = '', $response = '', $privkey = RECAPTCHA_PRIVATE_KEY, $extra_params = array())
 {
 	if ($privkey == null || $privkey == '') {
 		die ("To use reCAPTCHA you must get an API key from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a>");
 	}
 
-	if ($remoteip == null || $remoteip == '') {
-		die ("For security reasons, you must pass the remote ip to reCAPTCHA");
-	}
-
+	if($remoteip == null || $remoteip == '') $remoteip = $_SERVER['REMOTE_ADDR'];
 	
+	if($challenge == '') $challenge = $_REQUEST['recaptcha_challenge_field'];
+	if($response == '') $response = $_REQUEST['recaptcha_response_field'];
 	
         //discard spam submissions
         if ($challenge == null || strlen($challenge) == 0 || $response == null || strlen($response) == 0) {

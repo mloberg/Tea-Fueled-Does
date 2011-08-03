@@ -214,3 +214,8 @@
 ## 1.3.6
 
 * added maintenance mode
+
+## 1.3.7
+
+* moved some files around
+* updated ReCAPTCHA helper
