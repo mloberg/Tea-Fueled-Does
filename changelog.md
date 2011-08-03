@@ -219,3 +219,7 @@
 
 * moved some files around
 * updated ReCAPTCHA helper
+
+## 1.3.8
+
+* removed cookie based user authentication

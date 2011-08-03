@@ -61,3 +61,7 @@ Logins uses a user secret key, which is a key unique to each user. Add a column 
 ## 1.3.6
 
 Added maintenance mode. This adds a master called *maintenance.php*. Also adds another config option in *content/_config/general.php*.
+
+## 1.3.8
+
+Removed cookie based user authentication. This removes the LOGIN_TIME config option in *content/_config/general.php*.
