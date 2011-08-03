@@ -1,18 +1,13 @@
 <?php
 	
 	class Admin extends App{
-	
-		protected $login_time;
-		
+			
 		function __construct(){
 			parent::__construct();
-			$this->login_time = time() + LOGIN_TIME;
 		}
 		
 		public function loggedin(){
 			if($_SESSION['logged_in'] && $this->validate_session_fingerprint()){
-				return true;
-			}elseif($_COOKIE['loggedin'] && $this->validate_cookie_fingerprint()){
 				return true;
 			}else{
 				return false;
@@ -22,19 +17,6 @@
 		private function validate_session_fingerprint(){
 			$fingerprint = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
 			return ($fingerprint === $_SESSION['fingerprint']);
-		}
-		
-		private function validate_cookie_fingerprint(){
-			$secret = $this->mysql->where('id', $_COOKIE['uid'])->limit(1)->get(USERS_TABLE, 'secret');
-			if(empty($secret)) return false;
-			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$secret[0]['secret']);
-			if($fingerprint === $_COOKIE['fingerprint']){
-				$_SESSION['logged_in'] = true;
-				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
-				return true;
-			}else{
-				return false;
-			}
 		}
 		
 		public function login(){
@@ -85,10 +67,6 @@
 				// set session vars
 				$_SESSION['logged_in'] = true;
 				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
-				// set cookie
-				setcookie('loggedin', true, $this->login_time);
-				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$user_info[0]['secret']), $this->login_time);
-				setcookie('uid', $user_info[0]['id'], $this->login_time);
 				// run user hook
 				$this->hooks->login($user_info[0]);
 				// validated
