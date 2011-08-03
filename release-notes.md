@@ -65,3 +65,9 @@ Added maintenance mode. This adds a master called *maintenance.php*. Also adds a
 ## 1.3.8
 
 Removed cookie based user authentication. This removes the LOGIN_TIME config option in *content/_config/general.php*.
+
+## 1.4.0
+
+Added *public/js/tfd.js*. This includes some functions/helpers. If you are using another library (jQuery, MooTools), you don't need this. If you are running raw js, this is required.
+
+Added LOGIN_TIME to *content/_config/general.php*.

@@ -228,3 +228,13 @@
 
 * enhanced user/admin security
 * performance improvements
+
+## 1.4.0
+
+* $this->error->report() does not die by default if you are in testing mode
+* added tfd.js which includes some JavaScript functions/helpers if no other library is loaded
+* raw css and javascript loaded through their respective libraries are minfied
+* css and javascript ordering enhancements
+* css and javascript check for duplicate entries
+* enhanced user/admin security
+* login via cookie working again
