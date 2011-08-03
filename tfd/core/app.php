@@ -85,30 +85,22 @@
 					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request);
 				}
 				return $this->ajax->call();
-				exit;
-			}else{
-				if(!empty($_SESSION['flash']['message'])){
-					$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $_SESSION['flash']['options']);
-					unset($_SESSION['flash']);
-				}
+			}elseif(!empty($_SESSION['flash']['message'])){
+				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $_SESSION['flash']['options']);
+				unset($_SESSION['flash']);
 			}
 			// get routes
 			$route = $this->routes();
 			// if a matched route was found, use it
 			if(is_array($route)){
 				// check for some admin stuff
-				if($route['logged_in'] && !$this->admin->loggedin()){
-					// redirect to login page and redirect back once logged in
-					setcookie('redirect', $this->request, time() + 3600);
-					header('Location: '.BASE_URL.LOGIN_PATH);
-					exit;
-				}
-				if($route['admin']){
+				if($route['logged_in'] || $route['admin']){
 					if(!$this->admin->loggedin()){
+						// redirect to login page and redirect back once logged in
 						setcookie('redirect', $this->request, time() + 3600);
-						return $this->admin->login();
+						header('Location: '.BASE_URL.LOGIN_PATH);
 					}
-					return $this->admin->dashboard($route);
+					if($route['admin']) return $this->admin->dashboard($route);
 				}
 				// check to see if it's a module or redirect
 				if($route['redirect']){
@@ -125,7 +117,7 @@
 				return $this->admin->logout();
 			}elseif(preg_match('/^'.LOGIN_PATH.'/', $this->request)){
 				return $this->admin->login();
-			}elseif(file_exists(WEB_DIR.$this->request.EXT) && !$this->admin->loggedin()){
+			}elseif(file_exists(WEB_DIR.$this->request.EXT)){
 				return $this->render(array('file' => $this->request));
 			}elseif(preg_match('/^'.ADMIN_PATH.'/', $this->request)){
 				$this->is_admin = true;
@@ -197,7 +189,7 @@
 					$this->send_404();
 					$master = '404';
 				}else{
-					$file = CONTENT_DIR . "{$dir}/{$file}".EXT;
+					$file = CONTENT_DIR . $dir.'/'.$file.EXT;
 				}
 			}else{
 				$file = WEB_DIR . $file . EXT;
@@ -213,7 +205,7 @@
 				ob_clean();
 			}elseif($this->testing && $this->request !== '404'){
 				$this->send_404();
-				$this->error->report("{$file} not found!");
+				$this->error->report($file.' not found!');
 			}else{
 				// if the file wasn't found, 404
 				$this->send_404();

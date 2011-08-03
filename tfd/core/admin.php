@@ -1,37 +1,32 @@
 <?php
 	
 	class Admin extends App{
-			
-		function __construct(){
-			parent::__construct();
-		}
-		
+	
 		public function loggedin(){
-			if($_SESSION['logged_in'] && $this->validate_session_fingerprint()){
-				return true;
-			}else{
-				return false;
-			}
+			if(!$_SESSION['logged_in']) return false;
+			return $this->validate_session_fingerprint();
 		}
 		
 		private function validate_session_fingerprint(){
-			$fingerprint = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
+			$user = $this->mysql->where('id', $_SESSION['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
+			if(empty($user)){
+				unset($_SESSION['logged_in']);
+				return false;
+			}
+			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user[0]['secret']);
 			return ($fingerprint === $_SESSION['fingerprint']);
 		}
 		
 		public function login(){
 			if($_POST['submit'] && $this->validate() || $this->loggedin()){
 				if($_COOKIE['redirect']){
-					// unset cookie
 					$redirect = $_COOKIE['redirect'];
 					setcookie('redirect', '', time() - 3600, '/');
-					// redirect
-					header('Location: '.BASE_URL.$redirect);
-					exit;
 				}else{
-					header('Location: '. BASE_URL . ADMIN_PATH);
-					exit;
+					$redirect = ADMIN_PATH;
 				}
+				header('Location: '.BASE_URL.$redirect);
+				exit;
 			}else{
 				if($_POST['submit']){
 					$errors = 'Login incorrect!';
@@ -48,9 +43,6 @@
 		
 		public function logout(){
 			$this->hooks->logout();
-			setcookie('loggedin', '', time() - 3600, '/');
-			setcookie('fingerprint', '', time() - 3600, '/');
-			setcookie('uid', '', time() - 3600, '/');
 			session_destroy();
 			header('Location: ' . BASE_URL);
 		}
@@ -66,7 +58,8 @@
 			if(AdminValidation::check_password($salt, $pass)){
 				// set session vars
 				$_SESSION['logged_in'] = true;
-				$_SESSION['fingerprint'] = md5(AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id());
+				$_SESSION['user_id'] = $user_info[0]['id'];
+				$_SESSION['fingerprint'] = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user_info[0]['secret']);
 				// run user hook
 				$this->hooks->login($user_info[0]);
 				// validated
