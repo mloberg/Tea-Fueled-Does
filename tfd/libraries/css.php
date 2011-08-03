@@ -25,7 +25,7 @@
 				echo $sheets;
 			}
 			if(!is_null(self::$style_tag)){
-				echo "\t<style>\n".self::$style_tag."\t</style>\n";
+				echo '<style>'.self::$style_tag."</style>\n";
 			}
 		}
 		
@@ -37,34 +37,38 @@
 		}
 		
 		function load($src, $order = null){
-			if(is_null($order)) $order = count(self::$styles) + 1;
 			if(is_array($src)){
 				ksort($src);
 				foreach($src as $index => $style){
-					self::$styles[$index + $order] = self::prepare($style);
+					$o = $index + $order;
+					if(isset(self::$styles[$o])) $o = @max(array_keys(self::$styles)) + 1;
+					$style = self::prepare($style);
+					if(!in_array($style, self::$styles)) self::$styles[] = $style;
 				}
-			}elseif(array_key_exists($src, self::$sheets)){
-				self::$styles[$order] = self::prepare(self::$sheets[$src]);
 			}else{
-				self::$styles[$order] = self::prepare($src);
+				if(is_null($order) || isset(self::$styles[$order])) $order = @max(array_keys(self::$styles)) + 1;
+				if(array_key_exists($src, self::$sheets)){
+					$src = self::prepare(self::$sheets[$src]);
+					if(!in_array($src, self::$styles)) self::$styles[$order] = $src;
+				}else{
+					$src = self::prepare($src);
+					if(!in_array($src, self::$styles)) self::$styles[$order] = $src;
+				}
 			}
 		}
 		
 		function style($styles){
 			foreach($styles as $element => $style){
-				$sheet .= <<<STYLE
-	{$element}{
-
-STYLE;
+				$sheet .= $element.'{';
 				foreach($style as $key => $value){
 					if(preg_match('/^(border-radius|drop-shadow)$/', $key)){
 						$key = str_replace('-', '_', $key);
 						$sheet .= Styles::$key($value);
 					}else{
-						$sheet .= "\t\t{$key}: {$value};\n";
+						$sheet .= $key.':'.$value.';';
 					}
 				}
-				$sheet .= "\t}\n";
+				$sheet .= '}';
 			}
 			self::$style_tag .= $sheet;
 		}
@@ -74,10 +78,7 @@ STYLE;
 			
 			}
 			$style = self::$style_tag;
-			$font = <<<FONT
-	@font-face{font-family: "{$name}"; src: url('{$src}');}
-
-FONT;
+			$font = '@font-face{font-family:"'.$name.'";src:url("'.$src.'");}';
 			self::$style_tag = $font.$style;
 		}
 	
@@ -86,12 +87,7 @@ FONT;
 	class Styles{
 	
 		function border_radius($size){
-			return <<<CSS
-		-moz-border-radius: {$size};
-		-webkit-border-radius: {$size};
-		border-radius: {$size};
-
-CSS;
+			return '-moz-border-radius:'.$size.';-webkit-border-radius:'.$size.';border-radius:'.$size.';';
 		}
 		
 		function drop_shadow($opts){
@@ -101,12 +97,7 @@ CSS;
 				'color' => '#000'
 			);
 			$opts = $opts + $defaults;
-			return <<<CSS
-		box-shadow: {$opts['spread']} {$opts['spread']} {$opts['blur']} {$opts['color']};
-		-moz-box-shadow: {$opts['spread']} {$opts['spread']} {$opts['blur']} {$opts['color']};
-		-webkit-box-shadow: {$opts['spread']} {$opts['spread']} {$opts['blur']} {$opts['color']};
-
-CSS;
+			return 'box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'].';-moz-box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'].';-webkit-box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'];
 		}
 	
 	}

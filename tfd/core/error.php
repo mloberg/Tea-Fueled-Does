@@ -11,9 +11,9 @@
 			}
 		}
 		
-		function report($message, $die = false){
+		public function report($message, $die = false){
 			echo $message;
-			if($die || $this->testing) exit;
+			if($die) exit;
 		}
 		
 		function email($error, $report = false){

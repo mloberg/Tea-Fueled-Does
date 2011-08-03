@@ -3,18 +3,36 @@
 	class Admin extends App{
 	
 		public function loggedin(){
-			if(!$_SESSION['logged_in']) return false;
-			return $this->validate_session_fingerprint();
+			if($_SESSION['logged_in']){
+				return $this->validate_session_fingerprint();
+			}elseif($_COOKIE['logged_in']){
+				return $this->validate_cookie_fingerprint();
+			}else{
+				return false;
+			}
 		}
 		
 		private function validate_session_fingerprint(){
 			$user = $this->mysql->where('id', $_SESSION['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
 			if(empty($user)){
-				unset($_SESSION['logged_in']);
+				session_destroy();
 				return false;
 			}
 			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user[0]['secret']);
 			return ($fingerprint === $_SESSION['fingerprint']);
+		}
+		
+		private function validate_cookie_fingerprint(){
+			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
+			$user = $this->mysql->where('id', $_COOKIE['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
+			if(empty($user)){
+				setcookie('logged_in', false, time() - 3600, '/');
+				setcookie('user_id', '', time() - 3600, '/');
+				setcookie('fingerprint', '', time() - 3600, '/');
+				return false;
+			}
+			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user[0]['secret']);
+			return ($fingerprint === $_COOKIE['fingerprint']);
 		}
 		
 		public function login(){
@@ -44,6 +62,9 @@
 		public function logout(){
 			$this->hooks->logout();
 			session_destroy();
+			setcookie('logged_in', false, time() - 3600, '/');
+			setcookie('user_id', '', time() - 3600, '/');
+			setcookie('fingerprint', '', time() - 3600, '/');
 			header('Location: ' . BASE_URL);
 		}
 		
@@ -60,6 +81,10 @@
 				$_SESSION['logged_in'] = true;
 				$_SESSION['user_id'] = $user_info[0]['id'];
 				$_SESSION['fingerprint'] = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user_info[0]['secret']);
+				// set cookies
+				setcookie('logged_in', true, time() + LOGIN_TIME, '/');
+				setcookie('user_id', $user_info[0]['id'], time() + LOGIN_TIME, '/');
+				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info[0]['secret']), time() + LOGIN_TIME, '/');
 				// run user hook
 				$this->hooks->login($user_info[0]);
 				// validated
