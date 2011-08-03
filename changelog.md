@@ -223,3 +223,8 @@
 ## 1.3.8
 
 * removed cookie based user authentication
+
+## 1.3.9
+
+* enhanced user/admin security
+* performance improvements
