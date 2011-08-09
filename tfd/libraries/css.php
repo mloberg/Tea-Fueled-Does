@@ -46,7 +46,11 @@
 					if(!in_array($style, self::$styles)) self::$styles[] = $style;
 				}
 			}else{
-				if(is_null($order) || isset(self::$styles[$order])) $order = @max(array_keys(self::$styles)) + 1;
+				if(is_null($order) && empty(self::$styles)){
+					$order = 0;
+				}elseif(is_null($order) || isset(self::$styles[$order])){
+					$order = @max(array_keys(self::$styles)) + 1;
+				}
 				if(array_key_exists($src, self::$sheets)){
 					$src = self::prepare(self::$sheets[$src]);
 					if(!in_array($src, self::$styles)) self::$styles[$order] = $src;
@@ -74,9 +78,6 @@
 		}
 		
 		function add_font($name, $src){
-			if(is_array($src)){
-			
-			}
 			$style = self::$style_tag;
 			$font = '@font-face{font-family:"'.$name.'";src:url("'.$src.'");}';
 			self::$style_tag = $font.$style;
