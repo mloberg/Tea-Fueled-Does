@@ -238,3 +238,8 @@
 * css and javascript check for duplicate entries
 * enhanced user/admin security
 * login via cookie working again
+
+## 1.4.1
+
+* Added flash option to the redirect() helper
+* MySQL limit() improvements

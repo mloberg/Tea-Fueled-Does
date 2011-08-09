@@ -12,12 +12,16 @@
 		return $css;
 	}
 	
-	function redirect($location){
+	function redirect($location, $message = null, $type = 'message', $options = array()){
 		// check if external link
 		if(preg_match('/^http/',$location)){
 			header("Location: $location");
 			exit();
 		}else{
+			if(!is_null($message)){
+				global $app;
+				$app->flash->redirect($message, $type, $options);
+			}
 			header("Location: ".BASE_URL.$location);
 			exit();
 		}

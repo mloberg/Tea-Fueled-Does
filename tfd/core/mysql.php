@@ -20,9 +20,7 @@
 		
 		function __destruct(){
 			// do some cleanup
-			if(is_resource(self::$link)){
-				mysql_close(self::$link);
-			}
+			if(is_resource(self::$link)) mysql_close(self::$link);
 		}
 		
 		static function errors($qry=''){
@@ -120,7 +118,7 @@
 		}
 		
 		protected function extra(){
-			$extra = self::$where.' '.$this->limit.' '.$this->order_by;
+			$extra = self::$where.' '.$this->order_by.' '.$this->limit;
 			// cleanup
 			self::$where = null;
 			$this->limit = null;
