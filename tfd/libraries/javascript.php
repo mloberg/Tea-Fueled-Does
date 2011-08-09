@@ -73,7 +73,11 @@
 			// if no library, return false
 			if(!array_key_exists($lib, self::$libraries)) return false;
 			if($load && !in_array($src, self::$scripts)){
-				if(is_null($order) || isset(self::$scripts[$order])) $order = @max(array_keys(self::$scripts)) + 1;
+				if(is_null($order) && empty(self::$scripts)){
+					$order = 0;
+				}elseif(is_null($order) || isset(self::$scripts[$order])){
+					$order = @max(array_keys(self::$scripts)) + 1;
+				}
 				self::$scripts[$order] = self::prepare(self::$libraries[$lib]);;
 			}
 			if($lib == 'mootools'){
@@ -94,7 +98,11 @@
 					if(!in_array($s, self::$scripts)) self::$scripts[$o] = $s;
 				}
 			}else{
-				if(is_null($order) || isset(self::$scripts[$order])) $order = @max(array_keys(self::$scripts)) + 1;
+				if(is_null($order) && empty(self::$scripts)){
+					$order = 0;
+				}elseif(is_null($order) || isset(self::$scripts[$order])){
+					$order = @max(array_keys(self::$scripts)) + 1;
+				}
 				$src = self::prepare($src);
 				if(!in_array($src, self::$scripts)) self::$scripts[$order] = $src;
 			}
@@ -103,14 +111,22 @@
 		// functions, vars, etc. that go outside of the domready function
 		
 		function script($script, $order = null){
-			if(is_null($order) || isset(self::$script[$order])) $order = @max(array_keys(self::$script)) + 1;
+			if(is_null($order) && empty(self::$script)){
+				$order = 0;
+			}elseif(is_null($order) || isset(self::$script[$order])){
+				$order = @max(array_keys(self::$script)) + 1;
+			}
 			if(!in_array($script, self::$script)) self::$script[$order] = $script;
 		}
 		
 		// function, vars, etc. that go inside of the domready function
 		
 		function ready($script, $order = null){
-			if(is_null($order) || isset(self::$ready[$order])) $order = @max(array_keys(self::$ready)) + 1;
+			if(is_null($order) && empty(self::$ready)){
+				$order = 0;
+			}elseif(is_null($order) || isset(self::$ready[$order])){
+				$order = @max(array_keys(self::$ready)) + 1;
+			}
 			if(!in_array($script, self::$ready)) self::$ready[$order] = $script;
 		}
 	
