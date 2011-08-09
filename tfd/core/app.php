@@ -86,7 +86,8 @@
 				}
 				return $this->ajax->call();
 			}elseif(!empty($_SESSION['flash']['message'])){
-				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $_SESSION['flash']['options']);
+				$options = (empty($_SESSION['flash']['options']) || !is_array($_SESSION['flash']['options'])) ? array() : $_SESSION['flash']['options'];
+				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $options);
 				unset($_SESSION['flash']);
 			}
 			// get routes
