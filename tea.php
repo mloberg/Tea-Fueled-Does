@@ -7,6 +7,8 @@ define('TEA_CONFIG', TEA_DIR.'config'.DIRECTORY_SEPARATOR);
 
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 
+$app = new TFD();
+
 $tea = new Tea();
 
 $tea->command($_SERVER['argv']);

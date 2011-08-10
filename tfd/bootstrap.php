@@ -12,6 +12,7 @@ define('APP_DIR', realpath(PUBLIC_DIR.$app_dir).DIRECTORY_SEPARATOR);
 define('BASE_DIR', realpath(PUBLIC_DIR.'..').DIRECTORY_SEPARATOR);
 define('CONTENT_DIR', realpath(PUBLIC_DIR.$content_dir).DIRECTORY_SEPARATOR);
 define('TEA_DIR', APP_DIR.'tea'.DIRECTORY_SEPARATOR);
+define('CONF_DIR', CONTENT_DIR . '_config'.DIRECTORY_SEPARATOR);
 
 // app directories
 define('CORE_DIR', APP_DIR.'core'.DIRECTORY_SEPARATOR);
@@ -36,8 +37,11 @@ define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
 // tfd version
 define('TFD_VERSION', '1.4.1');
 
+// environments config class
+include_once(CONF_DIR.'environments'.EXT);
+new Environment($environment);
+
 // include all the other config files
-define('CONF_DIR', CONTENT_DIR . '_config'.DIRECTORY_SEPARATOR);
 foreach(glob(CONF_DIR."*".EXT) as $conf){
 	include_once($conf);
 }
