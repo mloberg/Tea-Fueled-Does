@@ -13,45 +13,59 @@
  * If testing mode is on, it will display the error (along with logging it or emailing it) and then stop the script.
  */
 
-define('ENVIRONMENT', $_SERVER['ENV']);
+class Environment{
 
-if(ENVIRONMENT === 'DEVELOPMENT'){
-	define('BASE_URL', 'http://localhost/'); // with trailing slash
-	// php error reporting
-	error_reporting(E_ERROR | E_WARNING | E_PARSE);
-	// tfd error reporting
-	define('TESTING_MODE', true);
-	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
-	define('ADD_USER', true);
-	// MySQL
-	define('DB_HOST', 'localhost');
-	define('DB_USER', 'root');
-	define('DB_PASS', 'root');
-	define('DB', 'tfd');
-}elseif(ENVIRONMENT === 'TESTING'){
-	define('BASE_URL', ''); // with trailing slash
-	// php error reporting
-	error_reporting(E_ERROR | E_WARNING);
-	// tfd error reporting
-	define('TESTING_MODE', true);
-	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
-	define('ADD_USER', false);
-	// MySQL
-	define('DB_HOST', '');
-	define('DB_USER', '');
-	define('DB_PASS', '');
-	define('DB', '');
-}elseif(ENVIRONMENT === 'PRODUCTION'){
-	define('BASE_URL', ''); // with trailing slash
-	// php error reporting
-	error_reporting(0); // no reporting
-	// tfd error reporting
-	define('TESTING_MODE', false);
-	// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
-	define('ADD_USER', false);
-	// MySQL
-	define('DB_HOST', '');
-	define('DB_USER', '');
-	define('DB_PASS', '');
-	define('DB', '');
+	function __construct($env){
+		// you could place "global" settings in here
+		
+		// call specific environment settings
+		$env = strtolower($env);
+		$this->$env();
+	}
+	
+	function development(){
+		define('BASE_URL', 'http://localhost/'); // with trailing slash
+		// php error reporting
+		error_reporting(E_ERROR | E_WARNING | E_PARSE);
+		// tfd error reporting
+		define('TESTING_MODE', true);
+		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+		define('ADD_USER', true);
+		// MySQL
+		define('DB_HOST', 'localhost');
+		define('DB_USER', 'root');
+		define('DB_PASS', 'root');
+		define('DB', 'tfd');
+	}
+	
+	function testing(){
+		define('BASE_URL', ''); // with trailing slash
+		// php error reporting
+		error_reporting(E_ERROR | E_WARNING);
+		// tfd error reporting
+		define('TESTING_MODE', true);
+		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+		define('ADD_USER', false);
+		// MySQL
+		define('DB_HOST', '');
+		define('DB_USER', '');
+		define('DB_PASS', '');
+		define('DB', '');
+	}
+	
+	function production(){
+		define('BASE_URL', ''); // with trailing slash
+		// php error reporting
+		error_reporting(0); // no reporting
+		// tfd error reporting
+		define('TESTING_MODE', false);
+		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
+		define('ADD_USER', false);
+		// MySQL
+		define('DB_HOST', '');
+		define('DB_USER', '');
+		define('DB_PASS', '');
+		define('DB', '');
+	}
+
 }
