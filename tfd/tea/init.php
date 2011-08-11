@@ -3,7 +3,7 @@
 	class Tea{
 	
 		function __construct(){
-			echo "Tea Fueled Does Version ",TFD_VERSION."\n";
+			echo "== Tea Fueled Does Version ",TFD_VERSION." ==\n";
 			spl_autoload_register('Tea::loader');
 		}
 		
