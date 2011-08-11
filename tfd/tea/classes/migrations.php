@@ -13,13 +13,13 @@
 		static function test(){
 			$db_conf = include_once(TEA_CONFIG.'migrations'.EXT);
 			try{
-				if($db_conf['host'] == 'localhost'){
-					$dsn = "mysql:unix_socket=/Applications/MAMP/tmp/mysql/mysql.sock;dbname={$db_conf['database']}";
+				if(!empty($db_conf['sock']) && DB_HOST == 'localhost'){
+					$dsn = 'mysql:unix_socket='.$db_conf['sock'].';dbname='.DB;
 				}else{
-					$dsn = "mysql:host={$db_conf['host']};dbname={$db_conf['database']}";
+					$dsn = 'mysql:host='.DB_HOST.';port='.$db_conf['port'].';dbname='.DB;
 				}
-				$dbh = new PDO($dsn, $db_conf['user'], $db_conf['pass']);
-				$stmt = $dbh->prepare(sprintf("SHOW TABLES FROM %s", $db_conf['database']));
+				$dbh = new PDO($dsn, DB_USER, DB_PASS);
+				$stmt = $dbh->prepare(sprintf("SHOW TABLES FROM %s", DB));
 				$stmt->execute();
 				$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 				$schema = array();
@@ -50,22 +50,23 @@
 					echo "Exiting...\n";
 					exit(0);
 				}
+			}elseif(DB_HOST == ''){
+				echo "Please set up your database config in /content/_config/environments.php.\n";
+				exit(0);
 			}
 			echo "Creating inital migration...\n\n";
 			echo "We must set some config stuff.\n";
-			echo "\tDatabase Host [localhost]: ";
-			$resp = trim(fgets(STDIN));
-			$host = (!empty($resp)) ? $resp : 'localhost';
-			echo "\tDatabase User [root]: ";
-			$resp = trim(fgets(STDIN));
-			$user = (!empty($resp)) ? $resp : 'root';
-			echo "\tDatabase Password [root]: ";
-			$resp = trim(fgets(STDIN));
-			$pass = (!empty($resp)) ? $resp : 'root';
-			do{
-				echo "\tDatabase Name: ";
-				$db = trim(fgets(STDIN));
-			}while(empty($db));
+			if(DB_HOST == 'localhost'){
+				// socket
+				echo "\tLocation of the MySQL Socket [/var/mysql/mysql.sock]: ";
+				$resp = trim(fgets(STDIN));
+				$sock = (!empty($resp)) ? $resp : '/var/mysql/mysql.sock';
+			}else{
+				// port
+				echo "\tMySQL port [3306]: ";
+				$resp = trim(fgets(STDIN));
+				$port = (!empty($resp)) ? $resp : '3306';
+			}
 			echo "\tMigrations Table [migrations]: ";
 			$resp = trim(fgets(STDIN));
 			$table = (!empty($resp)) ? $resp : 'migrations';
@@ -73,10 +74,8 @@
 			$conf_file = <<<CONF
 <?php
 return array(
-	'host' => '$host',
-	'user' => '$user',
-	'pass' => '$pass',
-	'database' => '$db',
+	'sock' => '$sock',
+	'port' => '$port',
 	'migrations_table' => '$table'
 );
 CONF;
