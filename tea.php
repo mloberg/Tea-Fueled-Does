@@ -11,7 +11,7 @@ require_once TEA_DIR.'init.php';
 // some Tea settings
 define('TEA_CONFIG', TEA_DIR.'config'.DIRECTORY_SEPARATOR);
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
-error_reporting(E_ERROR | E_PARSE);
+error_reporting(E_ERROR|E_WARNING|E_PARSE);
 
 
 $app = new TFD();
