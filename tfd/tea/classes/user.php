@@ -33,6 +33,7 @@
 				exit(0);
 			}
 			DBConnect::insert(USERS_TABLE, $user);
+			echo "User added.\n";
 		}
 	
 	}

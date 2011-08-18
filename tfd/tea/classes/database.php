@@ -43,14 +43,16 @@
 				echo "\tError: Table '$table_name' already exits.\n";
 				exit(0);
 			}
-			do{
-				echo "Table Name: ";
-				$table_name = trim(fgets(STDIN));
-				if(DBConnect::table_exists($table_name)){
-					$table_name = '';
-					echo "\tError: Table '$table_name' already exists.\n";
-				}
-			}while(empty($table_name));
+			if(is_null($table_name)){
+				do{
+					echo "Table Name: ";
+					$table_name = trim(fgets(STDIN));
+					if(DBConnect::table_exists($table_name)){
+						$table_name = '';
+						echo "\tError: Table '$table_name' already exists.\n";
+					}
+				}while(empty($table_name));
+			}
 			do{
 				$exit = false;
 				echo "Field name ('none' when you are done): ";
@@ -158,7 +160,22 @@
 				}
 			}
 			// create other tables
-			
+			echo "Add other tables? [y/n]: ";
+			$resp = trim(fgets(STDIN));
+			if(strtolower($resp) === 'y'){
+				do{
+					$exit = false;
+					echo "Table name ('none' when you are done): ";
+					$table = trim(fgets(STDIN));
+					if($table === 'none'){
+						$exit = true;
+					}elseif(DBConnect::table_exists($table)){
+						echo "\tError: The table {$table} already exists.\n";
+					}elseif(!empty($table)){
+						self::create_table($table);
+					}
+				}while(!$exit);
+			}
 			// create a migration file
 			if(self::$setup['migrations']){
 				
@@ -241,6 +258,9 @@ CONF;
 					self::update_users_table_config($table);
 				}
 			}
+			if(DBConnect::table_exists($table)){
+				DBConnect::drop_table($table);
+			}
 			$columns = array(
 				'id' => array(
 					'type' => 'int',
@@ -303,7 +323,11 @@ CONF;
 		}
 		
 		static function test(){
-			DBConnect::table_exists('test');
+			if(DBConnect::table_exists('users')){
+				echo 'table users exists';
+			}else{
+				echo 'no table named users';
+			}
 		}
 	
 	}
@@ -313,6 +337,7 @@ CONF;
 		private static $con;
 		
 		private static function connect(){
+			parent::load_config();
 			if(!is_resource(self::$con) || is_null(self::$con)){
 				try{
 					if(parent::$config['host'] == 'localhost'){
@@ -337,9 +362,16 @@ CONF;
 			$link =& self::connect();
 			$qry = $link->prepare("SHOW TABLES LIKE ?");
 			$qry->execute(array($table));
-			$count = $qry->rowCount();
+			$result = $qry->fetch(PDO::FETCH_ASSOC);
 			self::close();
-			return ($count === 0) ? true : false;
+			return (empty($result)) ? false : true;
+		}
+		
+		static function drop_table($table){
+			$link =& self::connect();
+			$qry = $link->prepare("DROP TABLE IF EXISTS ?");
+			$qry->execute(array($table));
+			self::close();
 		}
 		
 		static function create_table($table, $columns){
