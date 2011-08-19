@@ -24,8 +24,5 @@ content/admin-dashboard/*.php
 !content/admin-dashboard/index.php
 content/routes.json
 
-# Tea Config Files
-tfd/tea/config/*.php
-
 # Some testing files
 public/uploads/*

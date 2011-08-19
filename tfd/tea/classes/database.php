@@ -53,6 +53,19 @@
 					}
 				}while(empty($table_name));
 			}
+			if(empty($columns['id'])){
+				echo "Create an id column? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$columns['id'] = array(
+						'type' => 'int',
+						'length' => '11',
+						'null' => (bool)false,
+						'default' => false,
+						'extra' => 'auto_increment',
+						'key' => 'primary'
+					);
+				}
+			}
 			do{
 				$exit = false;
 				echo "Field name ('none' when you are done): ";
@@ -60,7 +73,7 @@
 				if($field == 'none'){
 					$exit = true;
 				}elseif(array_key_exists($field, $columns)){
-					echo "\tError: There is already a field with the name of '$field'.\n";
+					echo "\tError: There is already a field with the name of '{$field}'.\n";
 				}elseif(!empty($field)){
 					echo "Field type [varchar]: ";
 					$type = trim(fgets(STDIN));

@@ -9,10 +9,9 @@ require_once 'tfd/bootstrap.php';
 require_once TEA_DIR.'init.php';
 
 // some Tea settings
-define('TEA_CONFIG', TEA_DIR.'config'.DIRECTORY_SEPARATOR);
+define('TEA_CONFIG', CONTENT_DIR.'tea_config/');
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
-error_reporting(E_ERROR|E_WARNING|E_PARSE);
-
+error_reporting(E_ERROR|E_WARNING|E_PARSE); // run verbose
 
 $app = new TFD();
 $tea = new Tea();
@@ -21,5 +20,4 @@ $tea = new Tea();
 $tea->command($_SERVER['argv']);
 
 // exit the script properly
-echo PHP_EOL;
 exit(0);
