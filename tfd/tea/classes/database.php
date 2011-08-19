@@ -40,7 +40,7 @@
 		
 		private static function create_table($table_name = null, $columns = array()){
 			if(DBConnect::table_exists($table_name)){
-				echo "\tError: Table '$table_name' already exits.\n";
+				echo "\tError: Table '{$table_name}' already exits.\n";
 				exit(0);
 			}
 			if(is_null($table_name)){
@@ -48,8 +48,8 @@
 					echo "Table Name: ";
 					$table_name = trim(fgets(STDIN));
 					if(DBConnect::table_exists($table_name)){
+						echo "\tError: Table '{$table_name}' already exists.\n";
 						$table_name = '';
-						echo "\tError: Table '$table_name' already exists.\n";
 					}
 				}while(empty($table_name));
 			}
@@ -135,6 +135,7 @@
 				}
 			}while(!$exit);
 			DBConnect::create_table($table_name, $columns);
+			echo "Table {$table_name} created.\n";
 		}
 		
 		public static function init(){
@@ -323,11 +324,7 @@ CONF;
 		}
 		
 		static function test(){
-			if(DBConnect::table_exists('users')){
-				echo 'table users exists';
-			}else{
-				echo 'no table named users';
-			}
+			DBConnect::drop_table('users');
 		}
 	
 	}
@@ -369,8 +366,7 @@ CONF;
 		
 		static function drop_table($table){
 			$link =& self::connect();
-			$qry = $link->prepare("DROP TABLE IF EXISTS ?");
-			$qry->execute(array($table));
+			$qry = $link->exec(sprintf("DROP TABLE IF EXISTS `%s`", $table));
 			self::close();
 		}
 		
@@ -399,12 +395,14 @@ CONF;
 					default:
 						$type = $info['type'].'('.$info['length'].')';
 				}
-				if($info['default'] !== false){
-					$default = sprintf(" DEFAULT '%s'", $info['default']);
-				}elseif($info['null'] === true){
-					$default = " DEFAULT NULL";
+				if($info['key'] !== 'primary'){
+					if(!empty($info['default'])){
+						$default = sprintf(" DEFAULT '%s'", $info['default']);
+					}elseif($info['null'] == true){
+						$default = " DEFAULT NULL";
+					}
+					$null = ($info['null'] == false) ? ' NOT NULL' : '';
 				}
-				$null = ($info['null'] === false) ? ' NOT NULL' : '';
 				$sql .= sprintf("`%s` %s%s%s %s,",
 					$name, $type, $null, $default, strtoupper($info['extra']));
 			}
