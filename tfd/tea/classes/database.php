@@ -10,8 +10,17 @@
 		);
 		
 		public static function action($arg){
-			if(empty($arg[2])){
-				echo "Looking for help?";
+			if(empty($arg[2]) || $arg[2] == 'help'){
+				$commands = array(
+					'init' => 'Set up the database class for the current evironment. (Must be run before any other command can be run.)',
+					'create_table' => 'Create a table in the database.',
+					'config' => 'Update your database config.'
+				);
+				echo "Looking for help?\n";
+				echo "Commands:\n";
+				foreach($commands as $name => $description){
+					echo "\t{$name}: {$description}\n";
+				}
 			}else{
 				global $environment;
 				self::$env = strtolower(substr($environment, 0, 3));
@@ -38,7 +47,7 @@
 			return true;
 		}
 		
-		private static function create_table($table_name = null, $columns = array()){
+		protected static function create_table($table_name = null, $columns = array()){
 			if(DBConnect::table_exists($table_name)){
 				echo "\tError: Table '{$table_name}' already exits.\n";
 				exit(0);

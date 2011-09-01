@@ -3,8 +3,16 @@
 	class General extends Tea{
 	
 		public static function action($arg){
-			if(empty($arg[2])){
-				echo "Looking for help?";
+			if(empty($arg[2]) || $arg[2] == 'help'){
+				$commands = array(
+					'auth_key' => 'Generate a new admin auth key.',
+					'maintenance' => 'Turn maintenance mode on or off (takes 1 argument).'
+				);
+				echo "Looking for help?\n";
+				echo "Commands:\n";
+				foreach($commands as $name => $description){
+					echo "\t{$name}: {$description}\n";
+				}
 			}else{
 				// run the sent command
 				self::$arg[2]($arg);
