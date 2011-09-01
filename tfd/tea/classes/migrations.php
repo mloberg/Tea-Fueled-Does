@@ -2,15 +2,46 @@
 
 	class Migrations extends Tea{
 	
+		static $env;
+		static $table;
+		static $db;
+		
+		function __construct(){
+/*
+			global $environment;
+			self::$env = strtolower(substr($environment, 0, 3));
+			Database::load_config();
+			self::$table = Database::$config['migrations_table'];
+*/
+			self::$db = parent::db();
+		}
+		
 		static function action($arg){
 			if(empty($arg[2])){
 				echo "Looking for migrations help?\n";
 			}else{
-				self::$arg[2]();
+/*
+				if(!file_exists(TEA_CONFIG.'database-'.self::$env.EXT) && $arg[2] !== 'init'){
+					echo "You don't haven't set up Tea to use your database.\n\nPlease run 'tea database init' before any other command.\n";
+					exit(0);
+				}
+*/
+/*
+				if(empty(self::$table) && $arg[2] !== 'init'){
+					echo "It seems you haven't setup a migrations table. Please run 'tea migrations init'.\n";
+					exit(0);
+				}else{
+*/
+					self::$arg[2]();
+//				}
 			}
 		}
 		
 		static function test(){
+			self::$db->drop_table('test');
+		}
+		
+		static function _test(){
 			$db_conf = include_once(TEA_CONFIG.'migrations'.EXT);
 			try{
 				if(!empty($db_conf['sock']) && DB_HOST == 'localhost'){
@@ -39,6 +70,45 @@
 		}
 		
 		static function init(){
+			Database::load();
+			if(empty(self::$table)){
+				do{
+					do{
+						echo "Migrations table name: ";
+						$resp = trim(fgets(STDIN));
+						if(DBConnect::table_exists($resp)){
+							echo "Table already exists.\n";
+							$resp = '';
+						}
+					}while(empty($resp));
+					$sock = Database::$config['sock'];
+					$port = Database::$config['port'];
+					$migrations_table = $resp;
+					$conf_file = <<<CONF
+<?php
+return array(
+	'sock' => '$sock',
+	'port' => '$port',
+	'migrations_table' => '$migrations_table'
+);
+CONF;
+					if(file_exists(TEA_CONFIG.'database-'.self::$env.EXT)) unlink(TEA_CONFIG.'database-'.self::$env.EXT);
+					$fp = fopen(TEA_CONFIG.'database-'.self::$env.EXT, 'w');
+					if(!fwrite($fp, $conf_file)){
+						echo "Error saving the config file!\n";
+						fclose($fp);
+						exit(0);
+					}
+					fclose($fp);
+					self::$table = $migrations_table;
+				}while(empty(self::$table));
+			}
+			DBConnect::sql("CREATE TABLE `migrations` (`id` int(11) unsigned NOT NULL AUTO_INCREMENT, `number` int(11) NOT NULL, `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `active` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`))");
+			echo "Migrations table setup. Create initial migration? [y/n] ";
+			$resp = trim(fgets(STDIN));
+		}
+		
+		static function init_old(){
 			if(file_exists(TEA_CONFIG.'migrations'.EXT)){
 				do{
 					echo "You have already set up migrations. Overwrite them? [y/n]: ";

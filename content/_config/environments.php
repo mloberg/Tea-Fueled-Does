@@ -32,7 +32,8 @@ class Environment{
 		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
 		define('ADD_USER', true);
 		// MySQL
-		define('DB_HOST', 'localhost');
+		define('DB_HOST', '127.0.0.1'); // do not use "localhost" (use 127.0.0.1 instead)
+		define('DB_PORT', '8889'); // MySQL default is 3306
 		define('DB_USER', 'root');
 		define('DB_PASS', 'root');
 		define('DB', 'tea');
@@ -47,7 +48,8 @@ class Environment{
 		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
 		define('ADD_USER', false);
 		// MySQL
-		define('DB_HOST', '');
+		define('DB_HOST', ''); // do not use "localhost" (use 127.0.0.1 instead)
+		define('DB_PORT', '3306'); // MySQL default is 3306
 		define('DB_USER', '');
 		define('DB_PASS', '');
 		define('DB', '');
@@ -62,7 +64,8 @@ class Environment{
 		// ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
 		define('ADD_USER', false);
 		// MySQL
-		define('DB_HOST', '');
+		define('DB_HOST', ''); // do not use "localhost" (use 127.0.0.1 instead)
+		define('DB_PORT', '3306'); // MySQL default is 3306
 		define('DB_USER', '');
 		define('DB_PASS', '');
 		define('DB', '');

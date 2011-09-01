@@ -1,5 +1,8 @@
 <?php
 
+	$users_table = USERS_TABLE;
+	global $users_table;
+	
 	class Tea{
 	
 		function __construct(){
@@ -9,6 +12,8 @@
 		
 		static function loader($name){
 			include_once(TEA_DIR.'classes'.DIRECTORY_SEPARATOR.$name.EXT);
+			// so the constructor is called
+			$class = new $name();
 		}
 		
 		function command($arg){
@@ -26,6 +31,11 @@
 			}else{
 				$arg[1]::action($arg);
 			}
+		}
+		
+		static function db(){
+			include_once(TEA_DIR.'db'.EXT);
+			return new DB();
 		}
 	
 	}
