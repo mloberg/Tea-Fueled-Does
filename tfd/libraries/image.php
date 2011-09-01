@@ -103,12 +103,14 @@
 				$opts['width'] = round($this->info['width'] * $scale);
 				$opts['height'] = round($this->info['height'] * $scale);
 			}else{
-				if($options['width']){
-					$opts['width'] = $options['width'];
+				if(!$options['height'] || ($this->info['width'] > $this->info['height'])){
+					$opts['width'] = $options['width']
 					$opts['height'] = round($this->info['height'] / ($this->info['width'] / $options['width']));
-				}elseif($options['height']){
+				}elseif(!$options['width'] || ($this->info['height'] > $this->info['width'])){
 					$opts['height'] = $options['height'];
 					$opts['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
+				}else{
+					return false;
 				}
 			}
 			// now crop it
