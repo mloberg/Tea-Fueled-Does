@@ -95,6 +95,13 @@
 			}
 		}
 		
+		public function validate_user_pass($user, $pass){
+			$user_info = $this->mysql->where('username', $user)->limit(1)->get(USERS_TABLE, 'salt');
+			if(empty($user_info)) return false;
+			$salt = $user_info[0]['salt'];
+			return AdminValidation::check_password($salt, $pass);
+		}
+		
 		protected function add_user($username, $password, $info = array()){
 			$info['username'] = $username;
 			// hash the pass
