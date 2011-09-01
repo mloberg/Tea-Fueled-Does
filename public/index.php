@@ -11,6 +11,7 @@
 	
 	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
 	
+	$public_dir = dirname(__FILE__);
 	$app_dir = '../tfd/';
 	$content_dir = '../content/';
 	

@@ -7,7 +7,7 @@
  */
 
 // main directories
-define('PUBLIC_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
+define('PUBLIC_DIR', $public_dir.DIRECTORY_SEPARATOR);
 define('APP_DIR', realpath(PUBLIC_DIR.$app_dir).DIRECTORY_SEPARATOR);
 define('BASE_DIR', realpath(PUBLIC_DIR.'..').DIRECTORY_SEPARATOR);
 define('CONTENT_DIR', realpath(PUBLIC_DIR.$content_dir).DIRECTORY_SEPARATOR);
