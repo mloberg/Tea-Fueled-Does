@@ -3,11 +3,18 @@
 	class Database extends Tea{
 	
 		private static $env;
-		protected static $config = array();
+		public static $config = array();
 		private static $setup = array(
 			'users_table' => false,
 			'migrations' => false
 		);
+		private static $db;
+		
+		function __construct(){
+			global $environment;
+			self::$env = strtolower(substr($environment, 0, 3));
+			self::$db = parent::db();
+		}
 		
 		public static function action($arg){
 			if(empty($arg[2]) || $arg[2] == 'help'){
@@ -22,22 +29,16 @@
 					echo "\t{$name}: {$description}\n";
 				}
 			}else{
-				global $environment;
-				self::$env = strtolower(substr($environment, 0, 3));
-				// config stuff
-				if(!file_exists(TEA_CONFIG.'database-'.self::$env.EXT) && $arg[2] !== 'init'){
-					echo "You don't haven't set up Tea to use your database.\n\nPlease run 'tea database init' before any other command.\n";
-					exit(0);
-				}
-				self::load_config();
 				// run the sent command
 				self::$arg[2]();
 			}
 		}
 		
+		public static function load(){
+			// simply load the class for use
+		}
+		
 		public static function load_config(){
-			global $environment;
-			self::$env = strtolower(substr($environment, 0, 3));
 			if(!file_exists(TEA_CONFIG.'database-'.self::$env.EXT)) return false;
 			self::$config = include(TEA_CONFIG.'database-'.self::$env.EXT);
 			self::$config['host'] = DB_HOST;
@@ -47,8 +48,8 @@
 			return true;
 		}
 		
-		protected static function create_table($table_name = null, $columns = array()){
-			if(DBConnect::table_exists($table_name)){
+		public static function create_table($table_name = null, $columns = array()){
+			if(self::$db->table_exists($table_name)){
 				echo "\tError: Table '{$table_name}' already exits.\n";
 				exit(0);
 			}
@@ -56,7 +57,7 @@
 				do{
 					echo "Table Name: ";
 					$table_name = trim(fgets(STDIN));
-					if(DBConnect::table_exists($table_name)){
+					if(self::$db->table_exists($table_name)){
 						echo "\tError: Table '{$table_name}' already exists.\n";
 						$table_name = '';
 					}
@@ -141,8 +142,7 @@
 							$pass = false;
 							echo "Index (primary, unique, key): ";
 							$key = trim(fgets(STDIN));
-							if(preg_match('/(primary|unique|key)/', $key)) $pass = true;
-							if(empty($key)) $pass = true;
+							if(preg_match('/(primary|unique|key)/', $key) || empty($key)) $pass = true;
 						}while(!$pass);
 						// add to columns array
 						$columns[$field] = array(
@@ -156,30 +156,43 @@
 					}
 				}
 			}while(!$exit);
-			DBConnect::create_table($table_name, $columns);
+			self::$db->create_table($table_name, $columns);
 			echo "Table {$table_name} created.\n";
 		}
 		
 		public static function init(){
-			if(DB_HOST == ''){
-				echo "It seems your database config is empty.\nPlease edit /content/_config/environments.php.\n";
+			if(DB_HOST === ''){
+				echo "It seems your database config is empty.\nPlease edit /content/_config/environments.php\n";
 				exit(0);
 			}
-			// create a config file
-			if(file_exists(TEA_CONFIG.'database-'.self::$env.EXT)){
-				echo "It seems that you have already run this command.\n";
-				echo "\tIf you want to do a migration, try running 'tea migrations'\n\tIf you need to redo your config, run 'tea database config'.\n";
-				exit(0);
+			echo 'MySQL Host: '.DB_HOST."\n";
+			echo 'MySQL User: '.DB_USER."\n";
+			echo 'MySQL Pass: '.DB_PASS."\n";
+			echo 'MySQL Database: '.DB."\n";
+			echo "If this information is incorrect, please edit /content/_config/environments.php\n";
+			// users table
+			do{
+				echo "Setup users table? [y/n] ";
+				$resp = trim(fgets(STDIN));
+			}while(!preg_match('/[y|n]/', strtolower($resp)));
+			if(strtolower($resp) === 'y'){
+				$setup_users_table = true;
+				echo 'Users table name ['.USERS_TABLE.']: ';
+				$resp = trim(fgets(STDIN));
+				$user_table_name = (!empty($resp)) ? $resp : USERS_TABLE;
+				// rewrite /content/_config/general.php config file with user table name
+				if($user_table_name !== USERS_TABLE){
+					self::update_users_table_config($user_table_name);
+				}
 			}
-			self::config();
 			// create user table
-			if(self::$setup['users_table']){
-				self::create_users_table(self::$config['users_table']);				
+			if($setup_users_table){
+				self::create_users_table($user_table_name);				
 				// set up an admin user?
 				echo "Add an admin user? [y/n]: ";
 				$resp = trim(fgets(STDIN));
 				if(strtolower($resp) === 'y'){
-					user::add();
+					User::add();
 				}
 			}
 			// create other tables
@@ -192,84 +205,17 @@
 					$table = trim(fgets(STDIN));
 					if($table === 'none'){
 						$exit = true;
-					}elseif(DBConnect::table_exists($table)){
+					}elseif(self::$db->table_exists($table)){
 						echo "\tError: The table {$table} already exists.\n";
 					}elseif(!empty($table)){
 						self::create_table($table);
 					}
 				}while(!$exit);
 			}
-			// create a migration file
-			if(self::$setup['migrations']){
-				
-			}
+			
+			// Migrations
+			
 			echo "Database setup.";
-		}
-		
-		public static function config(){
-			echo 'MySQL Host: '.DB_HOST."\n";
-			echo 'MySQL User: '.DB_USER."\n";
-			echo 'MySQL Pass: '.DB_PASS."\n";
-			echo 'MySQL Database: '.DB."\n";
-			echo "If this information is incorrect, please edit /content/_config/environments.php\n";
-			echo "Extra DB config for Tea.\n";
-			if(DB_HOST == 'localhost'){
-				// socket
-				echo "\tLocation of the MySQL Socket [/var/mysql/mysql.sock]: ";
-				$resp = trim(fgets(STDIN));
-				$sock = (!empty($resp)) ? $resp : '/var/mysql/mysql.sock';
-				self::$config['sock'] = $sock;
-			}else{
-				// port
-				echo "\tMySQL port [3306]: ";
-				$resp = trim(fgets(STDIN));
-				$port = (!empty($resp)) ? $resp : '3306';
-				self::$config['port'] = $port;
-			}
-			// users table
-			do{
-				echo "Setup users table? [y/n] ";
-				$resp = trim(fgets(STDIN));
-			}while(!preg_match('/[y|n]/', strtolower($resp)));
-			if(strtolower($resp) === 'y'){
-				self::$setup['users_table'] = true;
-				echo 'Users table name ['.USERS_TABLE.']: ';
-				$resp = trim(fgets(STDIN));
-				$user_table_name = (!empty($resp)) ? $resp : USERS_TABLE;
-				self::$config['users_table'] = $user_table_name;
-				// rewrite /content/_config/general.php config file with user table name
-				if($user_table_name !== USERS_TABLE){
-					self::update_users_table_config($user_table_name);
-				}
-			}
-			// set up migrations?
-			do{
-				echo "Do you want to setup migrations? (you can always do this later) [y/n] ";
-				$resp = strtolower(trim(fgets(STDIN)));
-			}while(!preg_match('/[y|n]/', $resp));
-			if($resp === 'y'){
-				self::$setup['migrations'] = true;
-				echo "\tMigration table name [migrations]: ";
-				$resp = trim(fgets(STDIN));
-				$migrations_table = (!empty($resp)) ? $resp : 'migrations';
-			}
-			// write config file
-			$conf_file = <<<CONF
-<?php
-return array(
-	'sock' => '$sock',
-	'port' => '$port',
-	'migrations_table' => '$migrations_table'
-);
-CONF;
-			if(file_exists(TEA_CONFIG.'database-'.self::$env.EXT)) unlink(TEA_CONFIG.'database-'.self::$env.EXT);
-			$fp = fopen(TEA_CONFIG.'database-'.self::$env.EXT, 'w');
-			if(!fwrite($fp, $conf_file)){
-				echo "Error saving the config file!\n";
-				fclose($fp);
-				exit(0);
-			}
-			fclose($fp);
 		}
 		
 		public static function create_users_table($table = null){
@@ -281,8 +227,8 @@ CONF;
 					self::update_users_table_config($table);
 				}
 			}
-			if(DBConnect::table_exists($table)){
-				DBConnect::drop_table($table);
+			if(self::$db->table_exists($table)){
+				self::$db->drop_table($table);
 			}
 			$columns = array(
 				'id' => array(
@@ -343,114 +289,6 @@ CONF;
 			}
 			// close file
 			fclose($fp);
-		}
-		
-		static function test(){
-			DBConnect::drop_table('users');
-		}
-	
-	}
-	
-	class DBConnect extends Database{
-	
-		private static $con;
-		
-		private static function connect(){
-			parent::load_config();
-			if(!is_resource(self::$con) || is_null(self::$con)){
-				try{
-					if(parent::$config['host'] == 'localhost'){
-						$dsn = 'mysql:unix_socket='.parent::$config['sock'].';dbname='.parent::$config['database'];
-					}else{
-						$dsn = 'mysql:host='.parent::$config['host'].';port='.parent::$config['port'].';dbname='.parent::$config['database'];
-					}
-					self::$con = new PDO($dsn, parent::$config['user'], parent::$config['pass']);
-				}catch(PDOException $e){
-					print "Error: " . $e->getMessage()."\n";
-					exit(0);
-				}
-			}
-			return self::$con;
-		}
-		
-		private static function close(){
-			self::$con = null;
-		}
-		
-		static function table_exists($table){
-			$link =& self::connect();
-			$qry = $link->prepare("SHOW TABLES LIKE ?");
-			$qry->execute(array($table));
-			$result = $qry->fetch(PDO::FETCH_ASSOC);
-			self::close();
-			return (empty($result)) ? false : true;
-		}
-		
-		static function drop_table($table){
-			$link =& self::connect();
-			$qry = $link->exec(sprintf("DROP TABLE IF EXISTS `%s`", $table));
-			self::close();
-		}
-		
-		static function create_table($table, $columns){
-			$link =& self::connect();
-			$sql = sprintf("CREATE TABLE `%s` (", $table);
-			$keys = array();
-			foreach($columns as $name => $info){
-				// is there a key?
-				if(!empty($info['key'])){
-					$keys[$name] = $info['key'];
-				}
-				switch($info['type']){
-					case 'float':
-					case 'double':
-					case 'tinytext':
-					case 'text':
-					case 'mediumtext':
-					case 'longtext':
-					case 'date':
-					case 'datetime':
-					case 'timestamp':
-					case 'time':
-						$type = $info['type'];
-						break;
-					default:
-						$type = $info['type'].'('.$info['length'].')';
-				}
-				if($info['key'] !== 'primary'){
-					if(!empty($info['default'])){
-						$default = sprintf(" DEFAULT '%s'", $info['default']);
-					}elseif($info['null'] == true){
-						$default = " DEFAULT NULL";
-					}
-					$null = ($info['null'] == false) ? ' NOT NULL' : '';
-				}
-				$sql .= sprintf("`%s` %s%s%s %s,",
-					$name, $type, $null, $default, strtoupper($info['extra']));
-			}
-			foreach($keys as $field => $type){
-				$type = ($type === true) ? 'KEY' : strtoupper($type).' KEY';
-				$sql .= $type.' ';
-				if($type != 'primary') $sql .= sprintf("`%s` ", $field);
-				$sql .= sprintf("(`%s`),", $field);
-			}
-			$sql = substr($sql, 0, strlen($sql) -1);
-			$sql .= ')';
-			$link->exec($sql);
-			self::close();
-		}
-		
-		public static function insert($table, $info){
-			$link =& self::connect();
-			foreach($info as $key => $value){
-				$fields .= $key.', ';
-				$values .= ':'.$key.', ';
-			}
-			$fields = substr($fields, 0, -2);
-			$values = substr($values, 0, -2);
-			$qry = $link->prepare(sprintf("INSERT INTO %s (%s) VALUES (%s)", $table, $fields, $values));
-			$qry->execute($info);
-			self::close();
 		}
 	
 	}
