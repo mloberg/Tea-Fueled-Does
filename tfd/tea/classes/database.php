@@ -14,6 +14,8 @@
 			global $environment;
 			self::$env = strtolower(substr($environment, 0, 3));
 			self::$db = parent::db();
+			global $users_table;
+			self::$config['users_table'] = $users_table;
 		}
 		
 		public static function action($arg){
@@ -169,7 +171,12 @@
 			echo 'MySQL User: '.DB_USER."\n";
 			echo 'MySQL Pass: '.DB_PASS."\n";
 			echo 'MySQL Database: '.DB."\n";
-			echo "If this information is incorrect, please edit /content/_config/environments.php\n";
+			echo "Is this information correct? [y/n] ";
+			$resp = trim(fgets(STDIN));
+			if(strtolower($resp) !== 'y'){
+				echo "Please edit /content/_config/environments.php\n";
+				exit(0);
+			}
 			// users table
 			do{
 				echo "Setup users table? [y/n] ";
@@ -177,11 +184,11 @@
 			}while(!preg_match('/[y|n]/', strtolower($resp)));
 			if(strtolower($resp) === 'y'){
 				$setup_users_table = true;
-				echo 'Users table name ['.USERS_TABLE.']: ';
+				echo 'Users table name ['.self::$config['users_table'].']: ';
 				$resp = trim(fgets(STDIN));
-				$user_table_name = (!empty($resp)) ? $resp : USERS_TABLE;
+				$user_table_name = (!empty($resp)) ? $resp : self::$config['users_table'];
 				// rewrite /content/_config/general.php config file with user table name
-				if($user_table_name !== USERS_TABLE){
+				if($user_table_name !== self::$config['users_table']){
 					self::update_users_table_config($user_table_name);
 				}
 			}
@@ -215,15 +222,15 @@
 			
 			// Migrations
 			
-			echo "Database setup.";
+			echo "Database setup.\n";
 		}
 		
 		public static function create_users_table($table = null){
 			if(is_null($table)){
-				echo "Name of the users table [".USERS_TABLE."]: ";
+				echo "Name of the users table [".self::$config['users_table']."]: ";
 				$resp = trim(fgets(STDIN));
-				$table = (!empty($resp)) ? $resp : 'users';
-				if($table !== USERS_TABLE){
+				$table = (!empty($resp)) ? $resp : self::$config['users_table'];
+				if($table !== self::$config['users_table']){
 					self::update_users_table_config($table);
 				}
 			}
@@ -276,9 +283,9 @@
 			$match = preg_grep('/'.preg_quote("define('USERS_TABLE'").'/', $conf);
 			// repalce it
 			foreach($match as $line => $value){
-				$conf[$line] = "define('USERS_TABLE', '{$user_table_name}'); // the MySQL table the user info is store in\n";
+				$conf[$line] = "define('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
 			}
-			define('USERS_TABLE', $user_table_name);
+			self::$config['users_table'] = $user_table_name;
 			// delete config file
 			unlink(CONF_DIR.'general'.EXT);
 			// create new file

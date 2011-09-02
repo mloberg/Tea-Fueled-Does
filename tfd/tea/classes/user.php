@@ -18,10 +18,6 @@
 		}
 		
 		static function add(){
-			if(!Database::load_config()){
-				echo "Run database config first...\n";
-				exit(0);
-			}
 			echo "Add a new user.\n";
 			do{
 				echo "Username: ";
@@ -39,7 +35,7 @@
 				'salt' => $salt,
 				'secret' => $secret
 			);
-			DBConnect::insert(USERS_TABLE, $user);
+			parent::db()->insert(Database::$config['users_table'], $user);
 			echo "User added.\n";
 		}
 	

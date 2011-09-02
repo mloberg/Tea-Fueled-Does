@@ -51,7 +51,7 @@
 				}
 				if($info['key'] !== 'primary'){
 					if(!empty($info['default']) || $info['default'] !== false){
-						if(strtoupper($info['default']) === $info['default']){
+						if(strtoupper($info['default']) === $info['default'] && !empty($info['default'])){
 							$default = sprintf("DEFAULT %s", mysql_real_escape_string($info['default']));
 						}else{
 							$default = sprintf("DEFAULT '%s'", mysql_real_escape_string($info['default']));
@@ -61,20 +61,20 @@
 					}elseif(preg_match('/time/', $type)){
 						$default = 'DEFAULT CURRENT_TIMESTAMP';
 					}else{
-						$defailt = 'DEFAULT NULL';
+						$default = 'DEFAULT NULL';
 						$info['null'] = true;
 					}
 					$null = ($info['null'] === false) ? 'NOT NULL' : '';
 				}
 				$sql .= sprintf("`%s` %s %s %s %s,",
-					$name, $type, $null, $default, strtoupper($info['extra']);
+					$name, $type, $null, $default, strtoupper($info['extra'])
 				);
 			}
 			foreach($keys as $field => $type){
 				$type = ($type === true) ? 'KEY' : strtoupper($type).' KEY';
 				$sql .= $type.' ';
 				if($type != 'primary') $sql .= sprintf("`%s`", mysql_real_escape_string($field));
-				$sql .= sprintf("(`%s`)", mysql_real_escape_string($field));
+				$sql .= sprintf("(`%s`),", mysql_real_escape_string($field));
 			}
 			$sql = substr($sql, 0, -1);
 			$sql .= ')';
