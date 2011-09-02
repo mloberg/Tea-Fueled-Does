@@ -1,7 +1,6 @@
 <?php
 
 	$users_table = USERS_TABLE;
-	global $users_table;
 	
 	class Tea{
 	
