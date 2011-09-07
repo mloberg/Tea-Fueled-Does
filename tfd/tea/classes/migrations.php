@@ -2,7 +2,7 @@
 
 	class Migrations extends Tea{
 	
-		static private $db;
+		static protected $db;
 		static private $table;
 		
 		function __construct(){
@@ -71,11 +71,47 @@ CONF;
 			if(empty($migration_files)){
 				echo "Scan the database for current schema? [y/n]: ";
 				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$up = <<<UP
+function up(){
+
+UP;
+					$down = <<<DOWN
+function down(){
+
+DOWN;
 					$sql = sprintf("SHOW TABLES FROM `%s`", DB);
 					$tables = self::$db->query($sql, true);
 					foreach($tables as $table){
-						
+						$table = $table['Tables_in_'.DB];
+						$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
+						$table_columns = self::$db->query($sql, true);
+						$columns = "array(";
+						$keys = array(
+							'PRI' => 'primary',
+							'UNI' => 'unique',
+							'MUL' => 'index'
+						);
+						foreach($table_columns as $c){
+							preg_match('/\((\d+)\)/', $c['Type'], $match);
+							$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
+							$null = ($c['Null'] === 'NO') ? 'false' : 'true';
+							$columns .= "'{$c['Field']}' => array('type' => '{$type}', 'length' => {$match[1]}, 'null' => {$null}, 'default' => '{$c['Default']}', 'extra' => '{$c['Extra']}', 'key' => '{$keys[$c['Key']]}'),";
+						}
+						$columns = substr($columns, 0, -1).')';
+						$up .= <<<UP
+			parent::\$db->create_table('$table', $columns);
+
+UP;
+						$down .= <<<DOWN
+			parent::\$db->drop_table('$table');
+
+DOWN;
 					}
+					$up .= "\t\t}";
+					$down .= "\t\t}";
+					$number = self::write_migration_file(1, $up, $down);
+					// add migration to database so we don't run it
+					self::$db->insert(self::$table, array('number' => $number, 'active' => 1));
 				}
 			}
 			
@@ -83,6 +119,25 @@ CONF;
 			if(empty($migrations)){
 				
 			}
+		}
+		
+		function write_migration_file($number, $up, $down){
+			if(strlen($number) == 1) $number = '0'.$number;
+			$file = <<<FILE
+<?php
+
+	class TeaMigrations_$number extends Migrations{
+	
+		$up
+		
+		$down
+	
+	}
+FILE;
+			$fp = fopen(MIGRATIONS_DIR.$number.EXT, 'c');
+			fwrite($fp, $file);
+			fclose($fp);
+			return $number;
 		}
 	
 	}
