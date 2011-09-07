@@ -1,19 +1,24 @@
 <?php
 
 // some settings and stuff
-$environment = 'DEVELOPMENT';
-$app_dir = '../tfd/';
-$content_dir = '../content/';
+$environment = 'DEVELOPMENT'; // need a way to grab the environment from the .htaccess file
 
-require_once 'tfd/bootstrap.php';
+$public_dir = 'public/';
+$app_dir = 'tfd/';
+$content_dir = 'content/';
+
+require_once $app_dir.'bootstrap.php';
 require_once TEA_DIR.'init.php';
 
 // some Tea settings
 define('TEA_CONFIG', CONTENT_DIR.'tea_config/');
+define('MIGRATIONS_DIR', CONTENT_DIR.'migrations/');
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 error_reporting(E_ERROR|E_WARNING|E_PARSE); // run verbose
 
-$app = new TFD();
+echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
+
+//$app = new TFD();
 $tea = new Tea();
 
 // run the command

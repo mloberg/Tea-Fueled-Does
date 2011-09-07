@@ -171,7 +171,7 @@
 			echo 'MySQL User: '.DB_USER."\n";
 			echo 'MySQL Pass: '.DB_PASS."\n";
 			echo 'MySQL Database: '.DB."\n";
-			echo "Is this information correct? [y/n] ";
+			echo "Is this information correct? [y/n]: ";
 			$resp = trim(fgets(STDIN));
 			if(strtolower($resp) !== 'y'){
 				echo "Please edit /content/_config/environments.php\n";
@@ -278,18 +278,18 @@
 		
 		private static function update_users_table_config($user_table_name){
 			// load the file into an array
-			$conf = file(CONF_DIR.'general'.EXT);
+			$conf = file(CONF_FILE);
 			// serach for the line
 			$match = preg_grep('/'.preg_quote("define('USERS_TABLE'").'/', $conf);
 			// repalce it
 			foreach($match as $line => $value){
-				$conf[$line] = "define('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
+				$conf[$line] = "\t\tdefine('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
 			}
 			self::$config['users_table'] = $user_table_name;
 			// delete config file
-			unlink(CONF_DIR.'general'.EXT);
+			unlink(CONF_FILE);
 			// create new file
-			$fp = fopen(CONF_DIR.'general'.EXT, 'c');
+			$fp = fopen(CONF_FILE, 'c');
 			// write config file
 			foreach($conf as $l){
 				fwrite($fp, $l);

@@ -5,12 +5,16 @@
 	class Tea{
 	
 		function __construct(){
-			echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
 			spl_autoload_register('Tea::loader');
 		}
 		
 		static function loader($name){
-			include_once(TEA_DIR.'classes'.DIRECTORY_SEPARATOR.$name.EXT);
+			$file = TEA_DIR.'classes'.DIRECTORY_SEPARATOR.$name.EXT;
+			if(!file_exists($file)){
+				echo "Invalid class called: {$name}";
+				exit(0);
+			}
+			include_once($file);
 			// so the constructor is called
 			$class = new $name();
 		}
