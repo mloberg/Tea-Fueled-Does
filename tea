@@ -16,10 +16,10 @@ define('MIGRATIONS_DIR', CONTENT_DIR.'migrations/');
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 error_reporting(E_ERROR|E_WARNING|E_PARSE); // run verbose
 
-echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
-
-//$app = new TFD();
+$app = new TFD();
 $tea = new Tea();
+
+echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
 
 // run the command
 $tea->command($_SERVER['argv']);

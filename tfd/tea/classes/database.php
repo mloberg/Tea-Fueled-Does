@@ -221,6 +221,10 @@
 			}
 			
 			// Migrations
+			echo "Set up migrations? [y/n]: ";
+			if(strtolower(trim(fgets(STDIN))) === 'y'){
+				Migrations::init();
+			}
 			
 			echo "Database setup.\n";
 		}
