@@ -4,10 +4,6 @@
 	
 		private static $env;
 		public static $config = array();
-		private static $setup = array(
-			'users_table' => false,
-			'migrations' => false
-		);
 		private static $db;
 		
 		function __construct(){
@@ -16,6 +12,7 @@
 			self::$db = parent::db();
 			global $users_table;
 			self::$config['users_table'] = $users_table;
+			self::$config['migrations_table'] = include(TEA_CONFIG.'migrations'.EXT);
 		}
 		
 		public static function action($arg){
@@ -31,18 +28,15 @@
 					echo "\t{$name}: {$description}\n";
 				}
 			}else{
+				// stop calls to private methods
 				$check = new ReflectionMethod(__CLASS__, $arg[2]);
 				if(!$check->isPrivate()){
 					self::$arg[2]();
 				}else{
-					echo "Called private method.\n";
+					echo "Error: Call to private method.\n";
 					exit(0);
 				}
 			}
-		}
-		
-		private static function test(){
-			echo "Hello from a private method.\n";
 		}
 		
 		public static function init(){
@@ -297,12 +291,43 @@
 			fclose($fp);
 		}
 		
+		private function get_db_tables(){
+			$sql = sprintf("SHOW TABLES FROM `%s`", DB);
+			$tmp_tables = self::$db->query($sql, true);
+			$tables = array();
+			foreach($tmp_tables as $t){
+				$table = $t['Tables_in_'.DB];
+				if($table != self::$config['migrations_table']) $tables[] = $table;
+			}
+			return $tables;
+		}
+		
 		/**
-		 *
+		 * 
 		 */
 		
-		static function add_column(){
+		public static function add_column(){
+			// add column
+			$tables = self::get_db_tables();
+			foreach($tables as $index => $table){
+				echo "{$index}: {$table}\n";
+			}
+			do{
+				echo "Which table would you like to add the column to?: ";
+				$table = $tables[trim(fgets(STDIN))];
+			}while(empty($table));
 			
+				// which table?
+				// insert after what column?
+				// name of column?
+				// type, length, default of column
+			
+			// if migrations are setup, generate migration
+			if(!empty(self::$config['migrations_table'])){
+				
+				// add migration to database
+				
+			}
 		}
 	
 	}
