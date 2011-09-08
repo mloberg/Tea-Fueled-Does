@@ -31,6 +31,8 @@
 				foreach($commands as $name => $description){
 					echo "\t{$name}: {$description}\n";
 				}
+			}elseif($arg[1] == 'init'){
+				Database::init();
 			}else{
 				$arg[1]::action($arg);
 			}
