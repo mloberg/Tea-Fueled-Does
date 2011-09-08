@@ -31,23 +31,18 @@
 					echo "\t{$name}: {$description}\n";
 				}
 			}else{
-				// run the sent command
-				self::$arg[2]();
+				$check = new ReflectionMethod(__CLASS__, $arg[2]);
+				if(!$check->isPrivate()){
+					self::$arg[2]();
+				}else{
+					echo "Called private method.\n";
+					exit(0);
+				}
 			}
 		}
 		
-		public static function load(){
-			// simply load the class for use
-		}
-		
-		public static function load_config(){
-			if(!file_exists(TEA_CONFIG.'database-'.self::$env.EXT)) return false;
-			self::$config = include(TEA_CONFIG.'database-'.self::$env.EXT);
-			self::$config['host'] = DB_HOST;
-			self::$config['user'] = DB_USER;
-			self::$config['pass'] = DB_PASS;
-			self::$config['database'] = DB;
-			return true;
+		private static function test(){
+			echo "Hello from a private method.\n";
 		}
 		
 		public static function init(){
@@ -300,6 +295,14 @@
 			}
 			// close file
 			fclose($fp);
+		}
+		
+		/**
+		 *
+		 */
+		
+		static function add_column(){
+			
 		}
 	
 	}
