@@ -50,6 +50,73 @@
 			return true;
 		}
 		
+		public static function init(){
+			if(DB_HOST === ''){
+				echo "It seems your database config is empty.\nPlease edit /content/_config/environments.php\n";
+				exit(0);
+			}
+			echo 'MySQL Host: '.DB_HOST."\n";
+			echo 'MySQL User: '.DB_USER."\n";
+			echo 'MySQL Pass: '.DB_PASS."\n";
+			echo 'MySQL Database: '.DB."\n";
+			echo "Is this information correct? [y/n]: ";
+			$resp = trim(fgets(STDIN));
+			if(strtolower($resp) !== 'y'){
+				echo "Please edit /content/_config/environments.php\n";
+				exit(0);
+			}
+			// users table
+			do{
+				echo "Setup users table? [y/n] ";
+				$resp = trim(fgets(STDIN));
+			}while(!preg_match('/[y|n]/', strtolower($resp)));
+			if(strtolower($resp) === 'y'){
+				$setup_users_table = true;
+				echo 'Users table name ['.self::$config['users_table'].']: ';
+				$resp = trim(fgets(STDIN));
+				$user_table_name = (!empty($resp)) ? $resp : self::$config['users_table'];
+				// rewrite /content/_config/general.php config file with user table name
+				if($user_table_name !== self::$config['users_table']){
+					self::update_users_table_config($user_table_name);
+				}
+			}
+			// create user table
+			if($setup_users_table){
+				self::create_users_table($user_table_name);				
+				// set up an admin user?
+				echo "Add an admin user? [y/n]: ";
+				$resp = trim(fgets(STDIN));
+				if(strtolower($resp) === 'y'){
+					User::add();
+				}
+			}
+			// create other tables
+			echo "Add other tables? [y/n]: ";
+			$resp = trim(fgets(STDIN));
+			if(strtolower($resp) === 'y'){
+				do{
+					$exit = false;
+					echo "Table name ('none' when you are done): ";
+					$table = trim(fgets(STDIN));
+					if($table === 'none'){
+						$exit = true;
+					}elseif(self::$db->table_exists($table)){
+						echo "\tError: The table {$table} already exists.\n";
+					}elseif(!empty($table)){
+						self::create_table($table);
+					}
+				}while(!$exit);
+			}
+			
+			// Migrations
+			echo "Set up migrations? [y/n]: ";
+			if(strtolower(trim(fgets(STDIN))) === 'y'){
+				Migrations::init();
+			}
+			
+			echo "Database setup.\n";
+		}
+		
 		public static function create_table($table_name = null, $columns = array()){
 			if(self::$db->table_exists($table_name)){
 				echo "\tError: Table '{$table_name}' already exits.\n";
@@ -160,73 +227,6 @@
 			}while(!$exit);
 			self::$db->create_table($table_name, $columns);
 			echo "Table {$table_name} created.\n";
-		}
-		
-		public static function init(){
-			if(DB_HOST === ''){
-				echo "It seems your database config is empty.\nPlease edit /content/_config/environments.php\n";
-				exit(0);
-			}
-			echo 'MySQL Host: '.DB_HOST."\n";
-			echo 'MySQL User: '.DB_USER."\n";
-			echo 'MySQL Pass: '.DB_PASS."\n";
-			echo 'MySQL Database: '.DB."\n";
-			echo "Is this information correct? [y/n]: ";
-			$resp = trim(fgets(STDIN));
-			if(strtolower($resp) !== 'y'){
-				echo "Please edit /content/_config/environments.php\n";
-				exit(0);
-			}
-			// users table
-			do{
-				echo "Setup users table? [y/n] ";
-				$resp = trim(fgets(STDIN));
-			}while(!preg_match('/[y|n]/', strtolower($resp)));
-			if(strtolower($resp) === 'y'){
-				$setup_users_table = true;
-				echo 'Users table name ['.self::$config['users_table'].']: ';
-				$resp = trim(fgets(STDIN));
-				$user_table_name = (!empty($resp)) ? $resp : self::$config['users_table'];
-				// rewrite /content/_config/general.php config file with user table name
-				if($user_table_name !== self::$config['users_table']){
-					self::update_users_table_config($user_table_name);
-				}
-			}
-			// create user table
-			if($setup_users_table){
-				self::create_users_table($user_table_name);				
-				// set up an admin user?
-				echo "Add an admin user? [y/n]: ";
-				$resp = trim(fgets(STDIN));
-				if(strtolower($resp) === 'y'){
-					User::add();
-				}
-			}
-			// create other tables
-			echo "Add other tables? [y/n]: ";
-			$resp = trim(fgets(STDIN));
-			if(strtolower($resp) === 'y'){
-				do{
-					$exit = false;
-					echo "Table name ('none' when you are done): ";
-					$table = trim(fgets(STDIN));
-					if($table === 'none'){
-						$exit = true;
-					}elseif(self::$db->table_exists($table)){
-						echo "\tError: The table {$table} already exists.\n";
-					}elseif(!empty($table)){
-						self::create_table($table);
-					}
-				}while(!$exit);
-			}
-			
-			// Migrations
-			echo "Set up migrations? [y/n]: ";
-			if(strtolower(trim(fgets(STDIN))) === 'y'){
-				Migrations::init();
-			}
-			
-			echo "Database setup.\n";
 		}
 		
 		public static function create_users_table($table = null){
