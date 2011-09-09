@@ -107,10 +107,6 @@
 		}
 		
 		public static function create_table($table_name = null, $columns = array()){
-			if(self::$db->table_exists($table_name)){
-				echo "\tError: Table '{$table_name}' already exits.\n";
-				exit(0);
-			}
 			if(is_null($table_name)){
 				do{
 					echo "Table Name: ";
@@ -120,6 +116,9 @@
 						$table_name = '';
 					}
 				}while(empty($table_name));
+			}elseif(self::$db->table_exists($table_name)){
+				echo "\tError: Table '{$table_name}' already exits.\n";
+				exit(0);
 			}
 			if(empty($columns['id'])){
 				echo "Create an id column? [y/n]: ";
@@ -215,6 +214,15 @@
 				}
 			}while(!$exit);
 			self::$db->create_table($table_name, $columns);
+			if(!empty(self::$config['migrations_table'])){
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$col_str = var_export($columns, true);
+					$up = "parent::\$db->create_table('{$table_name}', {$col_str});\n";
+					$down = "parent::\$db->drop_table('{$table_name}');\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
+			}
 			echo "Table {$table_name} created.\n";
 		}
 		
@@ -291,7 +299,7 @@
 			fclose($fp);
 		}
 		
-		private function get_db_tables(){
+		private static function get_db_tables(){
 			$sql = sprintf("SHOW TABLES FROM `%s`", DB);
 			$tmp_tables = self::$db->query($sql, true);
 			$tables = array();
@@ -302,23 +310,47 @@
 			return $tables;
 		}
 		
+		private static function get_table_fields($table){
+			$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
+			$tmp_fields = self::$db->query($sql, true);
+			$fields = array();
+			foreach($tmp_fields as $f){
+				$fields[] = $f['Field'];
+			}
+			return $fields;
+		}
+		
 		/**
 		 * 
 		 */
 		
 		public static function add_column(){
-			// add column
+			// which table?
 			$tables = self::get_db_tables();
 			foreach($tables as $index => $table){
 				echo "{$index}: {$table}\n";
 			}
 			do{
-				echo "Which table would you like to add the column to?: ";
+				echo "Which table would you like to add the column to? ";
 				$table = $tables[trim(fgets(STDIN))];
 			}while(empty($table));
+			// after what column?
+			$fields = self::get_table_fields($table);
+			foreach($fields as $index => $field){
+				echo "{$index}: {$field}\n";
+			}
+			do{
+				echo "What field would you like to add it after? ";
+				$field = $fields[trim(fgets(STDIN))];
+			}while(empty($field));
+			// name of column
+			do{
+				echo "Name of field? ";
+				$column = trim(fgets(STDIN));
+				if(!array_search($column, $fields)) $column = '';
+			}while(empty($column));
+			// column info
 			
-				// which table?
-				// insert after what column?
 				// name of column?
 				// type, length, default of column
 			
