@@ -357,8 +357,6 @@
 			// if migrations are setup, generate migration
 			if(!empty(self::$config['migrations_table'])){
 				
-				// add migration to database
-				
 			}
 		}
 	
