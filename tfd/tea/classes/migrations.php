@@ -209,6 +209,33 @@ CONF;
 			}
 		}
 		
+		public static function latest(){
+			$active_migration = self::$db->where('active', 1)->limit(1)->get(self::$table);
+			$migration_files = glob(MIGRATIONS_DIR.'*'.EXT);
+			$migrations = array();
+			$latest = 0;
+			foreach($migration_files as $i => $m){
+				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $m, $match)){
+					$migrations[$match[1]] = $m;
+					$latest = ($match[1] > $latest) ? $match[1] : $latest;
+				}
+			}
+			for($i = $active_migration['number'] + 1; $i <= $latest; $i++){
+				$n = (strlen($i) == 1) ? '0'.$i : $i;
+				include_once($migrations[$n]);
+				$migration_name = 'TeaMigrations_'.$n;
+				$migration_name::up();
+				self::$db->where('active', 1)->update(self::$table, array('active' => 0));
+				$tmp = self::$db->where('number', $i)->get(self::$table);
+				if(empty($tmp)){
+					self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
+				}else{
+					self::$db->where('number', $i)->update(self::$table, array('active' => 1));
+				}
+			}
+			echo "Database updated to latest version.\n";
+		}
+		
 		public static function run_down(){
 			// list migrations
 			
