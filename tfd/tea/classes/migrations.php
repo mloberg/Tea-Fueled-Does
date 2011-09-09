@@ -21,6 +21,9 @@
 				foreach($commands as $name => $description){
 					echo "\t{$name}: {$description}\n";
 				}
+			}elseif($arg[2] == 'generate_migration_file'){
+				echo "Invalid command.\n";
+				exit(0);
 			}else{
 				self::$arg[2]();
 			}
@@ -71,21 +74,13 @@ CONF;
 			if(empty($migration_files)){
 				echo "Scan the database for current schema? [y/n]: ";
 				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					$up = <<<UP
-function up(){
-
-UP;
-					$down = <<<DOWN
-function down(){
-
-DOWN;
 					$sql = sprintf("SHOW TABLES FROM `%s`", DB);
 					$tables = self::$db->query($sql, true);
 					foreach($tables as $table){
 						$table = $table['Tables_in_'.DB];
 						$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
 						$table_columns = self::$db->query($sql, true);
-						$columns = "array(";
+						$columns = array();
 						$keys = array(
 							'PRI' => 'primary',
 							'UNI' => 'unique',
@@ -95,42 +90,94 @@ DOWN;
 							preg_match('/\((\d+)\)/', $c['Type'], $match);
 							$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
 							$null = ($c['Null'] === 'NO') ? 'false' : 'true';
-							$columns .= "'{$c['Field']}' => array('type' => '{$type}', 'length' => {$match[1]}, 'null' => {$null}, 'default' => '{$c['Default']}', 'extra' => '{$c['Extra']}', 'key' => '{$keys[$c['Key']]}'),";
+							$columns[$c['Field']] = array(
+								'type' => $type,
+								'length' => $match[1],
+								'null' => $null,
+								'default' => $c['Default'],
+								'extra' => $c['Extra'],
+								'key' => $keys[$c['Key']]
+							);
 						}
-						$columns = substr($columns, 0, -1).')';
-						$up .= <<<UP
-			parent::\$db->create_table('$table', $columns);
-
-UP;
-						$down .= <<<DOWN
-			parent::\$db->drop_table('$table');
-
-DOWN;
+						$col_str = var_export($columns, true);
+						$up .= "parent::\$db->create_table('{$table}', $col_str);\n";
+						$down .= "parent::\$db->drop_table('{$table}');\n";
 					}
-					$up .= "\t\t}";
-					$down .= "\t\t}";
 					$number = self::write_migration_file(1, $up, $down);
 					// add migration to database so we don't run it
 					self::$db->insert(self::$table, array('number' => $number, 'active' => 1));
 				}
 			}
 			
+			// run migrations if migrations are completely empty (in the database)
+			if(!self::$db->table_exists(self::$table)){
+				$sql = sprintf("CREATE TABLE `%s` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `number` int(11) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `active` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `number` (`number`)
+)", self::$table);
+				try{
+					self::$db->query($sql);
+				}catch(Exception $e){
+					echo $e->getMessage();
+					exit(0);
+				}
+			}
 			$migrations = self::$db->get(self::$table);
-			if(empty($migrations)){
-				
+			if(empty($migrations) && !empty($migration_files)){
+				echo "Run migrations? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					foreach($migration_files as $file){
+						preg_match('/\/(\d+)'.preg_quote(EXT).'/', $file, $match);
+						include_once($file);
+						$migration_name = 'TeaMigrations_'.$match[1];
+						$migration_name::up();
+						self::$db->where('active', '1')->update(self::$table, array('active' => 0));
+						self::$db->insert(self::$table, array('number' => $match[1], 'active' => 1));
+					}
+				}
 			}
 		}
 		
-		function write_migration_file($number, $up, $down){
+		public static function generate_migration_file($up, $down, $add_to_db = false){
+			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
+			foreach($migrations as $key => $value){
+				if(preg_match('/\/(\d+)'.preg_quote(EXT).'/', $value, $match)){
+					$migrations[$key] = $match[1];
+				}else{
+					unset($migrations[$key]);
+				}
+			}
+			if(empty($migrations)){
+				$number = 1;
+			}else{
+				$max = max(array_values($migrations));
+				$number = $max + 1;
+			}
+			if($add_to_db === true){
+				self::$db->where('active', '1')->update(self::$table, array('active' => 0));
+				self::$db->insert(self::$table, array('number' => $number, 'active' => 1));
+			}
+			self::write_migration_file($number, $up, $down);
+		}
+		
+		private static function write_migration_file($number, $up, $down){
 			if(strlen($number) == 1) $number = '0'.$number;
 			$file = <<<FILE
 <?php
 
 	class TeaMigrations_$number extends Migrations{
 	
-		$up
+		function up(){
+			$up
+		}
 		
-		$down
+		function down(){
+			$down
+		}
 	
 	}
 FILE;
