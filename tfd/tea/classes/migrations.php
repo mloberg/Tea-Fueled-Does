@@ -24,8 +24,17 @@
 			}elseif($arg[2] == 'generate_migration_file'){
 				echo "Invalid command.\n";
 				exit(0);
+			}elseif(empty(self::$table) && $arg[2] != 'init'){
+				echo "You have not set up migrations. Please run 'tea migrations init'.\n";
+				exit(0);
 			}else{
-				self::$arg[2]();
+				$check = new ReflectionMethod(__CLASS__, $arg[2]);
+				if(!$check->isPrivate()){
+					self::$arg[2]($arg);
+				}else{
+					echo "Error: Call to private method.\n";
+					exit(0);
+				}
 			}
 		}
 		
@@ -142,10 +151,71 @@ CONF;
 			}
 		}
 		
+		private static function _list_migrations(){
+			$active_migration = self::$db->where('active', 1)->limit(1)->get(self::$table);
+			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
+			$max = max(array_keys($migrations));
+			foreach($migrations as $i => $m){
+				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $m, $match)){
+					echo ($active_migration['number'] == $match[1]) ? '* ' : '  ';
+					echo "{$match[1]}\n";
+					if($active_migration['number'] == $match[1] && $i == $max) return true;
+					$migrations[$i] = $match[1];
+				}
+			}
+			return array(
+				'active' => $active_migration['number'],
+				'migrations' => $migrations
+			);
+		}
+		
+		public static function run_up($arg){
+			// list migrations
+			$info = self::_list_migrations();
+			if($info === true){
+				echo "You are running the latest migration.\n";
+				exit(0);
+			}
+			// match keys to value
+			$migrations = array();
+			foreach($info['migrations'] as $m){
+				$migrations[$m] = $m;
+			}
+			if(!empty($arg[3])){
+				$run = $migrations[$arg[3]];
+				if(empty($run)){
+					echo "That's not a valid migration.\n";
+					exit(0);
+				}
+			}else{
+				do{
+					echo "Which migration would you like update to? ";
+					$run = $migrations[trim(fgets(STDIN))];
+				}while(empty($run));
+			}
+			// run all migrations from active up to selected migration
+			for($i = $info['active'] + 1; $i <= $run; $i++){
+				$n = (strlen($i) == 1) ? '0'.$i : $i;
+				include_once(MIGRATIONS_DIR.$n.EXT);
+				$migration_name = 'TeaMigrations_'.$n;
+				$migration_name::up();
+				self::$db->where('active', 1)->update(self::$table, array('active' => 0));
+				self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
+			}
+			exit(0);
+		}
+		
+		public static function run_down(){
+			// list migrations
+			
+			// run all migrations from active down to selected migration
+			
+		}
+		
 		public static function generate_migration_file($up, $down, $add_to_db = false){
 			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
 			foreach($migrations as $key => $value){
-				if(preg_match('/\/(\d+)'.preg_quote(EXT).'/', $value, $match)){
+				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $value, $match)){
 					$migrations[$key] = $match[1];
 				}else{
 					unset($migrations[$key]);
