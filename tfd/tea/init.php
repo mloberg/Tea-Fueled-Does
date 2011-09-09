@@ -20,7 +20,19 @@
 		}
 		
 		function command($arg){
-			if(empty($arg[1]) || $arg[1] == 'help'){
+			$args = array(
+				'd' => 'Database',
+				'u' => 'User',
+				'm' => 'Migrations',
+				'h' => 'help',
+				'i' => 'init'
+			);
+			if(preg_match('/^\-('.implode('|', array_keys($args)).')$/', trim($arg[1]))){
+				$run = $args[trim(str_replace('-', '', $arg[1]))];
+			}else{
+				$run = $arg[1];
+			}
+			if(empty($run) || $run == 'help'){
 				$commands = array(
 					'general' => 'Make changes to the config.',
 					'database' => 'Automatically setup a database for TFD or create tables with ease.',
@@ -31,10 +43,10 @@
 				foreach($commands as $name => $description){
 					echo "\t{$name}: {$description}\n";
 				}
-			}elseif($arg[1] == 'init'){
+			}elseif($run == 'init'){
 				Database::init();
 			}else{
-				$arg[1]::action($arg);
+				$run::action($arg);
 			}
 		}
 		
