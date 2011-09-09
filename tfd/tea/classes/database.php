@@ -105,6 +105,104 @@
 			
 			echo "Database setup.\n";
 		}
+				
+		public static function create_users_table($table = null){
+			if(is_null($table)){
+				echo "Name of the users table [".self::$config['users_table']."]: ";
+				$resp = trim(fgets(STDIN));
+				$table = (!empty($resp)) ? $resp : self::$config['users_table'];
+				if($table !== self::$config['users_table']){
+					self::update_users_table_config($table);
+				}
+			}
+			if(self::$db->table_exists($table)){
+				self::$db->drop_table($table);
+			}
+			$columns = array(
+				'id' => array(
+					'type' => 'int',
+					'length' => '11',
+					'null' => false,
+					'default' => false,
+					'extra' => 'auto_increment',
+					'key' => 'primary'
+				),
+				'username' => array(
+					'type' => 'varchar',
+					'length' => '128',
+					'null' => false,
+					'default' => false,
+					'extra' => '',
+					'key' => 'unique'
+				),
+				'salt' => array(
+					'type' => 'varchar',
+					'length' => '512',
+					'null' => false,
+					'default' => false,
+					'extra' => '',
+					'key' => ''
+				),
+				'secret' => array(
+					'type' => 'varchar',
+					'length' => '512',
+					'null' => false,
+					'default' => '',
+					'extra' => '',
+					'key' => ''
+				)
+			);
+			echo "If you wish to add custom fields to the users table, please enter them below.\n\n";
+			self::create_table($table, $columns);
+			echo "Users table created.\n";
+		}
+		
+		private static function update_users_table_config($user_table_name){
+			// load the file into an array
+			$conf = file(CONF_FILE);
+			// serach for the line
+			$match = preg_grep('/'.preg_quote("define('USERS_TABLE'").'/', $conf);
+			// repalce it
+			foreach($match as $line => $value){
+				$conf[$line] = "\t\tdefine('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
+			}
+			self::$config['users_table'] = $user_table_name;
+			// delete config file
+			unlink(CONF_FILE);
+			// create new file
+			$fp = fopen(CONF_FILE, 'c');
+			// write config file
+			foreach($conf as $l){
+				fwrite($fp, $l);
+			}
+			// close file
+			fclose($fp);
+		}
+		
+		private static function get_db_tables(){
+			$sql = sprintf("SHOW TABLES FROM `%s`", DB);
+			$tmp_tables = self::$db->query($sql, true);
+			$tables = array();
+			foreach($tmp_tables as $t){
+				$table = $t['Tables_in_'.DB];
+				if($table != self::$config['migrations_table']) $tables[] = $table;
+			}
+			return $tables;
+		}
+		
+		private static function get_table_fields($table){
+			$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
+			$tmp_fields = self::$db->query($sql, true);
+			$fields = array();
+			foreach($tmp_fields as $f){
+				$fields[] = $f['Field'];
+			}
+			return $fields;
+		}
+		
+		/**
+		 * 
+		 */
 		
 		public static function create_table($table_name = null, $columns = array()){
 			if(is_null($table_name)){
@@ -226,103 +324,13 @@
 			echo "Table {$table_name} created.\n";
 		}
 		
-		public static function create_users_table($table = null){
+		public function drop_table($table = null){
 			if(is_null($table)){
-				echo "Name of the users table [".self::$config['users_table']."]: ";
-				$resp = trim(fgets(STDIN));
-				$table = (!empty($resp)) ? $resp : self::$config['users_table'];
-				if($table !== self::$config['users_table']){
-					self::update_users_table_config($table);
-				}
+				
 			}
-			if(self::$db->table_exists($table)){
-				self::$db->drop_table($table);
-			}
-			$columns = array(
-				'id' => array(
-					'type' => 'int',
-					'length' => '11',
-					'null' => false,
-					'default' => false,
-					'extra' => 'auto_increment',
-					'key' => 'primary'
-				),
-				'username' => array(
-					'type' => 'varchar',
-					'length' => '128',
-					'null' => false,
-					'default' => false,
-					'extra' => '',
-					'key' => 'unique'
-				),
-				'salt' => array(
-					'type' => 'varchar',
-					'length' => '512',
-					'null' => false,
-					'default' => false,
-					'extra' => '',
-					'key' => ''
-				),
-				'secret' => array(
-					'type' => 'varchar',
-					'length' => '512',
-					'null' => false,
-					'default' => '',
-					'extra' => '',
-					'key' => ''
-				)
-			);
-			echo "If you wish to add custom fields to the users table, please enter them below.\n\n";
-			self::create_table($table, $columns);
-			echo "Users table created.\n";
+			// need to collect information for migration down
+			
 		}
-		
-		private static function update_users_table_config($user_table_name){
-			// load the file into an array
-			$conf = file(CONF_FILE);
-			// serach for the line
-			$match = preg_grep('/'.preg_quote("define('USERS_TABLE'").'/', $conf);
-			// repalce it
-			foreach($match as $line => $value){
-				$conf[$line] = "\t\tdefine('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
-			}
-			self::$config['users_table'] = $user_table_name;
-			// delete config file
-			unlink(CONF_FILE);
-			// create new file
-			$fp = fopen(CONF_FILE, 'c');
-			// write config file
-			foreach($conf as $l){
-				fwrite($fp, $l);
-			}
-			// close file
-			fclose($fp);
-		}
-		
-		private static function get_db_tables(){
-			$sql = sprintf("SHOW TABLES FROM `%s`", DB);
-			$tmp_tables = self::$db->query($sql, true);
-			$tables = array();
-			foreach($tmp_tables as $t){
-				$table = $t['Tables_in_'.DB];
-				if($table != self::$config['migrations_table']) $tables[] = $table;
-			}
-			return $tables;
-		}
-		
-		private static function get_table_fields($table){
-			$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
-			$tmp_fields = self::$db->query($sql, true);
-			$fields = array();
-			foreach($tmp_fields as $f){
-				$fields[] = $f['Field'];
-			}
-			return $fields;
-		}
-		
-		/**
-		 * 
-		 */
 		
 		public static function add_column(){
 			// which table?
@@ -341,23 +349,95 @@
 			}
 			do{
 				echo "What field would you like to add it after? ";
-				$field = $fields[trim(fgets(STDIN))];
-			}while(empty($field));
+				$after = $fields[trim(fgets(STDIN))];
+			}while(empty($after));
 			// name of column
 			do{
 				echo "Name of field? ";
 				$column = trim(fgets(STDIN));
-				if(!array_search($column, $fields)) $column = '';
+				if(array_search($column, $fields)) $column = '';
 			}while(empty($column));
 			// column info
-			
-				// name of column?
-				// type, length, default of column
-			
+			echo "Field type [varchar]: ";
+			$type = trim(fgets(STDIN));
+			$type = (!empty($type)) ? $type : 'varchar';
+			if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time|varchar|int|tinyint|smallint|mediumint|bigint|decimal|bit|char|mediumtext|year|enum)/', $type)){
+				echo "\tError: We do not support that field type.\n";
+			}else{
+				if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time)/', $type)){
+					switch($type){
+						case 'tinyint':
+							$default = '4';
+							break;
+						case 'smallint':
+							$default = '6';
+							break;
+						case 'mediumint':
+							$default = '9';
+							break;
+						case 'int':
+							$default = '11';
+							break;
+						case 'bigint':
+							$default = '20';
+							break;
+						case 'char':
+							$default = '1';
+						case 'varchar':
+							$default = '128';
+							break;
+						case 'bit':
+							$default = '1';
+							break;
+						case 'decimal':
+							$default = '10,0';
+							break;
+						case 'year':
+							$default = '4';
+							break;
+					}
+					do{
+						echo "Field Length/Content [$default]:";
+						$length = trim(fgets(STDIN));
+						if(!empty($default) && empty($length)) $length = $default;
+					}while(empty($length));
+				}
+				do{
+					echo "Allow Null (true, false) [true]: ";
+					$null = trim(fgets(STDIN));
+					$null = (!empty($null)) ? $null : 'true';
+				}while(!preg_match('/(true|false)/', $null));
+				echo "Default value: ";
+				$default_val = trim(fgets(STDIN));
+				echo "Extra (auto_increment, etc.): ";
+				$extra = trim(fgets(STDIN));
+				do{
+					$pass = false;
+					echo "Index (primary, unique, key): ";
+					$key = trim(fgets(STDIN));
+					if(preg_match('/(primary|unique|key)/', $key) || empty($key)) $pass = true;
+				}while(!$pass);
+				$info = array(
+					'type' => $type,
+					'length' => $length,
+					'null' => $null,
+					'default' => $default_val,
+					'extra' => $extra,
+					'key' => $key
+				);
+				self::$db->add_column($table, $column, $info, $after);
+			}
 			// if migrations are setup, generate migration
 			if(!empty(self::$config['migrations_table'])){
-				
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$col_str = var_export($info, true);
+					$up = "parent::\$db->add_column('{$table}', '{$column}', {$col_str}, '{$after}');\n";
+					$down = "parent::\$db->drop_column('{$table}', '{$column}');\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
 			}
+			echo "Column {$column} added to table {$table}.\n";
 		}
 	
 	}

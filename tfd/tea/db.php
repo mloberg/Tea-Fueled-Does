@@ -85,5 +85,51 @@
 				exit(0);
 			}
 		}
+		
+		function add_column($table, $name, $info, $after = null){
+			switch($info['type']){
+				case 'float':
+				case 'double':
+				case 'tinytext':
+				case 'text':
+				case 'mediumtext':
+				case 'longtext':
+				case 'date':
+				case 'datetime':
+				case 'timestamp':
+				case 'time':
+					$type = $info['type'];
+					break;
+				default:
+					$type = $info['type'].'('.$info['length'].')';
+			}
+			$sql = sprintf("ALTER TABLE `%s` ADD `%s` %s", mysql_real_escape_string($table), mysql_real_escape_string($name), $type);
+			if($info['null'] === false) $sql .= " NOT NULL";
+			if(!empty($info['default'])){
+				$sql .= (strtoupper($info['default']) === $info['default']) ? " DEFAULT {$info['default']}" : " DEFAULT {$info['default']}";
+			}
+			if(!is_null($info['after'])){
+				$sql .= sprintf(" AFTER `%s`", mysql_real_escape_string($info['after']));
+			}
+			if(!empty($info['key'])){
+				$sql .= sprintf(", ADD %s(`%s`)", ($info['key'] == 'primary') ? 'PRIMARY KEY' : strtoupper($info['key']), $name);
+			}
+			try{
+				parent::query($sql);
+			}catch(Eception $e){
+				echo $e->getMessage().PHP_EOL;
+				exit(0);
+			}
+		}
+		
+		function drop_column($table, $column){
+			$sql = sprintf("ALTER TABLE `%s` DROP `%s`", mysql_real_escape_string($table), mysql_real_escape_string($column));
+			try{
+				parent::query($sql);
+			}catch(Exception $e){
+				echo $e->getMessage().PHP_EOL;
+				exit(0);
+			}
+		}
 	
 	}

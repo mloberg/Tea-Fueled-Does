@@ -12,7 +12,21 @@
 		}
 		
 		static function action($arg){
-			if(empty($arg[2]) || $arg[2] == 'help'){
+			$args = array(
+				'i' => 'init',
+				'u' => 'run_up',
+				'l' => 'latest',
+				'd' => 'run_down',
+				's' => 'status'
+			);
+			if(preg_match('/^\-('.implode('|', array_keys($args)).')$/', trim($arg[2]))){
+				$run = $args[trim(str_replace('-', '', $arg[2]))];
+			}elseif(preg_match('/(up|down)/', $arg[2])){
+				$run = 'run_'.$arg[2];
+			}else{
+				$run = $arg[2];
+			}
+			if(empty($run) || $run == 'help'){
 				$commands = array(
 					'init' => 'Set up migrations'
 				);
@@ -21,16 +35,16 @@
 				foreach($commands as $name => $description){
 					echo "\t{$name}: {$description}\n";
 				}
-			}elseif($arg[2] == 'generate_migration_file'){
+			}elseif($run == 'generate_migration_file'){
 				echo "Invalid command.\n";
 				exit(0);
-			}elseif(empty(self::$table) && $arg[2] != 'init'){
+			}elseif(empty(self::$table) && $run != 'init'){
 				echo "You have not set up migrations. Please run 'tea migrations init'.\n";
 				exit(0);
 			}else{
-				$check = new ReflectionMethod(__CLASS__, $arg[2]);
+				$check = new ReflectionMethod(__CLASS__, $run);
 				if(!$check->isPrivate()){
-					self::$arg[2]($arg);
+					self::$run($arg);
 				}else{
 					echo "Error: Call to private method.\n";
 					exit(0);
@@ -192,7 +206,7 @@ CONF;
 			}else{
 				do{
 					echo "Which migration would you like update to? ";
-					$run = $migrations[preg_replace('/^0/', '', trim(fgets(STDIN)))];
+					$run = $migrations[trim(fgets(STDIN))];
 				}while(empty($run));
 			}
 			// run all migrations from active up to selected migration
@@ -254,7 +268,7 @@ CONF;
 			}else{
 				do{
 					echo "Which migration would like to go back to? ";
-					$run = $migrations[preg_replace('/^0/', '', trim(fgets(STDIN)))];
+					$run = $migrations[trim(fgets(STDIN))];
 				}while(empty($run));
 			}
 			// run all migrations from active down to selected migration
@@ -268,7 +282,7 @@ CONF;
 			self::$db->where('number', preg_replace('/^0/', '', $run))->update(self::$table, array('active' => 1));
 		}
 		
-		public static function current(){
+		public static function status(){
 			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
 			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
 			sort($migrations);
