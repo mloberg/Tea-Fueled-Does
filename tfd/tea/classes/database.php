@@ -12,7 +12,7 @@
 			self::$db = parent::db();
 			global $users_table;
 			self::$config['users_table'] = $users_table;
-			self::$config['migrations_table'] = include(TEA_CONFIG.'migrations'.EXT);
+			if(file_exists(TEA_CONFIG.'migrations'.EXT)) self::$config['migrations_table'] = include(TEA_CONFIG.'migrations'.EXT);
 		}
 		
 		public static function action($arg){

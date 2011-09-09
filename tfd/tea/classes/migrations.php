@@ -87,30 +87,32 @@ CONF;
 					$tables = self::$db->query($sql, true);
 					foreach($tables as $table){
 						$table = $table['Tables_in_'.DB];
-						$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
-						$table_columns = self::$db->query($sql, true);
-						$columns = array();
-						$keys = array(
-							'PRI' => 'primary',
-							'UNI' => 'unique',
-							'MUL' => 'index'
-						);
-						foreach($table_columns as $c){
-							preg_match('/\((\d+)\)/', $c['Type'], $match);
-							$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
-							$null = ($c['Null'] === 'NO') ? 'false' : 'true';
-							$columns[$c['Field']] = array(
-								'type' => $type,
-								'length' => $match[1],
-								'null' => $null,
-								'default' => $c['Default'],
-								'extra' => $c['Extra'],
-								'key' => $keys[$c['Key']]
+						if($table !== self::$table){
+							$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
+							$table_columns = self::$db->query($sql, true);
+							$columns = array();
+							$keys = array(
+								'PRI' => 'primary',
+								'UNI' => 'unique',
+								'MUL' => 'index'
 							);
+							foreach($table_columns as $c){
+								preg_match('/\((\d+)\)/', $c['Type'], $match);
+								$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
+								$null = ($c['Null'] === 'NO') ? 'false' : 'true';
+								$columns[$c['Field']] = array(
+									'type' => $type,
+									'length' => $match[1],
+									'null' => $null,
+									'default' => $c['Default'],
+									'extra' => $c['Extra'],
+									'key' => $keys[$c['Key']]
+								);
+							}
+							$col_str = var_export($columns, true);
+							$up .= "parent::\$db->create_table('{$table}', $col_str);\n";
+							$down .= "parent::\$db->drop_table('{$table}');\n";
 						}
-						$col_str = var_export($columns, true);
-						$up .= "parent::\$db->create_table('{$table}', $col_str);\n";
-						$down .= "parent::\$db->drop_table('{$table}');\n";
 					}
 					$number = self::write_migration_file(1, $up, $down);
 					// add migration to database so we don't run it
@@ -151,7 +153,7 @@ CONF;
 			}
 		}
 		
-		private static function _list_migrations(){
+		private static function _list_migrations($up = true){
 			$active_migration = self::$db->where('active', 1)->limit(1)->get(self::$table);
 			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
 			$max = max(array_keys($migrations));
@@ -159,7 +161,7 @@ CONF;
 				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $m, $match)){
 					echo ($active_migration['number'] == $match[1]) ? '* ' : '  ';
 					echo "{$match[1]}\n";
-					if($active_migration['number'] == $match[1] && $i == $max) return true;
+					if($active_migration['number'] == $match[1] && $i == $max && $up === true) return true;
 					$migrations[$i] = $match[1];
 				}
 			}
@@ -184,13 +186,13 @@ CONF;
 			if(!empty($arg[3])){
 				$run = $migrations[$arg[3]];
 				if(empty($run)){
-					echo "That's not a valid migration.\n";
+					echo "That's an invalid migration.\n";
 					exit(0);
 				}
 			}else{
 				do{
 					echo "Which migration would you like update to? ";
-					$run = $migrations[trim(fgets(STDIN))];
+					$run = $migrations[preg_replace('/^0/', '', trim(fgets(STDIN)))];
 				}while(empty($run));
 			}
 			// run all migrations from active up to selected migration
@@ -236,11 +238,34 @@ CONF;
 			echo "Database updated to latest version.\n";
 		}
 		
-		public static function run_down(){
+		public static function run_down($arg){
 			// list migrations
-			
+			$info = self::_list_migrations(false);
+			$migrations = array();
+			foreach($info['migrations'] as $m){
+				$migrations[$m] = $m;
+			}
+			if(!empty($arg[3])){
+				$run = $migrations[$arg[3]];
+				if(empty($run)){
+					echo "That's an invalid migration.\n.";
+					exit(0);
+				}
+			}else{
+				do{
+					echo "Which migration would like to go back to? ";
+					$run = $migrations[preg_replace('/^0/', '', trim(fgets(STDIN)))];
+				}while(empty($run));
+			}
 			// run all migrations from active down to selected migration
-			
+			for($i = $info['active']; $i > $run; $i--){
+				$n = (strlen($i) == 1) ? '0'.$i : $i;
+				include_once(MIGRATIONS_DIR.$n.EXT);
+				$migration_name = 'TeaMigrations_'.$n;
+				$migration_name::down();
+			}
+			self::$db->where('active', 1)->update(self::$table, array('active' => 0));
+			self::$db->where('number', preg_replace('/^0/', '', $run))->update(self::$table, array('active' => 1));
 		}
 		
 		public static function generate_migration_file($up, $down, $add_to_db = false){
