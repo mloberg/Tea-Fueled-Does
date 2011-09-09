@@ -200,9 +200,13 @@ CONF;
 				$migration_name = 'TeaMigrations_'.$n;
 				$migration_name::up();
 				self::$db->where('active', 1)->update(self::$table, array('active' => 0));
-				self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
+				$tmp = self::$db->where('number', $i)->get(self::$table);
+				if(empty($tmp)){
+					self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
+				}else{
+					self::$db->where('number', $i)->update(self::$table, array('active' => 1));
+				}
 			}
-			exit(0);
 		}
 		
 		public static function run_down(){
