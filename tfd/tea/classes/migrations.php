@@ -268,6 +268,15 @@ CONF;
 			self::$db->where('number', preg_replace('/^0/', '', $run))->update(self::$table, array('active' => 1));
 		}
 		
+		public static function current(){
+			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
+			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
+			sort($migrations);
+			preg_match('/\/(\d+)'.preg_quote(EXT).'$/', max($migrations), $match);
+			$max = preg_replace('/^0/', '', $match[1]);
+			echo "Currently on migration {$active['number']} of {$max}\n";
+		}
+		
 		public static function generate_migration_file($up, $down, $add_to_db = false){
 			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
 			foreach($migrations as $key => $value){
