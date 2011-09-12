@@ -51,7 +51,7 @@
 		
 		static protected function connection(){
 			if(!is_resource(self::$link) || empty(self::$link)){
-				if(($link = mysql_connect(DB_HOST, DB_USER, DB_PASS)) && mysql_select_db(DB, $link)){
+				if(($link = mysql_connect(DB_HOST.':'.DB_PORT, DB_USER, DB_PASS)) && mysql_select_db(DB, $link)){
 					self::$link = $link;
 					mysql_set_charset('utf8');
 				}else{
