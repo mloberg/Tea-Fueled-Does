@@ -1,12 +1,16 @@
 <?php
 
-// some settings and stuff
-$environment = 'DEVELOPMENT'; // need a way to grab the environment from the .htaccess file
-
+// define some app directories
 $public_dir = 'public/';
 $app_dir = 'tfd/';
 $content_dir = 'content/';
 
+// set the environment (by getting it from the .htaccess file)
+$htaccess = file_get_contents($public_dir.'.htaccess');
+preg_match('/SetEnv ENV (.*)/', $htaccess, $match);
+$environment = $match[1];
+
+// include the files to get this going
 require_once $app_dir.'bootstrap.php';
 require_once TEA_DIR.'init.php';
 
@@ -16,9 +20,11 @@ define('MIGRATIONS_DIR', CONTENT_DIR.'migrations/');
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 error_reporting(E_ERROR|E_WARNING|E_PARSE); // run verbose
 
+// create our objects
 $app = new TFD();
 $tea = new Tea();
 
+// welcome message
 echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
 
 // run the command
