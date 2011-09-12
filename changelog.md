@@ -243,3 +243,9 @@
 
 * Added flash option to the redirect() helper
 * MySQL limit() improvements
+
+## 1.5
+
+* Naming changes to folders within content (see release-notes.md for details)
+* Config folder now a file (config.php)
+* Added CLI called tea

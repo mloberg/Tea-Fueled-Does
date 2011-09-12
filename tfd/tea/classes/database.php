@@ -162,7 +162,7 @@
 			$conf = file(CONF_FILE);
 			// serach for the line
 			$match = preg_grep('/'.preg_quote("define('USERS_TABLE'").'/', $conf);
-			// repalce it
+			// replace it
 			foreach($match as $line => $value){
 				$conf[$line] = "\t\tdefine('USERS_TABLE', '".self::$config['users_table']."'); // the MySQL table the user info is store in\n";
 			}

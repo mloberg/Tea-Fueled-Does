@@ -38,7 +38,7 @@ define('DEFAULT_MASTER', MASTERS_DIR.'master'.EXT);
 define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
 
 // tfd version
-define('TFD_VERSION', '1.5b');
+define('TFD_VERSION', '1.5');
 
 // include and load the config
 include_once(CONF_FILE);
