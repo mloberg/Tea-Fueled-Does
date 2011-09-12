@@ -131,5 +131,38 @@
 				exit(0);
 			}
 		}
+		
+		function add_key($table, $column, $key_type){
+			if($key_type == 'primary') $key_type .= ' key';
+			$sql = sprintf("ALTER TABLE `%s` ADD %s(`%s`)", mysql_real_escape_string($table), strtoupper($key_type), mysql_real_escape_string($column));
+			try{
+				parent::query($sql);
+			}catch(Exception $e){
+				echo $e->getMessage().PHP_EOL;
+				exit(0);
+			}
+		}
+		
+		function remove_key($table, $column){
+			$sql = sprintf("SHOW FIELDS FROM `%s` WHERE `Field` = '%s'", mysql_real_escape_string($table), mysql_real_escape_string($column));
+			$col_info = parent::query($sql, true);
+			if($col_info[0]['Key'] === 'PRI'){
+				// DROP PRIMARY KEY
+				$drop = "PRIMARY KEY";
+			}elseif($col_info[0]['Key'] === 'UNI'){
+				// ALTER TABLE test DROP KEY `test`
+				$drop = sprintf("KEY `%s`", mysql_real_escape_string($column));
+			}else{
+				// ALTER TABLE test DROP INDEX `test`
+				$drop = sprintf("INDEX `%s`", mysql_real_escape_string($column));
+			}
+			try{
+				$sql = sprintf("ALTER TABLE `%s` DROP %s", mysql_real_escape_string($table), $drop);
+				parent::query($sql);
+			}catch(Exception $e){
+				echo $e->getMessage().PHP_EOL;
+				exit(0);
+			}
+		}
 	
 	}
