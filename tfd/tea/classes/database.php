@@ -563,7 +563,7 @@
 					$max = max(array_keys($cols));
 					$min = min(array_keys($cols));
 					do{
-						echo "Which column would you like to drop? [{$min} - {$max}]: ";
+						echo "Which column would you like to add the key to? [{$min} - {$max}]: ";
 						$resp = trim(fgets(STDIN));
 						$col = $cols[$resp];
 					}while(empty($col));
@@ -582,6 +582,56 @@
 				}
 			}
 			self::$db->add_key($table, $col, $type);
+		}
+		
+		public static function remove_key($table = null, $col = null){
+			if(is_null($column) || is_null($table)){
+				if(is_null($table)){
+					$tables = self::get_db_tables();
+					foreach($tables as $index => $t){
+						echo "{$index}: {$t}\n";
+					}
+					$max = max(array_keys($tables));
+					$min = min(array_keys($tables));
+					do{
+						echo "Which table would you like to add the key to? [{$min} - {$max}]: ";
+						$table = $tables[trim(fgets(STDIN))];
+					}while(empty($table));
+				}
+				if(is_null($col)){
+					$cols = self::get_table_fields($table);
+					foreach($cols as $index => $c){
+						echo "{$index}: {$c}\n";
+					}
+					$max = max(array_keys($cols));
+					$min = min(array_keys($cols));
+					do{
+						echo "Which column would you remove the key from? [{$min} - {$max}]: ";
+						$resp = trim(fgets(STDIN));
+						$col = $cols[$resp];
+					}while(empty($col));
+				}
+			}
+			if(!empty(self::$config['migrations_table'])){
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					// get key type
+					$sql = sprintf("SHOW FIELDS FROM `%s` WHERE `Field` = '%s'", mysql_real_escape_string($table), mysql_real_escape_string($column));
+					$col_info = self::$db->query($sql, true);
+					switch($col_info[0]['Key']){
+						case 'UNI':
+							$type = 'unique';
+						case 'PRI':
+							$type = 'primary';
+						default:
+							$type = 'index';
+					}
+					$up = "parent::\$db->remove_key('{$table}', '{$col}');\n";
+					$down = "parent::\$db->add_key('{$table}', '{$col}', '{$type}');\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
+			}
+			self::$db->remove_key($table, $col);
 		}
 	
 	}
