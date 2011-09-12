@@ -480,5 +480,65 @@
 			}
 			echo "Column {$column} added to table {$table}.\n";
 		}
+		
+		public static function drop_column($table = null, $column = null){
+			if(is_null($column) || is_null($table)){
+				if(is_null($table)){
+					$tables = self::get_db_tables();
+					foreach($tables as $index => $t){
+						echo "{$index}: {$t}\n";
+					}
+					$max = max(array_keys($tables));
+					$min = min(array_keys($tables));
+					do{
+						echo "Which table would you like to drop? [{$min} - {$max}]: ";
+						$table = $tables[trim(fgets(STDIN))];
+					}while(empty($table));
+				}
+				$cols = self::get_table_fields($table);
+				foreach($cols as $index => $c){
+					echo "{$index}: {$c}\n";
+				}
+				$max = max(array_keys($cols));
+				$min = min(array_keys($cols));
+				do{
+					echo "Which column would you like to drop? [{$min} - {$max}]: ";
+					$resp = trim(fgets(STDIN));
+					$after = $cols[$resp - 1];
+					$col = $cols[$resp];
+				}while(empty($col));
+			}
+			// if migrations are setup, generate migration
+			if(!empty(self::$config['migrations_table'])){
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$sql = sprintf("SHOW FIELDS FROM `%s` WHERE `Field` = '%s'", $table, $col);
+					$col_info = self::$db->query($sql, true);
+					$col_info = $col_info[0];
+					$keys = array(
+						'PRI' => 'primary',
+						'UNI' => 'unique',
+						'MUL' => 'index'
+					);
+					preg_match('/\((\d+)\)/', $col_info['Type'], $match);
+					$type = str_replace(array($match[0], 'unsigned'), '', $col_info['Type']);
+					$null = ($col_info['Null'] === 'NO') ? 'false' : 'true';
+					$info = array(
+						'type' => $type,
+						'length' => $match[1],
+						'null' => $null,
+						'default' => $col_info['Default'],
+						'extra' => $col_info['Extra'],
+						'key' => $keys[$col_info['Key']]
+					);
+					$col_str = var_export($info, true);
+					$up = "parent::\$db->drop_column('{$table}', '{$col}');\n";
+					$down = "parent::\$db->add_column('{$table}', '{$col}', {$col_str}, '{$after}');\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
+			}
+			// drop column
+			self::$db->drop_column($table, $col);
+		}
 	
 	}
