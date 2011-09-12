@@ -481,7 +481,7 @@
 			echo "Column {$column} added to table {$table}.\n";
 		}
 		
-		public static function drop_column($table = null, $column = null){
+		public static function drop_column($table = null, $col = null){
 			if(is_null($column) || is_null($table)){
 				if(is_null($table)){
 					$tables = self::get_db_tables();
@@ -539,6 +539,49 @@
 			}
 			// drop column
 			self::$db->drop_column($table, $col);
+		}
+		
+		public static function add_key($table = null, $col = null, $type = null){
+			if(is_null($column) || is_null($table)){
+				if(is_null($table)){
+					$tables = self::get_db_tables();
+					foreach($tables as $index => $t){
+						echo "{$index}: {$t}\n";
+					}
+					$max = max(array_keys($tables));
+					$min = min(array_keys($tables));
+					do{
+						echo "Which table would you like to add the key to? [{$min} - {$max}]: ";
+						$table = $tables[trim(fgets(STDIN))];
+					}while(empty($table));
+				}
+				if(is_null($col)){
+					$cols = self::get_table_fields($table);
+					foreach($cols as $index => $c){
+						echo "{$index}: {$c}\n";
+					}
+					$max = max(array_keys($cols));
+					$min = min(array_keys($cols));
+					do{
+						echo "Which column would you like to drop? [{$min} - {$max}]: ";
+						$resp = trim(fgets(STDIN));
+						$col = $cols[$resp];
+					}while(empty($col));
+				}
+			}
+			if(is_null($type)){
+				echo "Key type (primary, unique, index): ";
+				$type = trim(fgets(STDIN));
+			}
+			if(!empty(self::$config['migrations_table'])){
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					$up = "parent::\$db->add_key('{$table}', '{$col}', '{$type}');\n";
+					$down = "parent::\$db->remove_key('{$table}', '{$col}');\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
+			}
+			self::$db->add_key($table, $col, $type);
 		}
 	
 	}
