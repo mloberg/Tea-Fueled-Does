@@ -1,1 +1,0 @@
-<p>Please check your email for a confirmation code.</p>

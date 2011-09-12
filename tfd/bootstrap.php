@@ -16,7 +16,6 @@ define('CONTENT_DIR', realpath($content_dir).DIRECTORY_SEPARATOR);
 define('CORE_DIR', APP_DIR.'core'.DIRECTORY_SEPARATOR);
 define('HELPER_DIR', APP_DIR.'helpers'.DIRECTORY_SEPARATOR);
 define('LIBRARY_DIR', APP_DIR.'libraries'.DIRECTORY_SEPARATOR);
-
 define('TEA_DIR', APP_DIR.'tea'.DIRECTORY_SEPARATOR);
 
 // public directories
@@ -27,7 +26,10 @@ define('PARTIALS_DIR', CONTENT_DIR.'partials'.DIRECTORY_SEPARATOR);
 define('AJAX_DIR', CONTENT_DIR.'ajax'.DIRECTORY_SEPARATOR);
 define('TEMPLATES_DIR', CONTENT_DIR.'templates'.DIRECTORY_SEPARATOR);
 
+// some file helpers
 define('EXT', '.php');
+define('ADMIN_DIR', 'admin');
+define('LOGIN_DIR', 'login');
 
 // define some file paths
 define('HOOKS_FILE', CONTENT_DIR.'hooks'.EXT);
