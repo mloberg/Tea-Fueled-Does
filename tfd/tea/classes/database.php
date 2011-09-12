@@ -326,10 +326,51 @@
 		
 		public function drop_table($table = null){
 			if(is_null($table)){
-				
+				$tables = self::get_db_tables();
+				foreach($tables as $index => $t){
+					echo "{$index}: {$t}\n";
+				}
+				$max = max(array_keys($tables));
+				$min = min(array_keys($tables));
+				do{
+					echo "Which table would you like to drop? [{$min} - {$max}]:";
+					$table = $tables[trim(fgets(STDIN))];
+				}while(empty($table));
 			}
-			// need to collect information for migration down
-			
+			if(!empty(self::$config['migrations_table'])){
+				echo "Create migration? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) === 'y'){
+					// get table info for down
+					$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
+					$cols = self::$db->query($sql, true);
+					$columns = array();
+					$keys = array(
+						'PRI' => 'primary',
+						'UNI' => 'unique',
+						'MUL' => 'index'
+					);
+					foreach($cols as $c){
+						preg_match('/\((\d+)\)/', $c['Type'], $match);
+						$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
+						$null = ($c['Null'] === 'NO') ? 'false' : 'true';
+						$columns[$c['Field']] = array(
+							'type' => $type,
+							'length' => $match[1],
+							'null' => $null,
+							'default' => $c['Default'],
+							'extra' => $c['Extra'],
+							'key' => $keys[$c['Key']]
+						);
+					}
+					$col_str = var_export($columns, true);
+					$up = "parent::\$db->drop_table('{$table}');\n";
+					$down = "parent::\$db->create_table('{$table}', {$col_str});\n";
+					Migrations::generate_migration_file($up, $down, true);
+				}
+			}
+			// drop table
+			self::$db->drop_table($table);
+			echo "Dropped table {$table}.\n";
 		}
 		
 		public static function add_column(){
