@@ -17,7 +17,8 @@
 				'u' => 'run_up',
 				'l' => 'latest',
 				'd' => 'run_down',
-				's' => 'status'
+				's' => 'status',
+				'r' => 'delete_migration'
 			);
 			if(preg_match('/^\-('.implode('|', array_keys($args)).')$/', trim($arg[2]))){
 				$run = $args[trim(str_replace('-', '', $arg[2]))];
@@ -289,6 +290,34 @@ CONF;
 			preg_match('/\/(\d+)'.preg_quote(EXT).'$/', max($migrations), $match);
 			$max = preg_replace('/^0/', '', $match[1]);
 			echo "Currently on migration {$active['number']} of {$max}\n";
+		}
+		
+		public static function delete_migration(){
+			// we can only delete the latest migration right now
+			echo "Delete the latest migration? [y/n]: ";
+			if(strtolower(trim(fgets(STDIN))) !== 'y'){
+				exit(0);
+			}
+			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
+			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
+			sort($migrations);
+			// get the highest migration
+			preg_match('/\/(\d+)'.preg_quote(EXT).'$/', max($migrations), $match);
+			$max = preg_replace('/^0/', '', $match[1]);
+			// if that's not the latest, run up to it
+			if($max !== $active['number']){
+				self::run_up(array(3 => $match[1]));
+			}
+			// run the down method
+			include_once(MIGRATIONS_DIR.$match[1].EXT);
+			$migration_name = 'TeaMigrations_'.$match[1];
+			$migration_name::down();
+			self::$db->where('number', $max - 1)->update(self::$table, array('active' => 1));
+			// delete file
+			unlink(MIGRATIONS_DIR.$match[1].EXT);
+			// delete from db
+			self::$db->where('number', $max)->delete(self::$table);
+			echo "Migration {$max} deleted.\n";
 		}
 		
 		public static function generate_migration_file($up, $down, $add_to_db = false){
