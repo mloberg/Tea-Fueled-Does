@@ -357,9 +357,9 @@
 							'type' => $type,
 							'length' => $match[1],
 							'null' => $null,
-							'default' => $c['Default'],
+							'default' => (is_null($c['Default'])) ? '' : $c['Default'],
 							'extra' => $c['Extra'],
-							'key' => $keys[$c['Key']]
+							'key' => (!empty($keys[$c['Key']])) ? $keys[$c['Key']] : ''
 						);
 					}
 					$col_str = var_export($columns, true);
