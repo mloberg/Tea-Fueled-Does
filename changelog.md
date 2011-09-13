@@ -254,3 +254,8 @@
 
 * Minor changes to Tea's database class
 * bootstap.php fixes to work with both Tea and TFD
+
+## 1.5.2
+
+* New and improved validation class (see wiki for usage)
+* Added autoloader function for library classes
