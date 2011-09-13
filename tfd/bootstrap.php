@@ -7,8 +7,8 @@
  */
 
 // main directories
-define('PUBLIC_DIR', $public_dir.DIRECTORY_SEPARATOR);
-define('APP_DIR', realpath(PUBLIC_DIR.$app_dir).DIRECTORY_SEPARATOR);
+define('PUBLIC_DIR', realpath($public_dir).DIRECTORY_SEPARATOR);
+define('APP_DIR', realpath($app_dir).DIRECTORY_SEPARATOR);
 define('BASE_DIR', realpath(PUBLIC_DIR.'..').DIRECTORY_SEPARATOR);
 define('CONTENT_DIR', realpath($content_dir).DIRECTORY_SEPARATOR);
 
@@ -38,7 +38,7 @@ define('DEFAULT_MASTER', MASTERS_DIR.'master'.EXT);
 define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
 
 // tfd version
-define('TFD_VERSION', '1.5');
+define('TFD_VERSION', '1.5.1');
 
 // include and load the config
 include_once(CONF_FILE);

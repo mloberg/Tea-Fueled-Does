@@ -106,7 +106,7 @@
 			echo "Database setup.\n";
 		}
 				
-		public static function create_users_table($table = null){
+		private static function create_users_table($table = null){
 			if(is_null($table)){
 				echo "Name of the users table [".self::$config['users_table']."]: ";
 				$resp = trim(fgets(STDIN));
