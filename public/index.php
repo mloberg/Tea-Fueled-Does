@@ -9,9 +9,12 @@
 	define('START_TIME', microtime(true));
 	define('START_MEM', memory_get_usage());
 	
-	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
+	// grab the environment from the .htaccess file
+	$environment = $_SERVER['ENV'];
 	
+	// get the public dir
 	$public_dir = dirname(__FILE__);
+	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
 	$app_dir = '../tfd/';
 	$content_dir = '../content/';
 	
