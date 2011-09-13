@@ -249,3 +249,8 @@
 * Naming changes to folders within content (see release-notes.md for details)
 * Config folder now a file (config.php)
 * Added CLI called tea
+
+## 1.5.1
+
+* Minor changes to Tea's database class
+* bootstap.php fixes to work with both Tea and TFD
