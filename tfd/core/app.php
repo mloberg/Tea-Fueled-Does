@@ -23,6 +23,8 @@
 					$this->load($name,$type);
 				}
 			}
+			// our autoloader
+			spl_autoload_register('TFD::__autoloader');
 		}
 		
 		function __destruct(){
@@ -50,6 +52,14 @@
 				}else{
 					$this->error->report("Could not load class: {$name}",true);
 				}
+			}
+		}
+		
+		protected static function __autoloader($name){
+			if(file_exists(LIBRARY_DIR.$name.EXT)){
+				include_once(LIBRARY_DIR.$name.EXT);
+			}else{
+				throw new Exception('Could not load class '.$name.'!');
 			}
 		}
 		
