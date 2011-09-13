@@ -75,3 +75,9 @@ Removed cookie based user authentication. This removes the LOGIN_TIME config opt
 Added *public/js/tfd.js*. This includes some functions/helpers. If you are using another library (jQuery, MooTools), you don't need this. If you are running raw js, this is required.
 
 Added LOGIN_TIME to *content/_config/general.php*.
+
+## 1.5
+
+A lot has changed. *admin-dashboard* has been renamed to *admin*. *admin-www* has been renamed to *login* and the signup pages have been deleted. The config folder has been turned into a single file (*content/config.php*).
+
+A couple folders have also been added to the content folder that the new CLI uses.

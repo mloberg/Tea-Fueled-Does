@@ -50,7 +50,7 @@
 					$errors = 'Login incorrect!';
 				}
 				$options = array(
-					'dir' => 'admin-www',
+					'dir' => LOGIN_DIR,
 					'file' => 'login',
 					'title' => 'Login',
 					'errors' => $errors
@@ -123,13 +123,13 @@
 					$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
 					if($request == '') $request = 'index';
 					$options = array(
-						'dir' => 'admin-dashboard',
+						'dir' => ADMIN_DIR,
 						'file' => $request,
 						'master' => 'admin'
 					);
 					return $this->render($options);
 				}else{
-					if(empty($render['dir'])) $render['dir'] = 'admin-dashboard';
+					if(empty($render['dir'])) $render['dir'] = ADMIN_DIR;
 					if(empty($render['master'])) $render['master'] = 'admin';
 					return $this->render($render);
 				}
