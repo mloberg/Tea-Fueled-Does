@@ -1,41 +1,117 @@
 <?php
 
+	/**
+	 * $page = new Render(array('file' => 'page'));
+	 * $page->master('cutom-master');
+	 * return $page; // rendered page
+	 *
+	 * I like this class a lot, it potentially allows you to create seperate pages (but why would you need to?),
+	 *  but you run into an issue when trying to access it through your page
+	 *
+	 *
+	 *
+	 * ISSUE:
+	 *  The same reason this died the last time I tried to create a class similar to this.
+	 *    Classes are loaded by TFD __get, but we have a __get method here that is messing with our parent __get method
+	 *      So you can't access TFD classes through $this
+	 */
+
 	class Render extends App{
 	
 		static private $replace = array();
+		static private $content;
+		static private $options = array(
+			'master' => DEFAULT_MASTER,
+			'title' => SITE_TITLE
+		);
 		
-		function original($options){
-			if(!$this->is_admin) $this->hooks->front();
-			$this->hooks->render();
-			extract($options);
-			// get full path of the file
-			if($dir){
-				if($dir == 'admin-dashboard' && !$this->admin->loggedin()){
-					$this->send_404();
-					$master = '404';
-				}else{
-					$file = CONTENT_DIR . $dir.'/'.$file.EXT;
-				}
+		function __construct($options){
+			parent::__construct();
+			// what file are we rendering?
+			if($options['dir'] === ADMIN_DIR && !$this->admin->loggedin()){
+				// 404
+				
+				$this->master('404');
+				return;
+			}elseif(isset($options['dir']) && isset($options['file'])){
+				$file = CONTENT_DIR . "{$options['dir']}/{$options['file']}".EXT;
+			}elseif(isset($options['file'])){
+				$file = WEB_DIR . $options['file'] . EXT;
 			}else{
-				$file = WEB_DIR . $file . EXT;
+				$file = WEB_DIR . $this->request . EXT;
 			}
+			
 			// start the output buffer
 			ob_start();
 			if(file_exists($file)){
-				// include the file
 				include($file);
-				// save file contents to var
-				$content = ob_get_contents();
-				// clean the output buffer
-				ob_clean();
+				self::$content = ob_get_contents();
 			}elseif($this->testing && $this->request !== '404'){
-				$this->send_404();
-				$this->error->report($file.' not found!');
+				// 404
+				
+				$this->master('404');
+				// report the error in detail
+				
 			}else{
-				// if the file wasn't found, 404
-				$this->send_404();
-				$master = '404';
+				// 404
+				
+				$this->master('404');
 			}
+			ob_end_clean();
+		}
+		
+		/**
+		 * Setter method
+		 */
+		
+		function __set($name, $value){
+			self::$options[$name] = $value;
+		}
+		
+		/**
+		 * Getter method
+		 */
+		
+		function __get($name){
+			if(array_key_exists($name, self::$options)) return self::$options[$name];
+			return null;
+		}
+		
+		/**
+		 * This returns our page fully rendered out
+		 */
+		
+		function __toString(){
+			// what master are we using?
+			$master = self::$options['master'];
+			if(!file_exists($master)){
+				// the master doesn't exist
+			}
+			
+			// run the replace method
+			if(!empty(self::$replace)) self::run_replace();
+			
+			// get the content
+			$content = self::$content;
+			
+			// get all saved variables to use in the master
+			unset(self::$options['master']);
+			extract(self::$options);
+			
+			// start the output buffer
+			ob_start();
+			include($master);
+			$render = ob_get_contents();
+			ob_end_clean();
+			
+			// return the rendered page
+			return $render;
+		}
+		
+		function original($options){
+			$this->hooks->render();
+			extract($options);
+
 			// figure out the title
 			if(!$options['title'] && $title == ''){
 				$title = SITE_TITLE;
@@ -64,8 +140,16 @@
 			return $page;
 		}
 		
+		function master($master){
+			self::$options['master'] = MASTERS_DIR.$master.EXT;
+		}
+		
 		function replace($text, $replace){
 			self::$replace[$text] = $replace;
+		}
+		
+		private static function run_replace(){
+			self::$content = str_replace(array_keys(self::$replace), array_values(self::$replace), self::$content);
 		}
 	
 	}
