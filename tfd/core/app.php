@@ -56,7 +56,9 @@
 		}
 		
 		protected static function __autoloader($name){
-			if(file_exists(LIBRARY_DIR.$name.EXT)){
+			if(file_exists(CORE_DIR.$name.EXT)){
+				include_once(CORE_DIR.$name.EXT);
+			}elseif(file_exists(LIBRARY_DIR.$name.EXT)){
 				include_once(LIBRARY_DIR.$name.EXT);
 			}else{
 				throw new Exception('Could not load class '.$name.'!');
@@ -83,6 +85,7 @@
 		}
 		
 		public function site(){
+			// maintenance mode
 			if(MAINTENANCE_MODE){
 				ob_start();
 				include(MAINTENANCE_PAGE);
@@ -90,6 +93,8 @@
 				return;
 			}
 			$this->hooks->initialize();
+			
+			// check for ajax
 			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request)){
 				if(empty($_GET['ajax'])){
 					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request);
@@ -100,78 +105,31 @@
 				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $options);
 				unset($_SESSION['flash']);
 			}
-			// get routes
-			$route = $this->routes();
-			// if a matched route was found, use it
-			if(is_array($route)){
+			
+			$router = new Router(); // create a router object
+			if(is_array($router->route($this->request))){
 				// check for some admin stuff
-				if($route['logged_in'] || $route['admin']){
-					if(!$this->admin->loggedin()){
-						// redirect to login page and redirect back once logged in
-						setcookie('redirect', $this->request, time() + 3600);
-						header('Location: '.BASE_URL.LOGIN_PATH);
-					}
+				if($route['logged_in'] || $route['admin'] && !$this->admin->loggedin()){
+					// redirect to login page and redirect back once logged in
+					setcookie('redirect', $this->request, time() + 3600);
+					header('Location: '.BASE_URL.LOGIN_PATH);
 					if($route['admin']) return $this->admin->dashboard($route);
-				}
-				// check to see if it's a module or redirect
-				if($route['redirect']){
-					header('Location: '.BASE_URL.$route['redirect']);
-					exit;
-				}elseif($route['module']){
-					return $this->module->load_module($route['module']);
 				}
 				return $this->render($route);
 			}elseif(ADD_USER && $this->request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
 				$this->admin->add_user($_GET['username'], $_GET['password']);
 				return 'user "'.$_GET['user'].'" added';
-			}elseif(preg_match('/^('.ADMIN_PATH.'\/)?logout$/', $this->request)){
+			}elseif(preg_match('/^('.preg_quote(ADMIN_PATH).'\/)?logout$/', $this->request)){
 				return $this->admin->logout();
-			}elseif(preg_match('/^'.LOGIN_PATH.'/', $this->request)){
+			}elseif(preg_match('/^'.preg_quote(LOGIN_PATH).'/', $this->request)){
 				return $this->admin->login();
 			}elseif(file_exists(WEB_DIR.$this->request.EXT)){
 				return $this->render(array('file' => $this->request));
-			}elseif(preg_match('/^'.ADMIN_PATH.'/', $this->request)){
+			}elseif(preg_match('/^'.preg_quote(ADMIN_PATH).'/', $this->request)){
 				$this->is_admin = true;
 				return $this->admin->dashboard();
 			}else{
 				return $this->render(array('file' => $this->request));
-			}
-		}
-		
-		protected function routes(){
-			// get the routes file
-			$routes_file = file_get_contents(CONTENT_DIR . 'routes.json');
-			$routes = json_decode($routes_file, true);
-			$routes = $routes['routes'];
-			// look for a match and if match, return
-			foreach($routes as $key => $val){
-				if($key == $this->request){
-					$this->info['route'] = $key;
-					return $val;
-					break;
-				}
-				$match = str_replace('/', '\/', $key);
-				$match = str_replace('[:any]', '([\w\?\.\#_\-\+\*\^\/]+)?', $match);
-				$match = str_replace('[:num]', '([0-9]+)', $match);
-				if(preg_match("/^{$match}$/", $this->request, $matches)){
-					$this->info['route'] = $key;
-					if($val['file']){
-						$redirect = str_replace('$', '$r_', $val['file']);
-						extract($matches, EXTR_PREFIX_ALL, 'r');
-						eval("\$redirect = \"$redirect\";");
-						$val['file'] = $redirect;
-						return $val;
-					}elseif($val['redirect']){
-						$redirect = str_replace('$', '$r_', $val['redirect']);
-						extract($matches, EXTR_PREFIX_ALL, 'r');
-						eval("\$redirect = \"$redirect\";");
-						$val['redirect'] = $redirect;
-						return $val;
-					}else{
-						return $val;
-					}
-					break;
-				}
 			}
 		}
 		
