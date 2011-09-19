@@ -1,12 +1,24 @@
 <?php
 
-	class Router extends App{
+	class Router{
 	
 		private static $routes = array();
+		private static $request;
 		
-		function route($request){
-			// load the routes
-			$routes = include_once(CONTENT_DIR.'routes'.EXT);
+		function __construct($request){
+			self::$request = (string)$request;
+			self::load_routes();
+		}
+		
+		public function route(){
+			return $this->run_route(self::$request, self::$routes);
+		}
+		
+		private function load_routes(){
+			self::$routes = include_once(CONTENT_DIR.'routes'.EXT);
+		}
+		
+		private function run_route($request, $routes){
 			if(empty($routes)) return false;
 			
 			if(isset($routes[$request])){
