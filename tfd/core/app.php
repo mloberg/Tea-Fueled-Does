@@ -1,5 +1,5 @@
 <?php
-
+	
 	class App extends TFD{}class TFD{
 	
 		public $request;
@@ -8,23 +8,15 @@
 		protected $classes = array();
 		protected $info = array();
 		
-		function __construct($autoload=''){
+		/**
+		 * Magic Methods
+		 */
+		
+		function __construct($autoload = ''){
 			session_start();
 			$this->testing = TESTING_MODE;
-			if($_GET['tfd_request'] == ''){
-				$this->request = 'index';
-			}elseif(preg_match('/\/$/', $_GET['tfd_request'])){
-				$this->request = $_GET['tfd_request'].'index';
-			}else{
-				$this->request = $_GET['tfd_request'];
-			}
-			if(is_array($autoload)){
-				foreach($autoload as $type => $name){
-					$this->load($name,$type);
-				}
-			}
-			// our autoloader
 			spl_autoload_register('TFD::__autoloader');
+			$this->bootstrap($autoload, $_GET['tfd_request']);
 		}
 		
 		function __destruct(){
@@ -60,8 +52,35 @@
 				include_once(CORE_DIR.$name.EXT);
 			}elseif(file_exists(LIBRARY_DIR.$name.EXT)){
 				include_once(LIBRARY_DIR.$name.EXT);
+			}elseif(file_exists(CONTENT_DIR.$name.EXT)){
+				include_once(CONTENT_DIR.$name.EXT);
 			}else{
 				throw new Exception('Could not load class '.$name.'!');
+			}
+		}
+		
+		/**
+		 * Accessors
+		 */
+		
+		public function request(){
+			return (string)$this->request;
+		}
+		
+		/**
+		 * Class methods
+		 */
+		
+		private function bootstrap($autoload, $request){
+			$this->autoload($autoload);
+			$this->request = new Request($request);
+		}
+		
+		private function autoload($autoload){
+			if(is_array($autoload)){
+				foreach($autoload as $type => $name){
+					$this->load($name,$type);
+				}
 			}
 		}
 		
@@ -92,10 +111,10 @@
 				ob_end_flush();
 				return;
 			}
-			$this->hooks->initialize();
+			Hooks::initialize();
 			
 			// check for ajax
-			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request)){
+			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request())){
 				if(empty($_GET['ajax'])){
 					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request);
 				}
@@ -106,14 +125,15 @@
 				unset($_SESSION['flash']);
 			}
 			
-			$router = new Router(); // create a router object
-			if(is_array($router->route($this->request))){
+			$router = new Router($this->request()); // create a router object
+			$route = $router->route();
+			if(is_array($route)){
 				// check for some admin stuff
-				if($route['logged_in'] || $route['admin'] && !$this->admin->loggedin()){
+				if(($route['logged_in'] || $route['admin']) && !$this->admin->loggedin()){
 					// redirect to login page and redirect back once logged in
 					setcookie('redirect', $this->request, time() + 3600);
 					header('Location: '.BASE_URL.LOGIN_PATH);
-					if($route['admin']) return $this->admin->dashboard($route);
+					exit;
 				}
 				return $this->render($route);
 			}elseif(ADD_USER && $this->request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
@@ -149,8 +169,8 @@
 		}
 		
 		protected function render($options){
-			if(!$this->is_admin) $this->hooks->front();
-			$this->hooks->render();
+			if(!$this->is_admin) Hooks::front();
+			Hooks::render();
 			extract($options);
 			// get full path of the file
 			if($dir){
@@ -172,7 +192,7 @@
 				$content = ob_get_contents();
 				// clean the output buffer
 				ob_clean();
-			}elseif($this->testing && $this->request !== '404'){
+			}elseif($this->testing && $this->request() !== '404'){
 				$this->send_404();
 				$this->error->report($file.' not found!');
 			}else{
@@ -216,9 +236,9 @@
 		
 		protected function url($segment = null){
 			if($segment == null){
-				return $this->request;
+				return $this->request();
 			}else{
-				$segments = explode('/', $this->request);
+				$segments = explode('/', $this->request());
 				$seg = $segment - 1;
 				return $segments[$seg];
 			}

@@ -1,32 +1,29 @@
 <?php
 
-	class Hooks extends App{
-	
-		function __construct(){
-			parent::__construct();
-		}
+	abstract class Hooks{
 		
-		function initialize(){
+		static function initialize(){
 			
 		}
 		
-		function admin(){
+		static function admin(){
 			
 		}
 		
-		function front(){
+		static function front(){
 			
 		}
 		
-		function render(){
-			$this->css->load('reset');
+		static function render(){
+			global $app;
+			$app->css->load('reset');
 		}
 		
-		function login($user){
+		static function login($user){
 			
 		}
 		
-		function logout(){
+		static function logout(){
 			
 		}
 	
