@@ -43,6 +43,8 @@ class Environment{
 		define('AUTH_KEY', '123456'); // a custom key to validate users, change this
 		define('LOGIN_TIME', 3600); // time to stay logged in via cookie
 		
+		define('ERROR_LOG_LOCATION', BASE_DIR.'error.log');
+		
 		define('MAGIC_AJAX_PATH', 'ajax');
 	}
 	
