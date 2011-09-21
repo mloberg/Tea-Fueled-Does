@@ -7,13 +7,6 @@
 	 *
 	 * I like this class a lot, it potentially allows you to create seperate pages (but why would you need to?),
 	 *  but you run into an issue when trying to access it through your page
-	 *
-	 *
-	 *
-	 * ISSUE:
-	 *  The same reason this died the last time I tried to create a class similar to this.
-	 *    Classes are loaded by TFD __get, but we have a __get method here that is messing with our parent __get method
-	 *      So you can't access TFD classes through $this
 	 */
 
 	use \TFD\Admin;

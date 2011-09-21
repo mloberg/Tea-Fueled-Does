@@ -2,6 +2,7 @@
 	
 	use \TFD\DB\MySQL;
 	use \Content\Hooks;
+	use \TFD\Core\Render;
 	
 	class Admin{
 	
@@ -131,12 +132,12 @@
 						'file' => $request,
 						'master' => 'admin'
 					);
-					$render = new Core\Render($options);
+					$render = new Render($options);
 					return $render;
 				}else{
 					if(empty($render['dir'])) $render['dir'] = ADMIN_DIR;
 					if(empty($render['master'])) $render['master'] = 'admin';
-					$_render = new Core\Render($render);
+					$_render = new Render($render);
 					return $_render;
 				}
 			}else{

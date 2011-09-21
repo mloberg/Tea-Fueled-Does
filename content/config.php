@@ -45,7 +45,7 @@ class Environment{
 		
 		define('ERROR_LOG_LOCATION', BASE_DIR.'error.log');
 		
-		define('MAGIC_AJAX_PATH', 'ajax');
+		define('AJAX_PATH', 'ajax');
 	}
 	
 	function api_keys(){

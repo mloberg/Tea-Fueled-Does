@@ -4,7 +4,7 @@
 	
 	abstract class Hooks{
 		
-		static function initialize(){
+		static function spinup(){
 			
 		}
 		
@@ -12,12 +12,16 @@
 			
 		}
 		
-		static function front(){
+		static function www(){
 			
 		}
 		
-		static function render(){
+		static function pre_render(){
 			CSS::load('reset');
+		}
+		
+		static function post_render(){
+			
 		}
 		
 		static function login($user){

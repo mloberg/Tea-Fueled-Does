@@ -5,7 +5,7 @@ return array(
 	'test' => function(){
 		// it is possible to access TFD
 		global $app;
-		print_p($app->mysql->get('users'));
+//		print_p($app->mysql->get('users'));
 		return array('file' => 'index');
 	},
 	
