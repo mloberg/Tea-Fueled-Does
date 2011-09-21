@@ -23,13 +23,8 @@
 	
 	include_once('../bootstrap.php');
 	
-	$autoload = array(
-		'helper' => 'helpful'
-	);
-	
 	// make a new instance of our app class
-	
-	$app = new TFD\App($autoload);
+	$app = new TFD\App();
 	
 	// and finally echo the site output
 	

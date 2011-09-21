@@ -1,56 +1,28 @@
 <?php namespace TFD;
 	
 	use \Content\Hooks;
+	use \TFD\Core\Request;
+	use \TFD\Core\Router;
+	use \TFD\Core\Render;
 	
 	class Exception extends \Exception{}
 	
 	class App{
 	
-		public $request;
-		protected $testing;
-		protected $is_admin = false;
-		protected $classes = array();
-		protected $info = array();
+		private static $request;
 		
 		/**
 		 * Magic Methods
 		 */
 		
-		function __construct($autoload = ''){
+		function __construct(){
 			session_start();
-			$this->testing = TESTING_MODE;
-			$this->bootstrap($autoload, $_GET['tfd_request']);
+			$this->bootstrap($_GET['tfd_request']);
 		}
 		
 		function __destruct(){
-			unset($this->classes);
+			
 		}
-		
-/*
-		public function __get($name){
-			if(array_key_exists($name, $this->classes)){
-				return $this->classes[$name];
-			}else{
-				// load the class
-				if($name == 'hooks'){
-					include_once(HOOKS_FILE);
-					$this->classes[$name] = new Hooks();
-					return $this->classes[$name];
-				}elseif($this->load($name)){
-					// save the class
-					if($name == 'mysql'){
-						$this->classes[$name] = new Database();
-					}else{
-						$this->classes[$name] = new $name();
-					}
-					// return the class
-					return $this->classes[$name];
-				}else{
-					$this->error->report("Could not load class: {$name}",true);
-				}
-			}
-		}
-*/
 		
 		public static function __autoloader($name){
 			global $class_aliases;
@@ -71,31 +43,25 @@
 		 */
 		
 		public function request(){
-			return (string)$this->request;
+			return (string)self::$request;
 		}
 		
 		/**
 		 * Class methods
 		 */
 		
-		private function bootstrap($autoload, $request){
-			$this->autoload($autoload);
-			$this->request = new Core\Request($request);
-		}
-		
-		private function autoload($autoload){
-			if(is_array($autoload)){
-				foreach($autoload as $type => $name){
-					$this->load($name,$type);
-				}
-			}
+		private function bootstrap($request){
+			Hooks::spinup();
+			self::$request = new Request($request);
 		}
 		
 		protected function load($name){
+/*
 			if($name == 'ajax'){
 				include_once(AJAX_DIR.'ajax'.EXT);
 				return true;
 			}
+*/
 			if(file_exists(HELPER_DIR.$name.EXT)){
 				include_once(HELPER_DIR.$name.EXT);
 				return true;
@@ -104,76 +70,40 @@
 		}
 		
 		public function site(){
-			// maintenance mode
-			if(MAINTENANCE_MODE){
-				ob_start();
-				include(MAINTENANCE_PAGE);
-				ob_end_flush();
-				return;
+			Hooks::pre_render();
+			$do = self::$request->run();
+			if($do !== false){
+				return $do;
 			}
-			Hooks::initialize();
 			
-			// check for ajax
-			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request())){
-				if(empty($_GET['ajax'])){
-					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request());
-				}
-				return $this->ajax->call();
-			}elseif(!empty($_SESSION['flash']['message'])){
+			if(!empty($_SESSION['flash']['message'])){
 				$options = (empty($_SESSION['flash']['options']) || !is_array($_SESSION['flash']['options'])) ? array() : $_SESSION['flash']['options'];
 				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $options);
 				unset($_SESSION['flash']);
 			}
 			
-			$router = new Core\Router($this->request()); // create a router object
+			$router = new Router($this->request()); // create a router object
 			$route = $router->get();
 			
 			if(is_array($route)){
-/*
-				if(($route['logged_in'] || $route['admin']) && !$this->admin->loggedin()){
+				if(($route['logged_in'] || $route['admin']) && !Admin::loggedin()){
+					// need to login
+					setcookie('redirect', $this->request(), time() + 3600);
+					redirect(LOGIN_PATH);
 					exit;
 				}
-*/
+				if($route['admin']){
+					return Admin::dashboard($route);
+				}
 				$render_info = $route;
-			}elseif(preg_match('/^'.preg_quote(ADMIN_PATH).'/', $this->request())){
-				return Admin::dashboard();
-			}elseif(preg_match('/^'.preg_quote(LOGIN_PATH).'/', $this->request)){
-				return Admin::login();
 			}else{
-				$render_info = array(
-					'file' => $this->request()
-				);
+				$render_info = array('file' => $this->request());
 			}
+			Hooks::www();
 			Hooks::render();
-			$render = new Core\Render($render_info);
+			$render = new Render($render_info);
+			Hooks::post_render();
 			return $render;
-			exit;
-			
-			
-			if(is_array($route)){
-				// check for some admin stuff
-				if(($route['logged_in'] || $route['admin']) && !$this->admin->loggedin()){
-					// redirect to login page and redirect back once logged in
-					setcookie('redirect', $this->request, time() + 3600);
-					header('Location: '.BASE_URL.LOGIN_PATH);
-					exit;
-				}
-				return $this->render($route);
-			}elseif(ADD_USER && $this->request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
-				$this->admin->add_user($_GET['username'], $_GET['password']);
-				return 'user "'.$_GET['user'].'" added';
-			}elseif(preg_match('/^('.preg_quote(ADMIN_PATH).'\/)?logout$/', $this->request)){
-				return $this->admin->logout();
-			}elseif(preg_match('/^'.preg_quote(LOGIN_PATH).'/', $this->request)){
-				return $this->admin->login();
-			}elseif(file_exists(WEB_DIR.$this->request.EXT)){
-				return $this->render(array('file' => $this->request));
-			}elseif(preg_match('/^'.preg_quote(ADMIN_PATH).'/', $this->request)){
-				$this->is_admin = true;
-				return $this->admin->dashboard();
-			}else{
-				return $this->render(array('file' => $this->request));
-			}
 		}
 		
 		function partial($file, $extra=null){

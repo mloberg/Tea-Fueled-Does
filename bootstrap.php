@@ -46,6 +46,9 @@ new Environment($environment);
 // And now include the core file
 include_once(APP_DIR.'app'.EXT);
 
+// our helper
+include_once(HELPER_DIR.'helpful'.EXT);
+
 // Autoloader
 spl_autoload_register('TFD\App::__autoloader');
 
