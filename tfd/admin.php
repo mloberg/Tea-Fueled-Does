@@ -1,42 +1,45 @@
 <?php namespace TFD;
 	
+	use \TFD\DB\MySQL;
+	use \Content\Hooks;
+	
 	class Admin{
 	
-		public function loggedin(){
-			if($_SESSION['logged_in']){
-				return $this->validate_session_fingerprint();
-			}elseif($_COOKIE['logged_in']){
-				return $this->validate_cookie_fingerprint();
-			}else{
-				return false;
-			}
-		}
-		
-		private function validate_session_fingerprint(){
-			$user = MySQL->where('id', $_SESSION['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
+		private static function __validate_session_fingerprint(){
+			$user = MySQL::table(USERS_TABLE)->where('id', $_SESSION['user_id'])->limit(1)->get('secret');
 			if(empty($user)){
 				session_destroy();
 				return false;
 			}
-			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user[0]['secret']);
+			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user['secret']);
 			return ($fingerprint === $_SESSION['fingerprint']);
 		}
 		
-		private function validate_cookie_fingerprint(){
+		private static function __validate_cookie_fingerprint(){
 			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
-			$user = $this->mysql->where('id', $_COOKIE['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
+			$user = MySQL::table(USERS_TABLE)->where('id', $_COOKIE['user_id'])->limit(1)->get('secret');
 			if(empty($user)){
 				setcookie('logged_in', false, time() - 3600, '/');
 				setcookie('user_id', '', time() - 3600, '/');
 				setcookie('fingerprint', '', time() - 3600, '/');
 				return false;
 			}
-			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user[0]['secret']);
+			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user['secret']);
 			return ($fingerprint === $_COOKIE['fingerprint']);
 		}
 		
+		public static function loggedin(){
+			if($_SESSION['logged_in']){
+				return self::__validate_session_fingerprint();
+			}elseif($_COOKIE['logged_in']){
+				return self::__validate_cookie_fingerprint();
+			}else{
+				return false;
+			}
+		}
+		
 		public function login(){
-			if($_POST['submit'] && $this->validate() || $this->loggedin()){
+			if($_POST['submit'] && self::validate() || self::loggedin()){
 				if($_COOKIE['redirect']){
 					$redirect = $_COOKIE['redirect'];
 					setcookie('redirect', '', time() - 3600, '/');
@@ -55,12 +58,13 @@
 					'title' => 'Login',
 					'errors' => $errors
 				);
-				return $this->render($options);
+				$render = new Core\Render($options);
+				return $render;
 			}
 		}
 		
 		public function logout(){
-			$this->hooks->logout();
+			Hooks::logout();
 			session_destroy();
 			setcookie('logged_in', false, time() - 3600, '/');
 			setcookie('user_id', '', time() - 3600, '/');
@@ -68,25 +72,25 @@
 			header('Location: ' . BASE_URL);
 		}
 		
-		private function validate(){
+		private static function validate(){
 			$user = $_POST['username'];
 			$pass = $_POST['password'];
 			// get user info
-			$user_info = $this->mysql->where('username', $user)->limit(1)->get(USERS_TABLE);
+			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get();
 			if(empty($user_info)) return false;
-			$salt = $user_info[0]['salt'];
+			$salt = $user_info['salt'];
 			// check password
 			if(AdminValidation::check_password($salt, $pass)){
 				// set session vars
 				$_SESSION['logged_in'] = true;
-				$_SESSION['user_id'] = $user_info[0]['id'];
-				$_SESSION['fingerprint'] = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user_info[0]['secret']);
+				$_SESSION['user_id'] = $user_info['id'];
+				$_SESSION['fingerprint'] = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user_info['secret']);
 				// set cookies
 				setcookie('logged_in', true, time() + LOGIN_TIME, '/');
-				setcookie('user_id', $user_info[0]['id'], time() + LOGIN_TIME, '/');
-				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info[0]['secret']), time() + LOGIN_TIME, '/');
+				setcookie('user_id', $user_info['id'], time() + LOGIN_TIME, '/');
+				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info['secret']), time() + LOGIN_TIME, '/');
 				// run user hook
-				$this->hooks->login($user_info[0]);
+				Hooks::login($user_info);
 				// validated
 				return true;
 			}else{
@@ -96,9 +100,9 @@
 		}
 		
 		public function validate_user_pass($user, $pass){
-			$user_info = $this->mysql->where('username', $user)->limit(1)->get(USERS_TABLE, 'salt');
+			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get('salt');
 			if(empty($user_info)) return false;
-			$salt = $user_info[0]['salt'];
+			$salt = $user_info['salt'];
 			return AdminValidation::check_password($salt, $pass);
 		}
 		
@@ -109,17 +113,17 @@
 			// generate a secret key
 			$info['secret'] = uniqid('', true);
 			// add to database
-			if($this->mysql->insert(USERS_TABLE, $info)){
+			if(MySQL::table(USERS_TABLE)->insert($info)){
 				return true;
 			}
 			return false;
 		}
 		
-		public function dashboard($render=null){
-			if($this->loggedin()){
-				$this->hooks->admin();
+		public function dashboard($render = null){
+			if(self::loggedin()){
+				Hooks::admin();
 				if(is_null($render)){
-					$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', $this->request);
+					$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', App::request());
 					$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
 					if($request == '') $request = 'index';
 					$options = array(
@@ -127,11 +131,13 @@
 						'file' => $request,
 						'master' => 'admin'
 					);
-					return $this->render($options);
+					$render = new Core\Render($options);
+					return $render;
 				}else{
 					if(empty($render['dir'])) $render['dir'] = ADMIN_DIR;
 					if(empty($render['master'])) $render['master'] = 'admin';
-					return $this->render($render);
+					$_render = new Core\Render($render);
+					return $_render;
 				}
 			}else{
 				setcookie('redirect', $this->request, time() + 3600, '/');
