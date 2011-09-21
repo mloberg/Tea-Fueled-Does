@@ -13,7 +13,7 @@
 	$environment = $_SERVER['ENV'];
 	
 	// get the public dir
-	$public_dir = dirname(__FILE__);
+	$public_dir = __DIR__;
 	
 	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
 	$app_dir = '../tfd/';
@@ -21,7 +21,7 @@
 	
 	// then include the config file
 	
-	include_once($app_dir.'bootstrap.php');
+	include_once('../bootstrap.php');
 	
 	$autoload = array(
 		'helper' => 'helpful'
@@ -29,7 +29,7 @@
 	
 	// make a new instance of our app class
 	
-	$app = new TFD($autoload);
+	$app = new TFD\App($autoload);
 	
 	// and finally echo the site output
 	

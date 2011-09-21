@@ -1,6 +1,10 @@
-<?php
+<?php namespace TFD;
 	
-	class App extends TFD{}class TFD{
+	use \Content\Hooks;
+	
+	class Exception extends \Exception{}
+	
+	class App{
 	
 		public $request;
 		protected $testing;
@@ -15,7 +19,6 @@
 		function __construct($autoload = ''){
 			session_start();
 			$this->testing = TESTING_MODE;
-			spl_autoload_register('TFD::__autoloader');
 			$this->bootstrap($autoload, $_GET['tfd_request']);
 		}
 		
@@ -47,15 +50,17 @@
 			}
 		}
 		
-		protected static function __autoloader($name){
-			if(file_exists(CORE_DIR.$name.EXT)){
-				include_once(CORE_DIR.$name.EXT);
-			}elseif(file_exists(LIBRARY_DIR.$name.EXT)){
-				include_once(LIBRARY_DIR.$name.EXT);
-			}elseif(file_exists(CONTENT_DIR.$name.EXT)){
-				include_once(CONTENT_DIR.$name.EXT);
+		public static function __autoloader($name){
+			global $class_aliases;
+			$class = str_replace('\\', '/', $name);
+			if(file_exists(BASE_DIR.$class.EXT)){
+				include_once(BASE_DIR.$class.EXT);
+			}elseif(array_key_exists($name, $class_aliases)){
+				$class = str_replace('\\', '/', $class_aliases[$name]);
+				include_once(BASE_DIR.$class.EXT);
+				class_alias($class_aliases[$name], $name);
 			}else{
-				throw new Exception('Could not load class '.$name.'!');
+				throw new Exception("Could not load class {$class}!");
 			}
 		}
 		
@@ -73,7 +78,7 @@
 		
 		private function bootstrap($autoload, $request){
 			$this->autoload($autoload);
-			$this->request = new Request($request);
+			$this->request = new Core\Request($request);
 		}
 		
 		private function autoload($autoload){
@@ -125,8 +130,27 @@
 				unset($_SESSION['flash']);
 			}
 			
-			$router = new Router($this->request()); // create a router object
-			$route = $router->route();
+			$router = new Core\Router($this->request()); // create a router object
+			$route = $router->get();
+			
+			if(is_array($route)){
+/*
+				if(($route['logged_in'] || $route['admin']) && !$this->admin->loggedin()){
+					exit;
+				}
+*/
+				$render_info = $route;
+			}else{
+				$render_info = array(
+					'file' => $this->request()
+				);
+			}
+			Hooks::render();
+			$render = new Core\Render($render_info);
+			return $render;
+			exit;
+			
+			
 			if(is_array($route)){
 				// check for some admin stuff
 				if(($route['logged_in'] || $route['admin']) && !$this->admin->loggedin()){
