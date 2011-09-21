@@ -16,6 +16,9 @@
 	 *      So you can't access TFD classes through $this
 	 */
 
+	use \TFD\Admin;
+	use \TFD\App;
+	
 	class Render{
 	
 		static private $replace = array();
@@ -27,19 +30,19 @@
 		
 		function __construct($options){
 			// what file are we rendering?
-			if($options['dir'] === ADMIN_DIR && !$this->admin->loggedin()){
+			if($options['dir'] === ADMIN_DIR && !Admin::loggedin()){
 				// 404
 				
 				$this->master('404');
 				return;
 			}elseif(isset($options['dir']) && isset($options['file'])){
-				$file = CONTENT_DIR . "{$options['dir']}/{$options['file']}".EXT;
+				$file = "{$options['dir']}/{$options['file']}".EXT;
 			}elseif(isset($options['file'])){
 				$file = WEB_DIR . $options['file'] . EXT;
 			}else{
 				$file = WEB_DIR . $this->request . EXT;
 			}
-			
+						
 			// start the output buffer
 			ob_start();
 			if(file_exists($file)){

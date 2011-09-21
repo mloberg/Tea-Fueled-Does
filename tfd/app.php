@@ -26,6 +26,7 @@
 			unset($this->classes);
 		}
 		
+/*
 		public function __get($name){
 			if(array_key_exists($name, $this->classes)){
 				return $this->classes[$name];
@@ -49,6 +50,7 @@
 				}
 			}
 		}
+*/
 		
 		public static function __autoloader($name){
 			global $class_aliases;
@@ -94,18 +96,11 @@
 				include_once(AJAX_DIR.'ajax'.EXT);
 				return true;
 			}
-			$dirs = array(CORE_DIR,LIBRARY_DIR,HELPER_DIR,MODELS_DIR);
-			for($i=0;$i <= count($dirs);$i++){
-				$file = $dirs[$i].$name.EXT;
-				if(file_exists($file)){
-					include_once($file);
-					return true;
-					break;
-				}elseif($i == count($dirs)){
-					return false;
-					break;
-				}
+			if(file_exists(HELPER_DIR.$name.EXT)){
+				include_once(HELPER_DIR.$name.EXT);
+				return true;
 			}
+			return false;
 		}
 		
 		public function site(){
@@ -121,7 +116,7 @@
 			// check for ajax
 			if(preg_match('/'.MAGIC_AJAX_PATH.'\/(.*)$/', $this->request())){
 				if(empty($_GET['ajax'])){
-					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request);
+					$_GET['ajax'] = preg_replace('/^(.*)'.MAGIC_AJAX_PATH.'\//', '', $this->request());
 				}
 				return $this->ajax->call();
 			}elseif(!empty($_SESSION['flash']['message'])){
@@ -140,6 +135,10 @@
 				}
 */
 				$render_info = $route;
+			}elseif(preg_match('/^'.preg_quote(ADMIN_PATH).'/', $this->request())){
+				return Admin::dashboard();
+			}elseif(preg_match('/^'.preg_quote(LOGIN_PATH).'/', $this->request)){
+				return Admin::login();
 			}else{
 				$render_info = array(
 					'file' => $this->request()
