@@ -1,4 +1,4 @@
-<?php
+<?php namespace TFD\Core;
 
 	/**
 	 * $page = new Render(array('file' => 'page'));
@@ -16,7 +16,7 @@
 	 *      So you can't access TFD classes through $this
 	 */
 
-	class Render extends App{
+	class Render{
 	
 		static private $replace = array();
 		static private $content;
@@ -26,7 +26,6 @@
 		);
 		
 		function __construct($options){
-			parent::__construct();
 			// what file are we rendering?
 			if($options['dir'] === ADMIN_DIR && !$this->admin->loggedin()){
 				// 404

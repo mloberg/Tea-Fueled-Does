@@ -1,6 +1,6 @@
-<?php
+<?php namespace TFD;
 	
-	class Admin extends App{
+	class Admin{
 	
 		public function loggedin(){
 			if($_SESSION['logged_in']){
@@ -13,7 +13,7 @@
 		}
 		
 		private function validate_session_fingerprint(){
-			$user = $this->mysql->where('id', $_SESSION['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
+			$user = MySQL->where('id', $_SESSION['user_id'])->limit(1)->get(USERS_TABLE, 'secret');
 			if(empty($user)){
 				session_destroy();
 				return false;

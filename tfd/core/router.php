@@ -1,4 +1,4 @@
-<?php
+<?php namespace TFD\Core;
 
 	class Router{
 	
@@ -6,19 +6,21 @@
 		private static $request;
 		
 		function __construct($request){
-			self::$request = (string)$request;
+			self::$request = $request;
 			self::load_routes();
 		}
 		
-		public function route(){
-			return $this->run_route(self::$request, self::$routes);
+		public function get(){
+			return self::run_route();
 		}
 		
-		private function load_routes(){
+		private static function load_routes(){
 			self::$routes = include_once(CONTENT_DIR.'routes'.EXT);
 		}
 		
-		private function run_route($request, $routes){
+		private static function run_route(){
+			$request =& self::$request;
+			$routes =& self::$routes;
 			if(empty($routes)) return false;
 			
 			if(isset($routes[$request])){

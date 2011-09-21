@@ -1,26 +1,15 @@
-<?php
+<?php namespace TFD\DB;
 
-	/**
-	 * This mysql class is loosely based of of Jon Henderson's IDL database class (http://idlworks.com)
-	 */
-
-	class Database extends App{
+	class MySQL{
 	
-		static private $link;
-		static private $last_query;
-		static private $num_rows;
-		static private $insert_id;
-		static private $where = null;
-		private $limit = null;
-		private $order_by = null;
-		
-		function __construct(){
-			parent::__construct();
-		}
+		static private $connection;
+		static private $info = array();
+		static private $query_info = array();
 		
 		function __destruct(){
 			// do some cleanup
-			if(is_resource(self::$link)) mysql_close(self::$link);
+			echo "desctruct";
+			self::$link = null;
 		}
 		
 		static function errors($qry=''){
@@ -37,28 +26,49 @@
 			}
 		}
 		
-		function last_query(){
-			return self::$last_query;
+		/**
+		 * Accessors
+		 */
+		
+		private static function set($name, $value){
+			self::$info[$name] = $value;
 		}
 		
-		function num_rows(){
-			return self::$num_rows;
+		public static function last_query(){
+			return self::$info['last_query'];
 		}
 		
-		function insert_id(){
-			return self::$insert_id;
+		public static function num_rows(){
+			return self::$info['num_rows'];
 		}
 		
-		static protected function connection(){
-			if(!is_resource(self::$link) || empty(self::$link)){
-				if(($link = mysql_connect(DB_HOST.':'.DB_PORT, DB_USER, DB_PASS)) && mysql_select_db(DB, $link)){
-					self::$link = $link;
-					mysql_set_charset('utf8');
-				}else{
-					self::errors();
-				}
+		public static function insert_id(){
+			return self::$info['insert_id'];
+		}
+		
+		/**
+		 * Class methods
+		 */
+		
+		static private function connection(){
+			if(!is_object(self::$connection)){
+				self::$connection = new Connection();
 			}
-			return self::$link;
+			return self::$connection->mysql();
+		}
+		
+		public static function table($table){
+			return new Query($table, self::connection());
+		}
+		
+		public function get($fields = '*'){
+			$sql = sprintf("SELECT * FROM %s", self::$query_info['table']);
+			$stmt = self::connection()->query($sql);
+			$stmt->setFetchMode(PDO::FETCH_ASSOC);
+			while($row = $stmt->fetch()){
+				print_p($row);
+			}
+			return;
 		}
 		
 		private static function _where($info,$type='AND'){
@@ -144,7 +154,7 @@
 			return null;
 		}
 		
-		function get($table,$select='*'){
+		function _get($table,$select='*'){
 			$link =& self::connection();
 			$data = array();
 			$qry = sprintf('SELECT %s FROM %s %s', mysql_real_escape_string($select), mysql_escape_string($table), $this->extra());

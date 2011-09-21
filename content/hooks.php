@@ -1,5 +1,7 @@
-<?php
+<?php namespace Content;
 
+	use \TFD\Library\CSS;
+	
 	abstract class Hooks{
 		
 		static function initialize(){
@@ -15,8 +17,7 @@
 		}
 		
 		static function render(){
-			global $app;
-			$app->css->load('reset');
+			CSS::load('reset');
 		}
 		
 		static function login($user){
