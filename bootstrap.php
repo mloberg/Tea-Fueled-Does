@@ -16,7 +16,7 @@ define('CONTENT_DIR', realpath($content_dir).'/');
 
 // app directories
 define('CORE_DIR', APP_DIR.'core/');
-define('HELPER_DIR', APP_DIR.'helpers/');
+define('HELPER_DIR', APP_DIR.'helper/');
 define('LIBRARY_DIR', APP_DIR.'library/');
 define('TEA_DIR', APP_DIR.'tea/');
 
@@ -57,4 +57,5 @@ $class_aliases = array(
 	'JavaScript' => '\TFD\Library\JavaScript',
 	'Flash' => '\TFD\Flash',
 	'MySQL' => '\TFD\DB\MySQL',
+	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA'
 );
