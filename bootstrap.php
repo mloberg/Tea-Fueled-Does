@@ -56,5 +56,5 @@ $class_aliases = array(
 	'CSS' => '\TFD\Library\CSS',
 	'JavaScript' => '\TFD\Library\JavaScript',
 	'Flash' => '\TFD\Flash',
-	'MySQL' => '\TFD\DB\MySQL'
+	'MySQL' => '\TFD\DB\MySQL',
 );
