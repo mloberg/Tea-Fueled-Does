@@ -11,6 +11,7 @@
 
 	use \TFD\Admin;
 	use \TFD\App;
+	use \Content\Hooks;
 	
 	class Render{
 	
@@ -22,6 +23,15 @@
 		);
 		
 		function __construct($options){
+			Hooks::pre_render();
+			$this->bootstrap($options);
+		}
+		
+		function __destruct(){
+			Hooks::post_render();
+		}
+		
+		private function bootstrap($options){
 			// what file are we rendering?
 			if($options['dir'] === ADMIN_DIR && !Admin::loggedin()){
 				// 404

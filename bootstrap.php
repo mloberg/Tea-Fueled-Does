@@ -54,5 +54,6 @@ spl_autoload_register('TFD\App::__autoloader');
 
 $class_aliases = array(
 	'CSS' => '\TFD\Library\CSS',
+	'JavaScript' => '\TFD\Library\JavaScript',
 	'MySQL' => '\TFD\DB\MySQL',
 );

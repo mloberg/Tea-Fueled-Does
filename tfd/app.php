@@ -4,9 +4,7 @@
 	use \TFD\Core\Request;
 	use \TFD\Core\Router;
 	use \TFD\Core\Render;
-	
-	class Exception extends \Exception{}
-	
+		
 	class App{
 	
 		private static $request;
@@ -17,11 +15,12 @@
 		
 		function __construct(){
 			session_start();
+			Hooks::spinup();
 			$this->bootstrap($_GET['tfd_request']);
 		}
 		
 		function __destruct(){
-			
+			Hooks::spindown();
 		}
 		
 		public static function __autoloader($name){
@@ -46,12 +45,21 @@
 			return (string)self::$request;
 		}
 		
+		public function url($segment = null){
+			if($segment == null){
+				return $this->request();
+			}else{
+				$segments = explode('/', $this->request());
+				$seg = $segment - 1;
+				return $segments[$seg];
+			}
+		}
+		
 		/**
 		 * Class methods
 		 */
 		
 		private function bootstrap($request){
-			Hooks::spinup();
 			self::$request = new Request($request);
 		}
 		
@@ -70,7 +78,6 @@
 		}
 		
 		public function site(){
-			Hooks::pre_render();
 			$do = self::$request->run();
 			if($do !== false){
 				return $do;
@@ -100,9 +107,7 @@
 				$render_info = array('file' => $this->request());
 			}
 			Hooks::www();
-			Hooks::render();
 			$render = new Render($render_info);
-			Hooks::post_render();
 			return $render;
 		}
 		
@@ -185,16 +190,6 @@
 		
 		function send_404(){
 			header('HTTP/1.1 404 Not Found');
-		}
-		
-		protected function url($segment = null){
-			if($segment == null){
-				return $this->request();
-			}else{
-				$segments = explode('/', $this->request());
-				$seg = $segment - 1;
-				return $segments[$seg];
-			}
 		}
 		
 		function flash($message, $type = 'message', $options = array()){

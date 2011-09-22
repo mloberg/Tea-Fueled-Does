@@ -37,7 +37,7 @@
 			}elseif(preg_match('/^'.preg_quote(ADMIN_PATH).'(\/?(.*))$/', self::$request)){
 				// admin dahboard
 				return Admin::dashboard();
-			}elseif(ADD_USER && $this->request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
+			}elseif(ADD_USER && self::$request === 'index' && array_key_exists('add_user', $_GET) && $_GET['username'] && $_GET['password']){
 				// add a user
 			}
 			

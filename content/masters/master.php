@@ -14,6 +14,6 @@
 <?php echo $content;?>
 
 </div>
-<?php //$this->javascript->echo_scripts();?>
+<?php echo JavaScript::render();?>
 </body>
 </html>
