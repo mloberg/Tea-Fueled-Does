@@ -61,6 +61,7 @@
 		
 		private function bootstrap($request){
 			self::$request = new Request($request);
+			Flash::bootstrap();
 		}
 		
 		protected function load($name){
@@ -81,12 +82,6 @@
 			$do = self::$request->run();
 			if($do !== false){
 				return $do;
-			}
-			
-			if(!empty($_SESSION['flash']['message'])){
-				$options = (empty($_SESSION['flash']['options']) || !is_array($_SESSION['flash']['options'])) ? array() : $_SESSION['flash']['options'];
-				$this->flash->message($_SESSION['flash']['message'], $_SESSION['flash']['type'], $options);
-				unset($_SESSION['flash']);
 			}
 			
 			$router = new Router($this->request()); // create a router object
