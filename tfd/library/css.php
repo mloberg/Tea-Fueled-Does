@@ -40,7 +40,7 @@
 					$o = $index + $order;
 					if(isset(self::$sheets[$o])) $o = @max(array_keys(self::$sheets)) + 1;
 					$style = self::__prepare($style);
-					if(!in_array($style, self::$sheets)) self::$sheets[] = $style;
+					if(!in_array($style, self::$sheets)) self::$sheets[$o] = $style;
 				}
 			}else{
 				if(isset(self::$preloaded[$src])) $src = self::$preloaded[$src];

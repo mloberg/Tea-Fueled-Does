@@ -1,6 +1,7 @@
 <?php namespace Content;
 
 	use \TFD\Library\CSS;
+	use \TFD\Library\JavaScript;
 	
 	abstract class Hooks{
 		
@@ -18,9 +19,14 @@
 		
 		static function pre_render(){
 			CSS::load('reset');
+			JavaScript::library('mootools');
 		}
 		
 		static function post_render(){
+			
+		}
+		
+		static function spindown(){
 			
 		}
 		
