@@ -32,8 +32,17 @@
 				$class = str_replace('\\', '/', $class_aliases[$name]);
 				include_once(BASE_DIR.$class.EXT);
 				class_alias($class_aliases[$name], $name);
+			}elseif(preg_match('/^Models\/(.+)/', $class, $match)){
+				$class = 'Content\\'.$name;
+				$file = BASE_DIR.str_replace('\\', '/', $class).EXT;
+				if(!file_exists($file)){
+					throw new \TFD\Exception("Could not load model {$name}");
+				}else{
+					include_once($file);
+					class_alias($class, $name);
+				}
 			}else{
-				throw new Exception("Could not load class {$class}!");
+				throw new \TFD\Exception("Could not load class {$name}!");
 			}
 		}
 		
@@ -185,10 +194,6 @@
 		
 		function send_404(){
 			header('HTTP/1.1 404 Not Found');
-		}
-		
-		function flash($message, $type = 'message', $options = array()){
-			$this->flash->message($message, $type, $options);
 		}
 		
 		function profile(){
