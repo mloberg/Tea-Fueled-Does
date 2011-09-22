@@ -5,22 +5,26 @@
 	
 	class Flash{
 		
-		static private $flash = array();
+		static private $flash = array(
+			'options' => array(
+				'time' => '2',
+				'sticky' => false
+			)
+		);
 		static private $valid_types = array('message', 'error', 'warning', 'success');
 		
 		function __toString(){
 			return self::render();
 		}
 		
+		public static function bootstrap(){
+			if(!empty($_SESSION['flash']['message'])) self::_redirect();
+		}
+		
 		public function message($message, $type = 'message', $options = array()){
 			self::$flash['message'] = $message;
-			$default_options = array(
-				'time' => '2',
-				'sticky' => false
-			);
-			self::$flash['options'] = $options + $default_options;
-			self::$flash['type'] = $type;
-			if(!array_search($type, self::$valid_types)) self::$flash['type'] = 'message';
+			self::$flash['type'] = (array_search($type, self::$valid_types)) ? $type : 'message';
+			self::$flash['options'] = $options + self::$flash['options'];
 			self::css();
 		}
 		
@@ -78,12 +82,28 @@ SCRIPT;
 			JavaScript::script($js);
 		}
 		
+		private static function _redirect(){
+			if(is_array($_SESSION['flash']['options'])){
+				self::$flash['options'] = $_SESSION['flash']['options'] + self::$flash['options'];
+			}
+			self::$flash['message'] = $_SESSION['flash']['message'];
+			self::$flash['type'] = (array_search($_SESSION['flash']['type'], self::$valid_types)) ? $_SESSION['flash']['type'] : 'message';
+			self::css();
+		}
+		
 		public static function render(){
-			if(empty(self::$flash)) return;
-			if(self::$flash['options']['sticky'] === false) self::js();
+			if(empty(self::$flash['message'])){
+				return;
+			}
+			
+			if(self::$flash['options']['sticky'] !== true) self::js();
 			$type = self::$flash['type'];
 			$message = self::$flash['message'];
+			
+			// cleanup
 			self::$flash = array();
+			unset($_SESSION['flash']);
+			
 			return <<<FLASH
 <div id="message-flash" class="message-$type"><p>$message</p></div><div class="clear"></div>
 FLASH;
