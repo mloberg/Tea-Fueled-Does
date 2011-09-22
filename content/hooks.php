@@ -2,6 +2,8 @@
 
 	use \TFD\Library\CSS;
 	use \TFD\Library\JavaScript;
+	use \TFD\Flash;
+	use \TFD\DB\MySQL;
 	
 	abstract class Hooks{
 		
@@ -19,7 +21,6 @@
 		
 		static function pre_render(){
 			CSS::load('reset');
-			JavaScript::library('mootools');
 		}
 		
 		static function post_render(){
