@@ -1,4 +1,4 @@
-<?php
+<?php namespace TFD\Library;
 
 	/**
 	 * This is a simple library for sending emails with Postmark
@@ -13,6 +13,10 @@
 		private $reply = POSTMARK_REPLY_TO;
 		private $data = array();
 		private static $errors;
+		
+		function __construct($api = null, $from = null, $reply = null){
+			echo 'new postmark';
+		}
 		
 		function e(){
 			return self::$errors;
@@ -76,6 +80,14 @@
 				$this->data['ReplyTo'] = $this->reply;
 			}
 			return $this->data;
+		}
+	
+	}
+	
+	class PostmarkBatch extends Postmark{
+	
+		function __construct(){
+			echo 'new postmarkBatch';
 		}
 	
 	}

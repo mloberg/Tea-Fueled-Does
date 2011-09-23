@@ -23,29 +23,6 @@
 			Hooks::spindown();
 		}
 		
-		public static function __autoloader($name){
-			global $class_aliases;
-			$class = str_replace('\\', '/', $name);
-			if(file_exists(BASE_DIR.$class.EXT)){
-				include_once(BASE_DIR.$class.EXT);
-			}elseif(array_key_exists($name, $class_aliases)){
-				$class = str_replace('\\', '/', $class_aliases[$name]);
-				include_once(BASE_DIR.$class.EXT);
-				class_alias($class_aliases[$name], $name);
-			}elseif(preg_match('/^Models\/(.+)/', $class, $match)){
-				$class = 'Content\\'.$name;
-				$file = BASE_DIR.str_replace('\\', '/', $class).EXT;
-				if(!file_exists($file)){
-					throw new \TFD\Exception("Could not load model {$name}");
-				}else{
-					include_once($file);
-					class_alias($class, $name);
-				}
-			}else{
-				throw new \TFD\Exception("Could not load class {$name}!");
-			}
-		}
-		
 		/**
 		 * Accessors
 		 */

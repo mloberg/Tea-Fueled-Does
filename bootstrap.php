@@ -50,12 +50,17 @@ include_once(APP_DIR.'app'.EXT);
 include_once(HELPER_DIR.'helpful'.EXT);
 
 // Autoloader
-spl_autoload_register('TFD\App::__autoloader');
+include_once(APP_DIR.'loader'.EXT);
+spl_autoload_register(array('TFD\Loader', 'load'));
+use TFD\Loader;
 
-$class_aliases = array(
+// create some class aliases
+Loader::create_aliases(array(
 	'CSS' => '\TFD\Library\CSS',
 	'JavaScript' => '\TFD\Library\JavaScript',
 	'Flash' => '\TFD\Flash',
 	'MySQL' => '\TFD\DB\MySQL',
-	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA'
-);
+	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA',
+	'Postmark' => '\TFD\Library\Postmark'
+));
+Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', LIBRARY_DIR.'postmark'.EXT);
