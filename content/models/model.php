@@ -4,6 +4,8 @@
 	
 	class Model{
 	
-		
+		public static function foo(){
+			return 'foobar';
+		}
 	
 	}
