@@ -1,10 +1,15 @@
-<?php
+<?php namespace TFD\Library;
 
 	class Image{
 	
-		private $image;
+		private $image = null;
+		private $new_image = null;
 		private $info = array();
-		private $new_image;
+		
+		function __construct($image){
+			$file = (preg_match('/^\//', $image)) ? $image : PUBLIC_DIR.$image;
+			$this->__open($file);
+		}
 		
 		function __destruct(){
 			// doing some cleanup
@@ -12,12 +17,9 @@
 			if(is_resource($this->new_image))imagedestroy($this->new_image);
 		}
 		
-		private function open($file){
-			$file = PUBLIC_DIR.$file;
-			list($width,$height,$type,$attr) = getimagesize($file);
-			$this->info['width'] = $width;
-			$this->info['height'] = $height;
-			switch($type){
+		private function __open($file){
+			$this->info = getimagesize($file);
+			switch($this->info['type']){
 				case 1:
 					$this->image = imagecreatefromgif($file);
 					$this->info['type'] = 'gif';
@@ -31,12 +33,11 @@
 					$this->info['type'] = 'png';
 					break;
 				default:
-					echo 'Not a valid image.';
-					exit;
+					throw new \TFD\Exception('Not a valid image type!');
 			}
 		}
 		
-		private function save($options){
+		private function __save($options){
 			$output = PUBLIC_DIR;
 			if($options['path']){
 				$output .= $options['path'].'/';
@@ -76,28 +77,82 @@
 			}
 		}
 		
-		private function _crop($file, $options, $output){
-			// create the image resource, if already doesn't exist
-			if(!is_resource($this->image)){
-				$this->open($file);
+		private function __crop($options){
+			if(is_resource($this->image)){
+				if(!is_array($options)){
+					throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given.');
+				}elseif(!isset($options['width']) || !isset($options['height'])){
+					throw new \LogicException('Width and height are required!');
+				}else{
+					$default = array(
+						'x' => 0,
+						'y' => 0
+					);
+					$options = $options + $default;
+					$new_image = imagecreatetruecolor($options['width'], $options['height']);
+					imagecopyresampled($new_image, $this->image, 0, 0, $options['x'], $options['y'], $options['width'], $options['height'], $this->info['width'], $this->info['height']);
+					$this->image = $new_image;
+					imagedestroy($new_image);
+				}
 			}
-			extract($options);
-			$this->new_image = imagecreatetruecolor($width, $height);
-			imagecopyresampled($this->new_image, $this->image, 0, 0, $x, $y, $width, $height, $this->info['width'], $this->info['height']);
-			return $this->save($output);
 		}
 		
-		function resize($file, $options, $output){
-			$options['x'] = 0;
-			$options['y'] = 0;
-			return $this->_crop($file, $options, $output);
+		public function rotate($rotate){
+			if(is_resource($this->image)){
+				switch($rotate){
+					case 'left':
+						$degrees = 270;
+						break;
+					case 'right':
+						$degrees = 90;
+						break;
+					case 'flip':
+						$degrees = 180;
+						break;
+					default:
+						$degrees = $rotate;
+						break;
+				}
+				$new_image = imagerotate($this->image, $degrees, 0);
+				$this->image = $new_image;
+				imagedestroy($new_image);
+			}
+			return $this;
 		}
 		
-		function scale($file, $options, $output){
-			// create image and get info
-			$this->open($file);
-			// now figure out the scale
-			$opts = array();
+		public function resize($width, $height){
+			if(empty($width) || empty($height)){
+				throw new \LogicException('Image::resize, expects width and height.');
+			}else{
+				$options = array(
+					'x' => 0,
+					'y' => 0,
+					'width' => $width,
+					'height' => $height
+				);
+				$this->_crop($options);
+			}
+			return $this;
+		}
+		
+		public function scale($o){
+			$options = array();
+			if(!is_resource($this->image)){
+				
+			}elseif(!is_array($options)){
+				throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given.');
+			}else{
+				$o = $options;
+				if($o['percent']){
+					$scale = '.'.$o['percent'];
+					$options['width'] = round($this->info['width'] * $scale);
+					$options['height'] = round($this->info['height'] * $scale);
+				}elseif(!isset($o['height']) || ($this->info['width'] > $this->info['height'])){
+					
+				}elseif(!isset($o)){
+					
+				}
+			}
 			if($options['percent']){
 				$scale = '.'.$options['percent'];
 				$opts['width'] = round($this->info['width'] * $scale);
@@ -124,26 +179,6 @@
 			extract($options);
 			$this->new_image = imagecreatetruecolor($width, $height);
 			imagecopy($this->new_image, $this->image, 0, 0, $x, $y, $this->info['width'], $this->info['height']);
-			return $this->save($output);
-		}
-		
-		function rotate($file, $rotate, $output){
-			$this->open($file);
-			switch($rotate){
-				case 'left':
-					$degrees = 270;
-					break;
-				case 'right':
-					$degrees = 90;
-					break;
-				case 'flip':
-					$degrees = 180;
-					break;
-				default:
-					$degrees = $rotate;
-					break;
-			}
-			$this->new_image = imagerotate($this->image,$degrees,0);
 			return $this->save($output);
 		}
 		
