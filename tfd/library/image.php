@@ -3,22 +3,20 @@
 	class Image{
 	
 		private $image = null;
-		private $new_image = null;
 		private $info = array();
 		
 		function __construct($image){
-			$file = (preg_match('/^\//', $image)) ? $image : PUBLIC_DIR.$image;
-			$this->__open($file);
+			if(!file_exists($image)) $image = PUBLIC_DIR.$image;
+			$this->__open($image);
 		}
 		
 		function __destruct(){
 			// doing some cleanup
-			if(is_resource($this->image))imagedestroy($this->image);
-			if(is_resource($this->new_image))imagedestroy($this->new_image);
+			if(is_resource($this->image)) imagedestroy($this->image);
 		}
 		
 		private function __open($file){
-			$this->info = getimagesize($file);
+			list($this->info['width'], $this->info['height'], $this->info['type'], $this->info['attr']) = getimagesize($file);
 			switch($this->info['type']){
 				case 1:
 					$this->image = imagecreatefromgif($file);
@@ -37,43 +35,34 @@
 			}
 		}
 		
-		private function __save($options){
-			$output = PUBLIC_DIR;
-			if($options['path']){
-				$output .= $options['path'].'/';
-			}
-			$output .= $options['name'];
-			// figure out the extension and type to save it as
-			if($options['type']){
-				$output .= '.'.$options['type'];
-				$type = $options['type'];
-			}elseif(preg_match('/\.(gif|jpg|jpeg|png)$/', $save, $match)){
-				$type = $match[1];
+		private function __save($path, $name, $type = null, $quality = 80){
+			if(!is_null($type) && !preg_match('/^(gif|jpg|jpeg|png)$/', $type)){
+				throw new \TFD\Exception('Not a valid save type!');
 			}else{
-				$output .= '.'.$this->info['type'];
-				$type = $this->info['type'];
-			}
-			switch($this->info['type']){
-				case 'jpg':
-				case 'jpeg':
-					$quality = ($options['quality']) ? $options['quality'] : 80;
-					imagejpeg($this->new_image,$output,$quality);
-					break;
-				case 'gif':
-					imagegif($this->new_image,$output);
-					break;
-				case 'png':
-					imagepng($this->new_image,$output);
-					break;
-				default:
-					echo 'Not a valid image type';
-					exit;
-			}
-			// check to see if the image was saved
-			if(file_exists($output)){
-				return true;
-			}else{
-				return false;
+				if(!is_dir($path)) $path = PUBLIC_DIR.$path;
+				if(!preg_match('/\/$/', $path)) $path .= '/';
+				$output = $path.$name;
+				// figure out the extension and type to save it as
+				if(is_null($type)){
+					$type = $this->info['type'];
+				}
+				$output .= '.'.$type;
+				switch($type){
+					case 'jpg':
+					case 'jpeg':
+						imagejpeg($this->image, $output, $quality);
+						break;
+					case 'gif':
+						imagegif($this->image, $output);
+						break;
+					case 'png':
+						imagepng($this->image, $output);
+						break;
+					default:
+						throw new \TFD\Exception('Not a valid image type!');
+				}
+				// check to see if the image was saved
+				return (file_exists($output)) ? true : false;
 			}
 		}
 		
@@ -91,10 +80,14 @@
 					$options = $options + $default;
 					$new_image = imagecreatetruecolor($options['width'], $options['height']);
 					imagecopyresampled($new_image, $this->image, 0, 0, $options['x'], $options['y'], $options['width'], $options['height'], $this->info['width'], $this->info['height']);
+					imagedestroy($this->image);
 					$this->image = $new_image;
-					imagedestroy($new_image);
 				}
 			}
+		}
+		
+		public function save($path, $name, $type = null, $quality = 80){
+			return $this->__save($path, $name, $type, $quality);
 		}
 		
 		public function rotate($rotate){
@@ -115,14 +108,13 @@
 				}
 				$new_image = imagerotate($this->image, $degrees, 0);
 				$this->image = $new_image;
-				imagedestroy($new_image);
 			}
 			return $this;
 		}
 		
 		public function resize($width, $height){
-			if(empty($width) || empty($height)){
-				throw new \LogicException('Image::resize, expects width and height.');
+			if(!is_int($width) || !is_int($height)){
+				throw new \LogicException('Image::resize, expects width and height to be integers.');
 			}else{
 				$options = array(
 					'x' => 0,
@@ -130,98 +122,86 @@
 					'width' => $width,
 					'height' => $height
 				);
-				$this->_crop($options);
+				$this->__crop($options);
 			}
 			return $this;
 		}
 		
-		public function scale($o){
-			$options = array();
-			if(!is_resource($this->image)){
-				
-			}elseif(!is_array($options)){
+		public function scale($options){
+			if(!is_array($options)){
 				throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given.');
 			}else{
-				$o = $options;
-				if($o['percent']){
-					$scale = '.'.$o['percent'];
+				if($options['percent']){
+					$scale = '.'.$options['percent'];
 					$options['width'] = round($this->info['width'] * $scale);
 					$options['height'] = round($this->info['height'] * $scale);
-				}elseif(!isset($o['height']) || ($this->info['width'] > $this->info['height'])){
-					
-				}elseif(!isset($o)){
-					
-				}
-			}
-			if($options['percent']){
-				$scale = '.'.$options['percent'];
-				$opts['width'] = round($this->info['width'] * $scale);
-				$opts['height'] = round($this->info['height'] * $scale);
-			}else{
-				if(!$options['height'] || ($this->info['width'] > $this->info['height'])){
-					$opts['width'] = $options['width']
-					$opts['height'] = round($this->info['height'] / ($this->info['width'] / $options['width']));
-				}elseif(!$options['width'] || ($this->info['height'] > $this->info['width'])){
-					$opts['height'] = $options['height'];
-					$opts['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
+				}elseif((!isset($options['height']) && isset($options['width'])) || ($this->info['width'] > $this->info['height'])){
+					$options['height'] = round($this->info['height'] / ($this->info['width'] / $options['width']));
+				}elseif((!isset($options['width']) && isset($options['height'])) || ($this->info['height'] > $this->info['width'])){
+					$options['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
 				}else{
-					return false;
+					throw new \LogicException('Width, height, or percent not set!');
+					return;
 				}
+				$options['x'] = 0;
+				$options['y'] = 0;
+				$this->__crop($options);
 			}
-			// now crop it
-			$opts['x'] = 0;
-			$opts['y'] = 0;
-			return $this->_crop($file, $opts, $output);
+			return $this;
 		}
 		
-		function crop($file, $options, $output){
-			$this->open($file);
-			extract($options);
-			$this->new_image = imagecreatetruecolor($width, $height);
-			imagecopy($this->new_image, $this->image, 0, 0, $x, $y, $this->info['width'], $this->info['height']);
-			return $this->save($output);
+		function crop($width, $height, $x = 0, $y = 0){
+			if(!is_int($width) || !is_int($height)){
+				throw new \LogicException('Image::crop, expects width and height to be integers.');
+			}else{
+				$options = array(
+					'width' => $width,
+					'height' => $height,
+					'x' => $x,
+					'y' => $y
+				);
+				$this->__crop($options);
+			}
+			return $this;
 		}
 		
-		function save_as($file, $output){
-			$this->open($file);
-			$width = $this->info['width'];
-			$height = $this->info['height'];
-			$this->new_image = imagecreatetruecolor($width, $height);
-			imagecopyresampled($this->new_image, $this->image, 0, 0, 0, 0, $width, $height, $width, $height);
-			return $this->save($output);
-		}
-		
-		function watermark($file, $watermark, $output, $options = array()){
-			$options = $options + array('x' => 0, 'y' => 0);
-			$this->open($watermark);
-			switch(end(explode('.', $file))){
-				case 'gif':
-					$this->new_image = imagecreatefromgif($file);
+		function watermark($watermark, $options = array()){
+			$defaults = array(
+				'x' => 0,
+				'y' => 0
+			);
+			$options = $options + $defaults;
+			
+			$image = $type = $new_image = null;
+			$info = array();
+			list($info['width'], $info['height'], $info['type'], $info['attr']) = getimagesize($watermark);
+			switch($info['type']){
+				case 1:
+					$image = imagecreatefromgif($watermark);
+					$type = 'gif';
 					break;
-				case 'jpg':
-				case 'jpeg':
-					$this->new_image = imagecreatefromjpeg($file);
+				case 2:
+					$image = imagecreatefromjpeg($watermark);
+					$type = 'jpg';
 					break;
-				case 'png':
-					$this->new_image = imagecreatefrompng($file);
+				case 3:
+					$image = imagecreatefrompng($watermark);
+					$type = 'png';
 					break;
 				default:
-					echo 'Not a valid image type.';
-					exit;
+					throw new \TFD\Exception('Not a valid image type!');
 			}
-			
-			$width = imagesx($this->new_image);
-			$height = imagesy($this->new_image);
 			
 			switch($options['x']){
 				case 'left':
 					$x = 0;
 					break;
 				case 'center':
-					$x = (($width - $this->info['width']) / 2);
+					$x = (($this->info['width'] - $info['width']) / 2);
+					echo $x;
 					break;
 				case 'right':
-					$x = ($width - $this->info['width']);
+					$x = ($this->info['width'] - $info['width']);
 				default:
 					$x = $options['x'];
 			}
@@ -230,17 +210,17 @@
 					$y = 0;
 					break;
 				case 'center':
-					$y = (($height - $this->info['height']) / 2);
+					$y = (($this->info['height'] - $info['height']) / 2);
 					break;
 				case 'bottom':
-					$y = ($height - $this->info['height']);
+					$y = ($this->info['height'] - $info['height']);
 				default:
 					$y = $options['y'];
 			}
 			
-			imagecopy($this->new_image, $this->image, $x, $y, 0, 0, $this->info['width'], $this->info['height']);
-			
-			return $this->save($output);
+			imagecopy($this->image, $image, $x, $y, 0, 0, $info['width'], $info['height']);
+			imagedestroy($image);
+			return $this;
 		}
 	
 	}
