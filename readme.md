@@ -1,6 +1,6 @@
 # Tea-Fueled Does
 
-Tea-Fueled Does (TFD) is a custom php framework written by Matthew Loberg. TFD allows for quick development of high-performance web apps.
+Tea-Fueled Does (TFD) is a PHP framework written by Matthew Loberg. TFD allows for quick development of high-performance web apps.
 
 ===
 
