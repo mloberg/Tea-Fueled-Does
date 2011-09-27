@@ -1,4 +1,4 @@
-<?php
+<?php namespace TFD\Library;
 
 /**
  * A Mustache implementation in PHP.
@@ -62,19 +62,22 @@ class Template{
 	}
 	
 	public function render($template = null, $view = null, $partials = null){
-		if($template === null){
-			$template = $this->_template;
+		if($template === null) $template = $this->_template;
+		
+		if(file_exists($template)){
+			$template = file_get_contents(TEMPLATES_DIR);
 		}elseif(file_exists(TEMPLATES_DIR.$template)){
 			$template = file_get_contents(TEMPLATES_DIR.$template);
 		}
+		
 		if($partials !== null) $this->_partials = $partials;
-
+		
 		if($view){
 			$this->_context = array($view);
 		}else if(empty($this->_context)){
 			$this->_context = array($this);
 		}
-
+		
 		$template = $this->_renderPragmas($template);
 		return $this->_renderTemplate($template, $this->_context);
 	}
@@ -471,7 +474,7 @@ class Template{
 	}
 }
 
-class MustacheException extends Exception {
+class MustacheException extends \Exception {
 
 	// An UNKNOWN_VARIABLE exception is thrown when a {{variable}} is not found
 	// in the current context.

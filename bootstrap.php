@@ -63,7 +63,8 @@ Loader::create_aliases(array(
 	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA',
 	'Postmark' => '\TFD\Library\Postmark',
 	'Image' => '\TFD\Library\Image',
-	'Validate' => '\TFD\Library\Validate'
+	'Validate' => '\TFD\Library\Validate',
+	'Template' => '\TFD\Library\Template'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', LIBRARY_DIR.'postmark'.EXT);
 Loader::add_alias('HTML', '\TFD\Library\HTML', LIBRARY_DIR.'elements'.EXT);
