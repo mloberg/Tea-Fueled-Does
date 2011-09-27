@@ -62,7 +62,8 @@ Loader::create_aliases(array(
 	'MySQL' => '\TFD\DB\MySQL',
 	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA',
 	'Postmark' => '\TFD\Library\Postmark',
-	'Image' => '\TFD\Library\Image'
+	'Image' => '\TFD\Library\Image',
+	'Validate' => '\TFD\Library\Validate'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', LIBRARY_DIR.'postmark'.EXT);
 Loader::add_alias('HTML', '\TFD\Library\HTML', LIBRARY_DIR.'elements'.EXT);
