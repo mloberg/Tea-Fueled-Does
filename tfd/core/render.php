@@ -3,6 +3,7 @@
 	use TFD\Admin;
 	use TFD\App;
 	use Content\Hooks;
+	use TFD\Library\Template;
 	
 	class Render{
 	
@@ -29,6 +30,10 @@
 		
 		public static function error($type){
 			return new ErrorPage($type);
+		}
+		
+		public static function template($template = null, $options = null, $partials = null){
+			return new Template($template, $options, $partials);
 		}
 	
 	}

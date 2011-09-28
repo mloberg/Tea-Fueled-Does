@@ -1,7 +1,7 @@
 <?php namespace Content;
 
-	use TFD\Library\CSS;
-	use TFD\Library\JavaScript;
+	use TFD\CSS;
+	use TFD\JavaScript;
 	use TFD\Flash;
 	use TFD\DB\MySQL;
 	
