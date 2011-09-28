@@ -67,6 +67,7 @@
 			if(!file_exists($view)){
 				// 404
 			}else{
+				unset($options['view']);
 				self::$content = parent::__render($view, $options);
 			}
 		}
@@ -145,12 +146,43 @@
 	
 	class View extends Render{
 	
+		private static $options = array();
+		
 		function __construct($options){
-			
+			$this->bootstrap($options);
 		}
 		
-		function __destruct(){
+		function __toString(){
+			return $this->render();
+		}
+		
+		private function __render_view(){
+			if(isset(self::$options['dir'])){
+				if((self::$options['dir'] === ADMIN_DIR && Admin::loggedin()) || self::$options['dir'] !== ADMIN_DIR){
+					$view = CONTENT_DIR.self::$options['dir'].'/'.self::$options['view'].EXT;
+				}
+			}else{
+				$view = WEB_DIR.self::$options['view'].EXT;
+			}
 			
+			if(!file_exists($view)){
+				// 404
+			}else{
+				unset(self::$options['view']);
+				return parent::__render($view, self::$options);
+			}
+		}
+		
+		private function bootstrap($options){
+			$this->set_options($options);
+		}
+		
+		public function set_options($options){
+			self::$options = $options + self::$options;
+		}
+		
+		public function render(){
+			return $this->__render_view();
 		}
 	
 	}
@@ -162,7 +194,9 @@
 	class Partial extends Render{
 	
 		function __construct($file, $options){
-			
+			Hooks::partial();
+			$options['view'] = $file;
+			return new View($options);
 		}
 	
 	}
