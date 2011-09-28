@@ -1,7 +1,7 @@
 <?php namespace TFD\Core;
 
-	use \TFD\Admin;
-	use \Content\Ajax;
+	use TFD\Admin;
+	use Content\Ajax;
 	
 	class Request{
 	

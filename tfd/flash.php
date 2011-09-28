@@ -1,7 +1,7 @@
 <?php namespace TFD;
 
-	use \TFD\Library\CSS;
-	use \TFD\Library\JavaScript;
+	use TFD\Library\CSS;
+	use TFD\Library\JavaScript;
 	
 	class Flash{
 		
