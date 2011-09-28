@@ -85,9 +85,9 @@ class Environment{
 		define('DB_PASS', 'root');
 		define('DB', 'tea');
 		// Redis
-		define('REDIS_HOST', 'localhost');
-		define('REDIS_PORT', 6379);
-		define('REDIS_PASS', '');
+		define('REDIS_HOST', '69.172.229.170');
+		define('REDIS_PORT', 7743);
+		define('REDIS_PASS', 'sackFa14!');
 	}
 	
 	function testing(){

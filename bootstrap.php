@@ -66,6 +66,7 @@ Loader::create_aliases(array(
 	'Validate' => '\TFD\Library\Validate',
 	'Template' => '\TFD\Library\Template',
 	'Benchmark' => '\TFD\Benchmark',
-	'Render' => '\TFD\Core\Render'
+	'Render' => '\TFD\Core\Render',
+	'Redis' => '\TFD\DB\Redis'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
