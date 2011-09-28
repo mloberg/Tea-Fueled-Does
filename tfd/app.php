@@ -4,6 +4,7 @@
 	use TFD\Core\Request;
 	use TFD\Core\Router;
 	use TFD\Core\Render;
+	use TFD\Core\Response;
 		
 	class App{
 	
@@ -36,8 +37,7 @@
 				return $this->request();
 			}else{
 				$segments = explode('/', $this->request());
-				$seg = $segment - 1;
-				return $segments[$seg];
+				return $segments[$segment - 1];
 			}
 		}
 		
@@ -52,9 +52,8 @@
 		
 		public function site(){
 			$do = self::$request->run();
-			if($do !== false){
-				return $do;
-			}
+			if($do !== false) return $do;
+			
 			$router = new Router($this->request()); // create a router object
 			$route = $router->get();
 			
@@ -72,12 +71,12 @@
 			}else{
 				$render_info = array('view' => $this->request());
 			}
+			
 			Hooks::www();
+			
 			$render = Render::page($render_info);
 			
-			return $render->render();
-			
-			new Response();
+			return Response::make($render->render());
 		}
 	
 	}
