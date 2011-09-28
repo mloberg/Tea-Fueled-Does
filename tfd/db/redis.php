@@ -1,4 +1,5 @@
-<?php
+<?php namespace TFD\DB;
+
 /**
  * iRedis
  *
@@ -35,16 +36,12 @@
  * @copyright 2009 Justin Poliey <jdp34@njit.edu>
  * @license http://www.opensource.org/licenses/mit-license.php The MIT License
  */
- 
-/**
- * This Redis class was modified by Matthew Loberg to work with Tea-Fueled Does
- */
 
 if(!defined('CRLF')){
 	define('CRLF', sprintf('%s%s', chr(13), chr(10)));
 }
 
-class redis{
+class Redis{
 
 	const ERROR = '-';
 	const INLINE = '+';
@@ -172,4 +169,4 @@ class redis{
 
 }
 
-class RedisException extends Exception{ }
+class RedisException extends \Exception{ }
