@@ -46,6 +46,7 @@ class Environment{
 		define('ERROR_LOG_LOCATION', BASE_DIR.'error.log');
 		
 		define('AJAX_PATH', 'ajax');
+		define('AJAX_REQUEST_PARAM', 'method'); // request parameter (e.g. ?method=ajax_call instead of ajax/ajax_call)
 	}
 	
 	function api_keys(){
