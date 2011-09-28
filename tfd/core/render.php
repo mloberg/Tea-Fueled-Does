@@ -26,6 +26,10 @@
 		public static function partial($file, $options){
 			return new Partial($file, $options);
 		}
+		
+		public static function error($type){
+			return new ErrorPage($type);
+		}
 	
 	}
 	
@@ -100,6 +104,7 @@
 		
 		public function set_options($options){
 			self::$options = $options + self::$options;
+			return $this;
 		}
 		
 		public function __set($name, $value){
@@ -108,6 +113,7 @@
 		
 		public function set_status($code){
 			self::$status = $code;
+			return $this;
 		}
 		
 		public function master($master){
@@ -117,6 +123,7 @@
 			}else{
 				self::$options['master'] = $master;
 			}
+			return $this;
 		}
 		
 		/**
@@ -151,6 +158,7 @@
 			}else{
 				self::$replace[$text] = $replace;
 			}
+			return $this;
 		}
 		
 		public function render(){
@@ -198,6 +206,7 @@
 		
 		public function set_options($options){
 			self::$options = $options + self::$options;
+			return $this;
 		}
 		
 		public function render(){
@@ -216,6 +225,14 @@
 			Hooks::partial();
 			$options['view'] = $file;
 			return new View($options);
+		}
+	
+	}
+	
+	class ErrorPage extends Render{
+	
+		function __construct($type){
+			
 		}
 	
 	}

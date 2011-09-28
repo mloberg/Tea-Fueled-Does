@@ -50,19 +50,64 @@
 			507 => 'Insufficient Storage',
 			509 => 'Bandwidth Limit Exceeded'
 		);
+		private static $headers = array();
+		private static $content;
+		private static $status;
 		
-		function __construct($content, $status = 200){
-			
+		function __construct($content = null, $status = 200){
+			self::$content = $content;
+			self::$status = $status;
 		}
 		
-		public static function send_header_code($code){
-			switch($code){
-				case 404:
-					header('HTTP/1.1 404 Not Found');
-					break;
+		public function __toString(){
+			return $this->send();
+		}
+		
+		/**
+		 * Setters
+		 */
+		
+		public function header($name, $value){
+			self::$headers[$name] = $value;
+			return $this;
+		}
+		
+		/**
+		 * Class methods
+		 */
+		
+		public function send(){
+			if(!array_key_exists('Content-Type', self::$headers)){
+				$this->header('Content-Type', 'text/html; charset=utf-8');
+			}
+			
+			if(!headers_sent()) $this->send_headers();
+			
+			echo (string) self::$content;
+		}
+		
+		public function send_headers(){
+			$protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+			
+			header($protocol.' '.self::$status.' '.self::$statuses[self::$status]);
+			
+			foreach(self::$headers as $name => $value){
+				header($name.': '.$value, true);
 			}
 		}
 		
+		/**
+		 * Static methods
+		 */
+		
+		public function make($content = null, $status = 200){
+			return new self($content, $status);
+		}
+		
+		public static function error($code, $data = array()){
+			return new self(Render::error($code)->render(), $code);
+		}
+				
 		public static function redirect($location){
 			$redirect = (!preg_match('/^http(s?):\/\//', $location)) ? BASE_URL.$location : $location;
 			header("Location: {$redirect}");
