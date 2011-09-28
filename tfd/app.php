@@ -1,9 +1,9 @@
 <?php namespace TFD;
 	
-	use \Content\Hooks;
-	use \TFD\Core\Request;
-	use \TFD\Core\Router;
-	use \TFD\Core\Render;
+	use Content\Hooks;
+	use TFD\Core\Request;
+	use TFD\Core\Router;
+	use TFD\Core\Render;
 		
 	class App{
 	
@@ -74,8 +74,7 @@
 				$render_info = array('view' => $this->request());
 			}
 			Hooks::www();
-			$render = new Render($render_info);
-			return $render;
+			return Render::page($render_info)->render();
 		}
 		
 		function partial($file, $extra=null){

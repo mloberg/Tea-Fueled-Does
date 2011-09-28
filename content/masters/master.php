@@ -12,7 +12,6 @@
 <?php echo Flash::render();?>
 <div id="wrapper">
 <?php echo $content;?>
-
 </div>
 <?php echo JavaScript::render();?>
 </body>
