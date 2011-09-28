@@ -68,5 +68,3 @@ Loader::create_aliases(array(
 	'Benchmark' => '\TFD\Benchmark'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', LIBRARY_DIR.'postmark'.EXT);
-Loader::add_alias('HTML', '\TFD\Library\HTML', LIBRARY_DIR.'elements'.EXT);
-Loader::add_alias('Form', '\TFD\Library\Form', LIBRARY_DIR.'elements'.EXT);
