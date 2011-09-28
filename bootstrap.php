@@ -22,6 +22,7 @@ define('TEA_DIR', APP_DIR.'tea/');
 // public directories
 define('ADMIN_DIR', CONTENT_DIR.'admin/');
 define('AJAX_DIR', CONTENT_DIR.'ajax/');
+define('ERROR_PAGES', CONTENT_DIR.'error_pages/');
 define('LOGIN_DIR', CONTENT_DIR.'login/');
 define('MASTERS_DIR', CONTENT_DIR.'masters/');
 define('MODELS_DIR', CONTENT_DIR.'models/');

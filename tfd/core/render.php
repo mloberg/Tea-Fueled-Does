@@ -231,8 +231,26 @@
 	
 	class ErrorPage extends Render{
 	
+		private static $page;
+		
 		function __construct($type){
-			
+			$this->bootstrap($type);
+		}
+		
+		function __toString(){
+			return $this->render();
+		}
+		
+		private function __render_page(){
+			return parent::__render(self::$page);
+		}
+		
+		private function bootstrap($type){
+			self::$page = ERROR_PAGES.$type.EXT;
+		}
+		
+		public function render(){
+			return $this->__render_page();
 		}
 	
 	}
