@@ -3,6 +3,7 @@
 	use TFD\DB\MySQL;
 	use Content\Hooks;
 	use TFD\Core\Render;
+	use TFD\Core\Response;
 	
 	class Admin{
 	
@@ -30,29 +31,26 @@
 		}
 		
 		public static function loggedin(){
-			if($_SESSION['logged_in']){
+			if(isset($_SESSION['logged_in'])){
 				return self::__validate_session_fingerprint();
-			}elseif($_COOKIE['logged_in']){
+			}elseif(isset($_COOKIE['logged_in'])){
 				return self::__validate_cookie_fingerprint();
-			}else{
-				return false;
 			}
+			return false;
 		}
 		
 		public function login(){
-			if($_POST['submit'] && self::validate() || self::loggedin()){
-				if($_COOKIE['redirect']){
+			if((isset($_POST['submit']) && self::validate()) || self::loggedin()){
+				if(isset($_COOKIE['redirect'])){
 					$redirect = $_COOKIE['redirect'];
 					setcookie('redirect', '', time() - 3600, '/');
 				}else{
 					$redirect = ADMIN_PATH;
 				}
-				header('Location: '.BASE_URL.$redirect);
-				exit;
-			}else{
-				if($_POST['submit']){
-					$errors = 'Login incorrect!';
-				}
+				return Response::redirect($redirect);
+			}elseif(isset($_POST['submit'])){
+				$errors = 'Login incorrect!';
+			}
 				$options = array(
 					'dir' => LOGIN_DIR,
 					'file' => 'login',

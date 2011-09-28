@@ -15,8 +15,7 @@ define('APP_DIR', realpath($app_dir).'/');
 define('CONTENT_DIR', realpath($content_dir).'/');
 
 // app directories
-define('CORE_DIR', APP_DIR.'core/');
-define('HELPER_DIR', APP_DIR.'helper/');
+define('FUNCTIONS_DIR', APP_DIR.'functions/');
 define('LIBRARY_DIR', APP_DIR.'library/');
 define('TEA_DIR', APP_DIR.'tea/');
 
@@ -47,7 +46,7 @@ new Environment($environment);
 include_once(APP_DIR.'app'.EXT);
 
 // our helper
-include_once(HELPER_DIR.'helpful'.EXT);
+include_once(FUNCTIONS_DIR.'helpful'.EXT);
 
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);
@@ -60,7 +59,7 @@ Loader::create_aliases(array(
 	'JavaScript' => '\TFD\Library\JavaScript',
 	'Flash' => '\TFD\Flash',
 	'MySQL' => '\TFD\DB\MySQL',
-	'ReCAPTCHA' => '\TFD\Helper\ReCAPTCHA',
+	'ReCAPTCHA' => '\TFD\Form\ReCAPTCHA',
 	'Postmark' => '\TFD\Library\Postmark',
 	'Image' => '\TFD\Library\Image',
 	'Validate' => '\TFD\Library\Validate',
