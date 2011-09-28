@@ -3,9 +3,7 @@
 return array(
 
 	'test' => function(){
-		// it is possible to access TFD
-		global $app;
-//		print_p($app->mysql->get('users'));
+		Benchmark::start('test');
 		return array('file' => 'index');
 	},
 	
