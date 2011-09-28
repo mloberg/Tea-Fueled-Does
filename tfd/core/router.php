@@ -4,36 +4,58 @@
 	
 		private static $routes = array();
 		private static $request;
+		private static $method;
 		
 		function __construct($request){
+			self::$method = $_SERVER['REQUEST_METHOD'];
 			self::$request = $request;
 			self::load_routes();
 		}
+		
+		/**
+		 * Public accessor for run_routes
+		 */
 		
 		public function get(){
 			return self::run_route();
 		}
 		
+		/**
+		 * Load routes file
+		 */
+		
 		private static function load_routes(){
 			self::$routes = include_once(CONTENT_DIR.'routes'.EXT);
 		}
 		
+		/**
+		 * Parses routes and looks for match
+		 */
+		
 		private static function run_route(){
-			$request =& self::$request;
+			$request = self::$method.' '.self::$request;
 			$routes =& self::$routes;
+			
 			if(empty($routes)) return false;
 			
 			if(isset($routes[$request])){
 				return $routes[$request]();
 			}else{
 				foreach($routes as $route => $function){
-					if(preg_match('/^'.self::replace_wildcards($route).'$/', $request, $match)){
+					$method = reset(explode(' ', $route));
+					$req = end(explode(' ', $route));
+					if($method === $req) $method = '';
+					if(preg_match('/^'.self::replace_wildcards($req).'$/', self::$request, $match) && (empty($method) || $method == self::$method)){
 						return $function($match);
 					}
 				}
 			}
 			return false;
 		}
+		
+		/**
+		 * Replace wildcards in route
+		 */
 		
 		private static function replace_wildcards($key){
 			return str_replace(array('/', '[:any]', '[:num]'), array('\/', '([\w\?\.\#_\-\+\*\^\/]+)?', '(\d+)'), $key);
