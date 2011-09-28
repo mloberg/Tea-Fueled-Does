@@ -56,15 +56,16 @@ use TFD\Loader;
 
 // create some class aliases
 Loader::create_aliases(array(
-	'CSS' => '\TFD\Library\CSS',
-	'JavaScript' => '\TFD\Library\JavaScript',
+	'CSS' => '\TFD\CSS',
+	'JavaScript' => '\TFD\JavaScript',
 	'Flash' => '\TFD\Flash',
 	'MySQL' => '\TFD\DB\MySQL',
 	'ReCAPTCHA' => '\TFD\Form\ReCAPTCHA',
-	'Postmark' => '\TFD\Library\Postmark',
+	'Postmark' => '\TFD\API\Postmark',
 	'Image' => '\TFD\Library\Image',
 	'Validate' => '\TFD\Library\Validate',
 	'Template' => '\TFD\Library\Template',
-	'Benchmark' => '\TFD\Benchmark'
+	'Benchmark' => '\TFD\Benchmark',
+	'Render' => '\TFD\Core\Render'
 ));
-Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', LIBRARY_DIR.'postmark'.EXT);
+Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
