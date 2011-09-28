@@ -38,12 +38,13 @@
 				
 				$this->master('404');
 				return;
-			}elseif(isset($options['dir']) && isset($options['file'])){
-				$file = "{$options['dir']}/{$options['file']}".EXT;
-			}elseif(isset($options['file'])){
-				$file = WEB_DIR . $options['file'] . EXT;
+			}elseif(isset($options['dir']) && isset($options['view'])){
+				$file = "{$options['dir']}/{$options['view']}".EXT;
+			}elseif(isset($options['view'])){
+				$file = WEB_DIR . $options['view'] . EXT;
 			}else{
-				$file = WEB_DIR . $this->request . EXT;
+				// 404
+				$this->master('404');
 			}
 						
 			// start the output buffer
