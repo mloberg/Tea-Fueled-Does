@@ -16,7 +16,7 @@
 		function __construct(){
 			session_start();
 			Hooks::spinup();
-			$this->bootstrap($_GET['tfd_request']);
+			self::bootstrap($_GET['tfd_request']);
 		}
 		
 		function __destruct(){
@@ -45,23 +45,9 @@
 		 * Class methods
 		 */
 		
-		private function bootstrap($request){
+		private static function bootstrap($request){
 			self::$request = new Request($request);
 			Flash::bootstrap();
-		}
-		
-		protected function load($name){
-/*
-			if($name == 'ajax'){
-				include_once(AJAX_DIR.'ajax'.EXT);
-				return true;
-			}
-*/
-			if(file_exists(HELPER_DIR.$name.EXT)){
-				include_once(HELPER_DIR.$name.EXT);
-				return true;
-			}
-			return false;
 		}
 		
 		public function site(){
@@ -74,7 +60,7 @@
 			$route = $router->get();
 			
 			if(is_array($route)){
-				if(($route['logged_in'] || $route['admin']) && !Admin::loggedin()){
+				if(($route['auth'] || $route['admin']) && !Admin::loggedin()){
 					// need to login
 					setcookie('redirect', $this->request(), time() + 3600);
 					redirect(LOGIN_PATH);
@@ -85,7 +71,7 @@
 				}
 				$render_info = $route;
 			}else{
-				$render_info = array('file' => $this->request());
+				$render_info = array('view' => $this->request());
 			}
 			Hooks::www();
 			$render = new Render($render_info);
@@ -171,13 +157,6 @@
 		
 		function send_404(){
 			header('HTTP/1.1 404 Not Found');
-		}
-		
-		function profile(){
-			return array(
-				round(microtime(true) - START_TIME, 4),
-				round((memory_get_peak_usage() - START_MEM) / pow(1024, 2), 3)
-			);
 		}
 	
 	}

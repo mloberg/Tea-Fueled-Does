@@ -8,6 +8,7 @@ return array(
 	},
 	
 	'users/[:num]' => function($match){
+		echo Models\model::foo();
 		// we have our matches available to use
 		print_p($match);
 		return array('file' => 'index');
