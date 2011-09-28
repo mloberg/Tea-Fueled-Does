@@ -54,12 +54,9 @@
 			$do = self::$request->run();
 			if($do !== false){
 				return $do;
-			}else{
-				$router = new Router($this->request()); // create a router object
-				$route = $router->get();
-				
-				
 			}
+			$router = new Router($this->request()); // create a router object
+			$route = $router->get();
 			
 			if(is_array($route)){
 				if(($route['auth'] || $route['admin']) && !Admin::loggedin()){
@@ -76,7 +73,11 @@
 				$render_info = array('view' => $this->request());
 			}
 			Hooks::www();
-			return Render::page($render_info)->render();
+			$render = Render::page($render_info);
+			
+			return $render->render();
+			
+			new Response();
 		}
 	
 	}

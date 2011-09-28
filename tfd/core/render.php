@@ -36,6 +36,7 @@
 	class Page extends Render{
 	
 		private static $content;
+		private static $status = 200;
 		private static $replace = array();
 		private static $options = array(
 			'master' => DEFAULT_MASTER,
@@ -58,14 +59,15 @@
 		private function __render_view($options){
 			if(isset($options['dir'])){
 				if(($options['dir'] === ADMIN_DIR && Admin::loggedin()) || $options['dir'] !== ADMIN_DIR){
-					$view = CONTENT_DIR.$options['dir'].'/'.$options['view'].EXT;
+					$view = $options['dir'].'/'.$options['view'].EXT;
+					if(!file_exists($view)) $view = CONTENT_DIR.$view;
 				}
 			}else{
 				$view = WEB_DIR.$options['view'].EXT;
 			}
-			
+						
 			if(!file_exists($view)){
-				// 404
+				self::$status = 404;
 			}else{
 				unset($options['view']);
 				self::$content = parent::__render($view, $options);
@@ -104,6 +106,19 @@
 			self::$options[$name] = $value;
 		}
 		
+		public function set_status($code){
+			self::$status = $code;
+		}
+		
+		public function master($master){
+			$master = MASTERS_DIR.$master.EXT;
+			if(!file_exists($master)){
+				throw new \TFD\Exception("Master {$master} not found.");
+			}else{
+				self::$options['master'] = $master;
+			}
+		}
+		
 		/**
 		 * Getter
 		 */
@@ -113,6 +128,10 @@
 			return null;
 		}
 		
+		public function status(){
+			return self::$status;
+		}
+		
 		/**
 		 * Class Methods
 		 */
@@ -120,18 +139,18 @@
 		private function bootstrap($options){
 			$this->__render_view($options);
 			unset($options['view'], $options['dir']);
+			if(isset($options['master'])) $options['master'] = MASTERS_DIR.$options['master'].EXT;
 			$this->set_options($options);
 		}
 		
-		public function master($master){
-			$master = MASTERS_DIR.$master.EXT;
-			if(!file_exists($master)){
-				throw new \TFD\Exception("Master {$master} not found.");
+		public function replace($text, $replace = null){
+			if(is_array($text)){
+				self::$replace = $text + self::$replace;
+			}elseif(is_null($replace)){
+				throw new \LogicException('Render::replace() expects two parameters, one given.');
+			}else{
+				self::$replace[$text] = $replace;
 			}
-		}
-		
-		public function replace($text, $replace){
-			self::$replace[$text] = $replace;
 		}
 		
 		public function render(){

@@ -1,5 +1,5 @@
 <?php namespace TFD;
-	
+
 	use TFD\DB\MySQL;
 	use Content\Hooks;
 	use TFD\Core\Render;
@@ -39,7 +39,7 @@
 			return false;
 		}
 		
-		public function login(){
+		public static function login(){
 			if((isset($_POST['submit']) && self::validate()) || self::loggedin()){
 				if(isset($_COOKIE['redirect'])){
 					$redirect = $_COOKIE['redirect'];
@@ -51,18 +51,16 @@
 			}elseif(isset($_POST['submit'])){
 				$errors = 'Login incorrect!';
 			}
-				$options = array(
-					'dir' => LOGIN_DIR,
-					'file' => 'login',
-					'title' => 'Login',
-					'errors' => $errors
-				);
-				$render = new Core\Render($options);
-				return $render;
-			}
+			$options = array(
+				'dir' => LOGIN_DIR,
+				'view' => 'login',
+				'title' => 'Login',
+				'errors' => $errors
+			);
+			return Render::page($options)->render();
 		}
 		
-		public function logout(){
+		public static function logout(){
 			Hooks::logout();
 			session_destroy();
 			setcookie('logged_in', false, time() - 3600, '/');
@@ -76,7 +74,7 @@
 			$pass = $_POST['password'];
 			// get user info
 			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get();
-			if(empty($user_info)) return false;
+			if(empty($user_info)) return false; // no user found
 			$salt = $user_info['salt'];
 			// check password
 			if(AdminValidation::check_password($salt, $pass)){
@@ -98,14 +96,14 @@
 			}
 		}
 		
-		public function validate_user_pass($user, $pass){
+		public static function validate_user_pass($user, $pass){
 			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get('salt');
 			if(empty($user_info)) return false;
 			$salt = $user_info['salt'];
 			return AdminValidation::check_password($salt, $pass);
 		}
 		
-		protected function add_user($username, $password, $info = array()){
+		public static function add_user($username, $password, $info = array()){
 			$info['username'] = $username;
 			// hash the pass
 			$info['salt'] = AdminValidation::hash($password);
@@ -127,11 +125,10 @@
 					if($request == '') $request = 'index';
 					$options = array(
 						'dir' => ADMIN_DIR,
-						'file' => $request,
+						'view' => $request,
 						'master' => 'admin'
 					);
-					$render = new Render($options);
-					return $render;
+					return Render::page($options)->render();
 				}else{
 					if(empty($render['dir'])) $render['dir'] = ADMIN_DIR;
 					if(empty($render['master'])) $render['master'] = 'admin';
@@ -139,12 +136,12 @@
 					return $_render;
 				}
 			}else{
-				setcookie('redirect', $this->request, time() + 3600, '/');
+				setcookie('redirect', App::request(), time() + 3600, '/');
 				header('Location: '.BASE_URL.LOGIN_PATH);
 			}
 		}
 		
-		public function hash_pass($password){
+		public static function hash_pass($password){
 			return AdminValidation::hash($password);
 		}
 	
