@@ -1,9 +1,9 @@
 <?php namespace Content;
 
-	use \TFD\Library\CSS;
-	use \TFD\Library\JavaScript;
-	use \TFD\Flash;
-	use \TFD\DB\MySQL;
+	use TFD\Library\CSS;
+	use TFD\Library\JavaScript;
+	use TFD\Flash;
+	use TFD\DB\MySQL;
 	
 	abstract class Hooks{
 		
@@ -21,6 +21,10 @@
 		
 		static function pre_render(){
 			CSS::load('reset');
+		}
+		
+		static function render(){
+		
 		}
 		
 		static function post_render(){
