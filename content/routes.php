@@ -2,7 +2,7 @@
 
 return array(
 
-	'test' => function(){
+	'GET test' => function(){
 		Benchmark::start('test');
 		return array('file' => 'index');
 	},
@@ -13,7 +13,7 @@ return array(
 		return array('file' => 'index');
 	},
 	
-	'redirect' => function(){
+	'GET redirect' => function(){
 		redirect('index');
 	}
 
