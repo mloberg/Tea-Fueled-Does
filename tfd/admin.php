@@ -1,8 +1,8 @@
 <?php namespace TFD;
 	
-	use \TFD\DB\MySQL;
-	use \Content\Hooks;
-	use \TFD\Core\Render;
+	use TFD\DB\MySQL;
+	use Content\Hooks;
+	use TFD\Core\Render;
 	
 	class Admin{
 	
