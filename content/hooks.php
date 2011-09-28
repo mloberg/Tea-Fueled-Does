@@ -24,10 +24,14 @@
 		}
 		
 		static function render(){
-		
+			
 		}
 		
 		static function post_render(){
+			
+		}
+		
+		static function partial(){
 			
 		}
 		
