@@ -38,7 +38,8 @@
 				'site.maintenance' => false,
 				'site.title' => 'Tea-Fueled Does',
 				
-				'admin.login_path' => 'login',
+				'admin.login' => 'login',
+				'admin.logout' => 'logout',
 				'admin.path' => 'admin',
 				'admin.table' => 'users',
 				'admin.auth_key' => '123456',

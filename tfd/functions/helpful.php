@@ -22,13 +22,13 @@
 				global $app;
 				$app->flash->redirect($message, $type, $options);
 			}
-			header("Location: ".BASE_URL.$location);
+			header("Location: ".Config::get('site.url').$location);
 			exit();
 		}
 	}
 	
 	function image_tag($src,$alt){
-		$img = BASE_URL.$src;
+		$img = Config::get('site.url').$src;
 		list($w,$h,$type,$attr) = getimagesize($img);
 		return '<img src="'.$img.'" alt="'.$alt.'" '.$attr.' />'."\n";
 	}
@@ -51,8 +51,8 @@
 		if(preg_match('/^http/', $a)){
 			return '<a href="'.$a.'">'.$text.'</a>';
 		}else{
-			$href = BASE_URL;
-			if($admin) $href .= ADMIN_PATH.'/';
+			$href = Config::get('site.url');
+			if($admin) $href .= Config::get('admin.path').'/';
 			$href .= $a;
 			return '<a href="'.$href.'">'.$text.'</a>';
 		}

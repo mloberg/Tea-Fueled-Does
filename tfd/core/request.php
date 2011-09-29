@@ -31,6 +31,8 @@
 				
 			}elseif(($call = self::is_ajax_request()) !== false){
 				return (string) new Ajax($call);
+			}elseif(self::is_logout()){
+				return Admin::logout();
 			}elseif(self::is_login()){
 				return Admin::login();
 			}elseif(self::is_admin()){
@@ -54,8 +56,12 @@
 			return false;
 		}
 		
+		private static function is_logout(){
+			return (Config::is_set('admin.logout') && preg_match('/^(admin\/)?'.preg_quote(Config::get('admin.logout')).'$/', self::$request)) ? true : false;
+		}
+		
 		private static function is_login(){
-			return (Config::is_set('admin.login_path') && preg_match('/^'.preg_quote(Config::get('admin.login_path')).'\/?$/', self::$request)) ? true : false;
+			return (Config::is_set('admin.login') && preg_match('/^'.preg_quote(Config::get('admin.login')).'\/?$/', self::$request)) ? true : false;
 		}
 		
 		private static function is_admin(){

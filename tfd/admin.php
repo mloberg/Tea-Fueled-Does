@@ -67,7 +67,7 @@
 			setcookie('logged_in', false, time() - 3600, '/');
 			setcookie('user_id', '', time() - 3600, '/');
 			setcookie('fingerprint', '', time() - 3600, '/');
-			header('Location: ' . Config::get('site.url'));
+			redirect('');
 		}
 		
 		private static function validate(){
