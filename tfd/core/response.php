@@ -1,5 +1,7 @@
 <?php namespace TFD\Core;
 
+	use TFD\Config;
+	
 	class Response{
 	
 		private static $statuses = array(
@@ -109,7 +111,7 @@
 		}
 				
 		public static function redirect($location){
-			$redirect = (!preg_match('/^http(s?):\/\//', $location)) ? BASE_URL.$location : $location;
+			$redirect = (!preg_match('/^http(s?):\/\//', $location)) ? Config::get('site.url').$location : $location;
 			header("Location: {$redirect}");
 			exit;
 		}

@@ -31,16 +31,16 @@ define('PARTIALS_DIR', CONTENT_DIR.'partials/');
 define('TEMPLATES_DIR', CONTENT_DIR.'templates/');
 define('WEB_DIR', CONTENT_DIR.'www/');
 
-// content files
-define('DEFAULT_MASTER', MASTERS_DIR.'master'.EXT);
-define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
-
 // our helper
 include_once(FUNCTIONS_DIR.'helpful'.EXT);
 
 // Config class
 include_once(APP_DIR.'config'.EXT);
-TFD\Config::set('application.version', '2.0a');
+TFD\Config::load(array(
+	'application.version' => '2.0a',
+	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
+	'render.default_master' => MASTERS_DIR.'master'.EXT
+));
 
 // include and load the config
 include_once(CONTENT_DIR.'config'.EXT);
@@ -66,6 +66,7 @@ Loader::create_aliases(array(
 	'Benchmark' => '\TFD\Benchmark',
 	'Render' => '\TFD\Core\Render',
 	'Redis' => '\TFD\DB\Redis',
-	'Upload' => '\TFD\Upload\File'
+	'Upload' => '\TFD\Upload\File',
+	'Config' => '\TFD\Config'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Email\PostmarkBatch', APP_DIR.'api/postmark'.EXT);

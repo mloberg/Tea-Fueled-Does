@@ -4,29 +4,30 @@
 	use Content\Hooks;
 	use TFD\Core\Render;
 	use TFD\Core\Response;
+	use TFD\Config;
 	
 	class Admin{
 	
 		private static function __validate_session_fingerprint(){
-			$user = MySQL::table(USERS_TABLE)->where('id', $_SESSION['user_id'])->limit(1)->get('secret');
+			$user = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('secret');
 			if(empty($user)){
 				session_destroy();
 				return false;
 			}
-			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user['secret']);
+			$fingerprint = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id().$user['secret']);
 			return ($fingerprint === $_SESSION['fingerprint']);
 		}
 		
 		private static function __validate_cookie_fingerprint(){
 			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
-			$user = MySQL::table(USERS_TABLE)->where('id', $_COOKIE['user_id'])->limit(1)->get('secret');
+			$user = MySQL::table(Config::get('admin.table'))->where('id', $_COOKIE['user_id'])->limit(1)->get('secret');
 			if(empty($user)){
 				setcookie('logged_in', false, time() - 3600, '/');
 				setcookie('user_id', '', time() - 3600, '/');
 				setcookie('fingerprint', '', time() - 3600, '/');
 				return false;
 			}
-			$fingerprint = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user['secret']);
+			$fingerprint = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user['secret']);
 			return ($fingerprint === $_COOKIE['fingerprint']);
 		}
 		
@@ -45,7 +46,7 @@
 					$redirect = $_COOKIE['redirect'];
 					setcookie('redirect', '', time() - 3600, '/');
 				}else{
-					$redirect = ADMIN_PATH;
+					$redirect = Config::get('admin.path');
 				}
 				return Response::redirect($redirect);
 			}elseif(isset($_POST['submit'])){
@@ -66,14 +67,14 @@
 			setcookie('logged_in', false, time() - 3600, '/');
 			setcookie('user_id', '', time() - 3600, '/');
 			setcookie('fingerprint', '', time() - 3600, '/');
-			header('Location: ' . BASE_URL);
+			header('Location: ' . Config::get('site.url'));
 		}
 		
 		private static function validate(){
 			$user = $_POST['username'];
 			$pass = $_POST['password'];
 			// get user info
-			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get();
+			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get();
 			if(empty($user_info)) return false; // no user found
 			$salt = $user_info['salt'];
 			// check password
@@ -81,11 +82,11 @@
 				// set session vars
 				$_SESSION['logged_in'] = true;
 				$_SESSION['user_id'] = $user_info['id'];
-				$_SESSION['fingerprint'] = hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].session_id().$user_info['secret']);
+				$_SESSION['fingerprint'] = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id().$user_info['secret']);
 				// set cookies
-				setcookie('logged_in', true, time() + LOGIN_TIME, '/');
-				setcookie('user_id', $user_info['id'], time() + LOGIN_TIME, '/');
-				setcookie('fingerprint', hash('sha1', AUTH_KEY.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info['secret']), time() + LOGIN_TIME, '/');
+				setcookie('logged_in', true, time() + Config::get('admin.login_time'), '/');
+				setcookie('user_id', $user_info['id'], time() + Config::get('admin.login_time'), '/');
+				setcookie('fingerprint', hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info['secret']), time() + Config::get('admin.login_time'), '/');
 				// run user hook
 				Hooks::login($user_info);
 				// validated
@@ -97,7 +98,7 @@
 		}
 		
 		public static function validate_user_pass($user, $pass){
-			$user_info = MySQL::table(USERS_TABLE)->where('username', $user)->limit(1)->get('salt');
+			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get('salt');
 			if(empty($user_info)) return false;
 			$salt = $user_info['salt'];
 			return AdminValidation::check_password($salt, $pass);
@@ -110,7 +111,7 @@
 			// generate a secret key
 			$info['secret'] = uniqid('', true);
 			// add to database
-			if(MySQL::table(USERS_TABLE)->insert($info)){
+			if(MySQL::table(Config::get('admin.table'))->insert($info)){
 				return true;
 			}
 			return false;
@@ -120,8 +121,8 @@
 			if(self::loggedin()){
 				Hooks::admin();
 				if(is_null($render)){
-					$request = preg_replace('/^'.ADMIN_PATH.'$/', 'index', App::request());
-					$request = preg_replace('/^'.ADMIN_PATH.'\//', '', $request);
+					$request = preg_replace('/^'.Config::get('admin.path').'$/', 'index', App::request());
+					$request = preg_replace('/^'.Config::get('admin.path').'\//', '', $request);
 					if($request == '') $request = 'index';
 					$options = array(
 						'dir' => ADMIN_DIR,
@@ -137,7 +138,7 @@
 				}
 			}else{
 				setcookie('redirect', App::request(), time() + 3600, '/');
-				header('Location: '.BASE_URL.LOGIN_PATH);
+				header('Location: '.Config::get('site.url').Config::get('admin.login_path'));
 			}
 		}
 		

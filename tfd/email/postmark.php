@@ -1,10 +1,12 @@
 <?php namespace TFD\Email;
 
+	use TFD\Config;
+	
 	class Postmark{
 	
-		private $api_key = POSTMARK_API_KEY;
-		protected $from = POSTMARK_FROM;
-		protected $reply = POSTMARK_REPLY_TO;
+		private $api_key;
+		protected $from;
+		protected $reply;
 		private $data = array();
 		
 		const API_ENDPOINT = 'http://api.postmarkapp.com/email';
@@ -12,9 +14,9 @@
 		const BOUNCES_ENDPOINT = 'http://api.postmarkapp.com/bounces';
 		
 		function __construct($api = null, $from = null, $reply = null){
-			if(!is_null($api)) $this->api_key = $api;
-			if(!is_null($from)) $this->from = $from;
-			if(!is_null($reply)) $this->reply = $reply;
+			$this->api_key = (!is_null($api)) $api : Config::get('postmark.api_key');
+			$this->from = (!is_null($from)) $from : Config::get('postmark.from');
+			$this->reply = (!is_null($reply)) $reply : Config::get('postmark.reply_to');
 		}
 		
 		protected function __send($data, $endpoint = null){

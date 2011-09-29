@@ -12,6 +12,10 @@
 	
 		private static $keys = array();
 		
+		public static function is_set($key){
+			return (($key = self::parse($key)) !== false && (array_key_exists($key, self::$keys))) ? true : false;
+		}
+		
 		public static function set($key, $value){
 			if(($key = self::parse($key)) !== false){
 				self::$keys[$key] = $value;

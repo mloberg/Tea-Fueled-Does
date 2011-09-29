@@ -1,5 +1,7 @@
 <?php namespace TFD;
 
+	use TFD\Config;
+	
 	class CSS{
 	
 		private static $sheets = array();
@@ -10,7 +12,7 @@
 		);
 		
 		private static function __prepare($src){
-			if(!preg_match('/^http(s*)\:\/\//', $src)) $src = BASE_URL.$src;
+			if(!preg_match('/^http(s*)\:\/\//', $src)) $src = Config::get('site.url').$src;
 			return '<link rel="stylesheet" href="'.$src.'" />';
 		}
 				

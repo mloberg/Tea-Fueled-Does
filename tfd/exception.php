@@ -39,7 +39,7 @@
 		}
 		
 		private function email_error($message){
-			error_log($message, 1, ADMIN_EMAIL);
+			error_log($message, 1, Config::get('application.admin_email'));
 		}
 	
 	}

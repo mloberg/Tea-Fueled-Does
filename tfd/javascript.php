@@ -1,5 +1,7 @@
 <?php namespace TFD;
 
+	use TFD\Config;
+	
 	class JavaScript{
 	
 		private static $scripts = array();
@@ -17,7 +19,7 @@
 		
 		private static function __prepare($src){
 			if(!preg_match('/^http(s*)\:\/\//', $src)){
-				$src = BASE_URL.$src;
+				$src = Config::get('site.url').$src;
 			}
 			return '<script src="'.$src.'"></script>';
 		}

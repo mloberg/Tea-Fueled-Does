@@ -4,6 +4,7 @@
 	use TFD\App;
 	use Content\Hooks;
 	use TFD\Library\Template;
+	use TFD\Config;
 	
 	class Render{
 	
@@ -47,12 +48,11 @@
 		private static $content;
 		private static $status = 200;
 		private static $replace = array();
-		private static $options = array(
-			'master' => DEFAULT_MASTER,
-			'title' => SITE_TITLE
-		);
+		private static $options = array('master' => '', 'title' => '');
 		
 		function __construct($options){
+			self::$options['master'] = Config::get('render.default_master');
+			self::$options['title'] = Config::get('site.title');
 			Hooks::pre_render();
 			$this->bootstrap($options);
 		}
@@ -228,6 +228,7 @@
 	
 		function __construct($file, $options){
 			Hooks::partial();
+			$options['dir'] = PARTIALS_DIR;
 			$options['view'] = $file;
 			return new View($options);
 		}

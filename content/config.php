@@ -40,6 +40,7 @@
 				
 				'admin.login_path' => 'login',
 				'admin.path' => 'admin',
+				'admin.table' => 'users',
 				'admin.auth_key' => '123456',
 				'admin.login_time' => 3600,
 				

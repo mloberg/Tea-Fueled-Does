@@ -34,6 +34,8 @@
  * THE SOFTWARE.
  */
 
+	use TFD\Config;
+	
 	class ReCAPTCHA{
 	
 		/**
@@ -110,7 +112,8 @@
 		 * @return string - The HTML to be embedded in the user's form.
 		 */
  		
-		public static function get_html($pubkey = RECAPTCHA_PUBLIC_KEY, $error = null, $use_ssl = false){
+		public static function get_html($pubkey = null, $error = null, $use_ssl = false){
+			if(is_null($pubkey)) $pubkey = Config::get('recaptcha.public_key');
 			if(empty($pubkey)){
 				die("To use reCAPTCHA you must get an API key from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a>.");
 			}
@@ -144,7 +147,8 @@ RECAPTCHA;
 		  * @return ReCaptchaResponse
 		  */
 		
-		public static function check_answer($remoteip = '', $challenge = '', $response = '', $privkey = RECAPTCHA_PRIVATE_KEY, $extra_params = array()){
+		public static function check_answer($remoteip = '', $challenge = '', $response = '', $privkey = null, $extra_params = array()){
+			if(is_null($privkey)) $privkey = Config::get('recaptcha.private_key');
 			if(empty($privkey)){
 				die("To use reCAPTCHA you must get an API key from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a>.");
 			}
@@ -220,9 +224,9 @@ function _recaptcha_aes_encrypt($val,$ky) {
 	if (! function_exists ("mcrypt_encrypt")) {
 		die ("To use reCAPTCHA Mailhide, you need to have the mcrypt php module installed.");
 	}
-	$mode=MCRYPT_MODE_CBC;   
-	$enc=MCRYPT_RIJNDAEL_128;
-	$val=_recaptcha_aes_pad($val);
+	$mode = MCRYPT_MODE_CBC;   
+	$enc = MCRYPT_RIJNDAEL_128;
+	$val = _recaptcha_aes_pad($val);
 	return mcrypt_encrypt($enc, $ky, $val, $mode, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 }
 
