@@ -13,6 +13,7 @@ define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', realpath('..').'/');
 define('APP_DIR', realpath($app_dir).'/');
 define('CONTENT_DIR', realpath($content_dir).'/');
+unset($public_dir, $app_dir, $content_dir);
 
 // app directories
 define('FUNCTIONS_DIR', APP_DIR.'functions/');
@@ -31,30 +32,27 @@ define('TEMPLATES_DIR', CONTENT_DIR.'templates/');
 define('WEB_DIR', CONTENT_DIR.'www/');
 
 // content files
-define('HOOKS_FILE', CONTENT_DIR.'hooks'.EXT);
-define('CONF_FILE', CONTENT_DIR.'config'.EXT);
 define('DEFAULT_MASTER', MASTERS_DIR.'master'.EXT);
 define('MAINTENANCE_PAGE', MASTERS_DIR.'maintenance'.EXT);
-
-// tfd version
-define('TFD_VERSION', '2.0a');
-
-// include and load the config
-include_once(CONF_FILE);
-new Environment($environment);
-
-// And now include the core file
-include_once(APP_DIR.'app'.EXT);
 
 // our helper
 include_once(FUNCTIONS_DIR.'helpful'.EXT);
 
+// Config class
+include_once(APP_DIR.'config'.EXT);
+TFD\Config::set('application.version', '2.0a');
+
+// include and load the config
+include_once(CONTENT_DIR.'config'.EXT);
+new Content\Environment($environment);
+unset($environment);
+
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);
 spl_autoload_register(array('TFD\Loader', 'load'));
-use TFD\Loader;
 
 // create some class aliases
+use TFD\Loader;
 Loader::create_aliases(array(
 	'CSS' => '\TFD\CSS',
 	'JavaScript' => '\TFD\JavaScript',
