@@ -1,5 +1,7 @@
 <?php
 
+use TFD\Upload\File;
+
 return array(
 
 	'GET test' => function(){
@@ -16,6 +18,14 @@ return array(
 	
 	'GET redirect' => function(){
 		redirect('index');
+	},
+	
+	'POST upload' => function(){
+		$file = new File('file');
+		print_p($file->type());
+		print_p($file->is_type('pdf'));
+		print_p($file->is_image());
+		print_p($file->save(PUBLIC_DIR));
 	}
 
 );

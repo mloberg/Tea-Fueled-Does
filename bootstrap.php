@@ -61,12 +61,13 @@ Loader::create_aliases(array(
 	'Flash' => '\TFD\Flash',
 	'MySQL' => '\TFD\DB\MySQL',
 	'ReCAPTCHA' => '\TFD\Form\ReCAPTCHA',
-	'Postmark' => '\TFD\API\Postmark',
+	'Postmark' => '\TFD\Email\Postmark',
 	'Image' => '\TFD\Library\Image',
 	'Validate' => '\TFD\Library\Validate',
 	'Template' => '\TFD\Library\Template',
 	'Benchmark' => '\TFD\Benchmark',
 	'Render' => '\TFD\Core\Render',
-	'Redis' => '\TFD\DB\Redis'
+	'Redis' => '\TFD\DB\Redis',
+	'Upload' => '\TFD\Upload\File'
 ));
-Loader::add_alias('PostmarkBatch', '\TFD\Library\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
+Loader::add_alias('PostmarkBatch', '\TFD\Email\PostmarkBatch', APP_DIR.'api/postmark'.EXT);

@@ -1,4 +1,4 @@
-<?php namespace TFD\API;
+<?php namespace TFD\Email;
 
 	class Postmark{
 	
