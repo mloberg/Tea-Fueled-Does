@@ -141,11 +141,15 @@
 					$options['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
 				}else{
 					throw new \LogicException('Width, height, or percent not set!');
-					return;
 				}
-				$options['x'] = 0;
-				$options['y'] = 0;
-				$this->__crop($options);
+				// don't scale up
+				if(($options['width'] > $this->info['width']) || ($options['height'] > $this->info['height'])){
+					throw new \TFD\Exception('Error: Trying to scale image up.');
+				}elseif(isset($options['width']) && isset($options['height'])){
+					$options['x'] = 0;
+					$options['y'] = 0;
+					$this->__crop($options);
+				}
 			}
 			return $this;
 		}
