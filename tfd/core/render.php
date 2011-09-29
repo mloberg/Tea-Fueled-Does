@@ -89,18 +89,22 @@
 		
 		private function __render_page(){
 			Hooks::render();
-			$master = self::$options['master'];
-			if(!file_exists($master)){
-				throw new \TFD\Exception("The master {$options['master']} doesn't exist!");
-				return '';
+			if(self::$status === 404){
+				return Render::error(404)->render();
+			}else{
+				$master = self::$options['master'];
+				if(!file_exists($master)){
+					throw new \TFD\Exception("The master {$options['master']} doesn't exist!");
+					return '';
+				}
+				
+				unset(self::$options['master']);
+				self::$options['content'] = self::__content();
+				
+				$page = parent::__render($master, self::$options);
+				
+				return $page;
 			}
-			
-			unset(self::$options['master']);
-			self::$options['content'] = self::__content();
-			
-			$page = parent::__render($master, self::$options);
-			
-			return $page;
 		}
 		
 		/**
@@ -198,7 +202,8 @@
 			}
 			
 			if(!file_exists($view)){
-				// 404
+				throw new \TFD\Exception("Could not find {$view}!");
+				return '';
 			}else{
 				unset(self::$options['view']);
 				return parent::__render($view, self::$options);

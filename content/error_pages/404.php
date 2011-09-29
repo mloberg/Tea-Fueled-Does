@@ -21,7 +21,7 @@
 			$apology = $apologies[mt_rand(0, 2)];
 		?>
 		<h2><?php echo $apology;?></h2>
-		<p>We couldn't find the resource you requested. Would you like to go to our <a href="<?php echo BASE_URL;?>">home page</a> instead?</p>
+		<p>We couldn't find the resource you requested. Would you like to go to our <a href="<?php echo Config::get('site.url');?>">home page</a> instead?</p>
 	</div>
 </body>
 </html>

@@ -76,7 +76,7 @@
 			
 			$render = Render::page($render_info);
 			
-			return Response::make($render->render());
+			return Response::make($render->render(), $render->status());
 		}
 	
 	}
