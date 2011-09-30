@@ -4,7 +4,7 @@
 	
 		private static function __build_tag($tag, $value, $attributes, $entities = true){
 			$value = ($entities) ? self::entities($value) : $value;
-			return '<'.$tag.self::attributes($attributes).'>'.$value.'<'.$tag.'>';
+			return '<'.$tag.self::attributes($attributes).'>'.$value.'</'.$tag.'>';
 		}
 		
 		private static function __build_list($type, $list, $attributes, $entities = true){
