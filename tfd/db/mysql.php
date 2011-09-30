@@ -218,13 +218,29 @@
 				throw new \LogicException("MySQL::insert() expects an array, {$type} given.");
 			}else{
 				foreach($data as $field => $value){
-					
+					$fields .= sprintf("`%s`, ", $field);
+					$values .= sprintf(":%s, ", $field);
+					self::$placeholders[$field] = $value;
+				}
+				$qry = sprintf("INSERT INTO %s (%s) VALUES (%s)", self::$table, substr($fields, 0, -2), substr($values, 0, -2));
+				$stmt = self::query_builder($qry);
+				try{
+					$stmt->execute(self::$placeholders);
+					self::set('insert_id', self::$connection->lastInsertId());
+					return true;
+				}catch(\PDOException $e){
+					throw new \TFD\Exception($e);
+					return false;
 				}
 			}
 		}
 		
 		public function update($data, $where = null){
-		
+			if(is_array($where)) self::where($where);
+			if(!is_array($data)){
+				$type = gettype($data);
+				throw new \LogicException("MySQL::update expects an array, {$type} given.");
+			}
 		}
 		
 		public function delete($where = null){
@@ -234,33 +250,6 @@
 	}
 	
 	class SQL extends MySQL implements Query{
-	
-		
-		/**
-		 * Main Methods
-		 */
-		
-		public function insert($data){
-			if(!is_array($data)){
-				throw new \LogicException('Query->insert() requires an array.');
-			}else{
-				foreach($data as $field => $value){
-					$fields .= sprintf("`%s`, ", $field);
-					$values .= sprintf(':%s, ', $field);
-					self::$placeholders[$field] = $value;
-				}
-				$qry = sprintf("INSERT INTO %s (%s) VALUES (%s)", $this->table, substr($fields, 0, -2), substr($values, 0, -2));
-				$stmt = self::query_builder($qry);
-				try{
-					$stmt->execute(self::$placeholders);
-					parent::set('insert_id', self::$connection->lastInsertId());
-					return true;
-				}catch(\PDOException $e){
-					throw new \TFD\Exception($e);
-					return false;
-				}
-			}
-		}
 		
 		public function update($data, $where = null){
 			if(is_array($where)) $this->where($where);
