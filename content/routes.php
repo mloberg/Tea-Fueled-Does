@@ -26,6 +26,14 @@ return array(
 		print_p($file->is_type('pdf'));
 		print_p($file->is_image());
 		print_p($file->save(PUBLIC_DIR));
+	},
+	
+	'GET admin/test' => function(){
+		return array(
+			'view' => 'index',
+			'admin' => true,
+			'master' => 'master'
+		);
 	}
 
 );

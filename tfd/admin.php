@@ -123,22 +123,24 @@
 				if(is_null($render)){
 					$request = preg_replace('/^'.Config::get('admin.path').'$/', 'index', App::request());
 					$request = preg_replace('/^'.Config::get('admin.path').'\//', '', $request);
-					if($request == '') $request = 'index';
-					$options = array(
+					if(empty($request)) $request = 'index';
+					$render = array(
 						'dir' => ADMIN_DIR,
 						'view' => $request,
 						'master' => 'admin'
 					);
-					return Render::page($options)->render();
 				}else{
-					if(empty($render['dir'])) $render['dir'] = ADMIN_DIR;
-					if(empty($render['master'])) $render['master'] = 'admin';
-					$_render = new Render($render);
-					return $_render;
+					$defaults = array(
+						'dir' => ADMIN_DIR,
+						'master' => 'admin'
+					);
+					$render = $render + $defaults;
 				}
+				$page = Render::page($render);
+				return Response::make($page->render(), $page->status());
 			}else{
 				setcookie('redirect', App::request(), time() + 3600, '/');
-				header('Location: '.Config::get('site.url').Config::get('admin.login_path'));
+				redirect(Config::get('admin.login'));
 			}
 		}
 		

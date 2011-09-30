@@ -50,27 +50,27 @@
 			Flash::bootstrap();
 		}
 		
-		public function site(){
-			$do = self::$request->run();
-			if($do !== false) return $do;
-			
+		public function site(){			
 			$router = new Router($this->request()); // create a router object
-			$route = $router->get();
+			$route = $router->get(); // get the matching route
 			
 			if(is_array($route)){
 				if(($route['auth'] || $route['admin']) && !Admin::loggedin()){
 					// need to login
 					setcookie('redirect', $this->request(), time() + 3600);
-					redirect(LOGIN_PATH);
+					redirect(Config::get('admin.login'));
 					exit;
 				}
 				if($route['admin']){
 					return Admin::dashboard($route);
 				}
 				$render_info = $route;
+			}elseif(($do = self::$request->run()) !== false){
+				return $do;
 			}else{
 				$render_info = array('view' => $this->request());
 			}
+			
 			
 			Hooks::www();
 			

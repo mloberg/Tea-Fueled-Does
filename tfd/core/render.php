@@ -48,11 +48,14 @@
 		private static $content;
 		private static $status = 200;
 		private static $replace = array();
-		private static $options = array('master' => '', 'title' => '');
+		private static $options = array();
 		
 		function __construct($options){
-			self::$options['master'] = Config::get('render.default_master');
-			self::$options['title'] = Config::get('site.title');
+			$default = array(
+				'master' => Config::get('render.default_master'),
+				'title' => Config::get('site.title')
+			);
+			$options = $options + $default;
 			Hooks::pre_render();
 			$this->bootstrap($options);
 		}
