@@ -51,10 +51,7 @@
 		private static $options = array();
 		
 		function __construct($options){
-			$default = array(
-				'master' => Config::get('render.default_master'),
-				'title' => Config::get('site.title')
-			);
+			$default = array('title' => Config::get('site.title'));
 			$options = $options + $default;
 			Hooks::pre_render();
 			$this->bootstrap($options);
@@ -97,8 +94,7 @@
 			}else{
 				$master = self::$options['master'];
 				if(!file_exists($master)){
-					throw new \TFD\Exception("The master {$options['master']} doesn't exist!");
-					return '';
+					$master = Config::get('render.default_master');
 				}
 				
 				unset(self::$options['master']);
