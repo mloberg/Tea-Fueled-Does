@@ -1,4 +1,4 @@
-<?php namespace TFD\DB;
+<?php namespace TFD;
 
 	/**
 	 * iRedis

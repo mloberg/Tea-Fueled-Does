@@ -65,7 +65,7 @@ Loader::create_aliases(array(
 	'Template' => '\TFD\Library\Template',
 	'Benchmark' => '\TFD\Benchmark',
 	'Render' => '\TFD\Core\Render',
-	'Redis' => '\TFD\DB\Redis',
+	'Redis' => '\TFD\Redis',
 	'Upload' => '\TFD\Upload\File',
 	'Config' => '\TFD\Config',
 	'HTML' => '\TFD\HTML',

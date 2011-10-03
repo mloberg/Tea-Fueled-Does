@@ -20,8 +20,8 @@
 			self::$connection = null;
 		}
 		
-		public static function __callStatic(){
-			if(!is_object(self::$connection)){
+		public static function __callStatic($name, $arguments){
+			if(!is_object(self::$connection) && $name !== 'table'){
 				self::create_connection();
 			}
 		}
@@ -74,8 +74,8 @@
 		
 		private function __where($fields, $value, $type = 'AND'){
 			$where = self::$query['where'];
-			if(!is_array($field)) $field = array($field => $value);
-			foreach($field as $col => $value){
+			if(!is_array($fields)) $fields = array($fields => $value);
+			foreach($fields as $col => $value){
 				if(empty($where)){
 					$where = sprintf("`%s` = :%s", $col, $col);
 				}else{
@@ -143,12 +143,12 @@
 		public function order_by($field, $type = 'DESC'){
 			$order = self::$query['order'];
 			if(!is_array($field)) $field = array($field => $type);
-			foreach($order_by as $by => $t){
-				if(is_int($col) && !preg_match('/desc|asc/', strtolower($t))){
+			foreach($field as $by => $t){
+				if(is_int($by) && !preg_match('/desc|asc/', strtolower($t))){
 					$by = $t;
 					$t = $type;
 				}
-				$order .= sprintf("`%s` %s, ", $col, $t);
+				$order .= sprintf("`%s` %s, ", $by, $t);
 			}
 			self::$query['order'] = $order;
 			return $this;
@@ -168,6 +168,8 @@
 			if(!empty(self::$query['limit'])){
 				$query .= ' LIMIT '.self::$query['limit'];
 			}
+			
+			self::$query = array();
 			
 			$stmt = self::$connection->prepare($query);
 			
@@ -209,6 +211,7 @@
 				}
 				$data[] = $row;
 			}
+			self::$placeholders = array();
 			return $data;
 		}
 		
@@ -227,9 +230,11 @@
 				try{
 					$stmt->execute(self::$placeholders);
 					self::set('insert_id', self::$connection->lastInsertId());
+					self::$placeholders = array();
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
+					self::$placeholders = array();
 					return false;
 				}
 			}
@@ -240,35 +245,26 @@
 			if(!is_array($data)){
 				$type = gettype($data);
 				throw new \LogicException("MySQL::update expects an array, {$type} given.");
-			}
-		}
-		
-		public function delete($where = null){
-			
-		}
-	
-	}
-	
-	class SQL extends MySQL implements Query{
-		
-		public function update($data, $where = null){
-			if(is_array($where)) $this->where($where);
-			if(!is_array($data)){
-				throw new \LogicException('Query->update requires an array!');
-			}elseif(empty(self::$info['where']) && $where !== true){
-				throw new \TFD\Exception('WHERE is not in your query, this will update all rows. Skipping query.');
+			}elseif(empty(self::$query['where']) && $where !== true){
+				throw new \TFD\Exception('WHERE is not set in your query, this will update all rows. Skipping query.');
+				return false;
 			}else{
 				foreach($data as $field => $value){
-					$update .= sprintf("`%s`=:%s, ", $field, $field);
+					$update .= sprintf("`%s` = :%s, ", $field, $field);
 					self::$placeholders[$field] = $value;
 				}
-				$qry = sprintf("UPDATE %s SET %s", $this->table, substr($update, 0, -2));
+				$qry = sprintf("UPDATE %s SET %s", self::$table, substr($update, 0, -2));
 				$stmt = self::query_builder($qry);
+				print_p(self::$placeholders);
+				echo self::last_query().'<br />';
 				try{
 					$stmt->execute(self::$placeholders);
+					self::set('num_rows', $stmt->rowCount());
+					self::$placeholders = array();
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
+					self::$placeholders = array();
 					return false;
 				}
 			}
@@ -276,16 +272,20 @@
 		
 		public function delete($where = null){
 			if(is_array($where)) $this->where($where);
-			if(empty(self::$info['where']) && $where !== true){
+			if(empty(self::$query['where']) && $where !== true){
 				throw new \TFD\Exception('WHERE is not set in your query, this will delete all rows. Skipping query.');
+				return false;
 			}else{
-				$qry = sprintf("DELETE FROM %s", $this->table);
+				$qry = sprintf("DELETE FROM %s", self::$table);
 				$stmt = self::query_builder($qry);
 				try{
 					$stmt->execute(self::$placeholders);
+					self::set('num_rows', $stmt->rowCount());
+					self::$placeholders = array();
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
+					self::$placeholders = array();
 					return false;
 				}
 			}
