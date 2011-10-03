@@ -21,15 +21,11 @@ define('LIBRARY_DIR', APP_DIR.'library/');
 define('TEA_DIR', APP_DIR.'tea/');
 
 // public directories
-define('ADMIN_DIR', CONTENT_DIR.'admin/');
-define('AJAX_DIR', CONTENT_DIR.'ajax/');
-define('ERROR_PAGES', CONTENT_DIR.'error_pages/');
-define('LOGIN_DIR', CONTENT_DIR.'login/');
 define('MASTERS_DIR', CONTENT_DIR.'masters/');
 define('MODELS_DIR', CONTENT_DIR.'models/');
 define('PARTIALS_DIR', CONTENT_DIR.'partials/');
 define('TEMPLATES_DIR', CONTENT_DIR.'templates/');
-define('WEB_DIR', CONTENT_DIR.'www/');
+define('VIEWS_DIR', CONTENT_DIR.'views/');
 
 // our helper
 include_once(FUNCTIONS_DIR.'helpful'.EXT);
@@ -39,7 +35,14 @@ include_once(APP_DIR.'config'.EXT);
 TFD\Config::load(array(
 	'application.version' => '2.0a',
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
-	'render.default_master' => MASTERS_DIR.'master'.EXT
+	'render.default_master' => MASTERS_DIR.'master'.EXT,
+	
+	'views.admin' => 'admin',
+	'views.login' => 'login',
+	'views.public' => 'public',
+	'views.protected' => 'protected',
+	'views.partials' => 'partials',
+	'views.error' => 'error'
 ));
 
 // include and load the config

@@ -16,8 +16,8 @@
 	$public_dir = __DIR__;
 	
 	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
-	$app_dir = '../tfd/';
-	$content_dir = '../content/';
+	$app_dir = '../tfd';
+	$content_dir = '../content';
 	
 	// then include the config file
 	

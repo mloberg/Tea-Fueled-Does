@@ -67,12 +67,11 @@
 		
 		private function __render_view($options){
 			if(isset($options['dir'])){
-				if(($options['dir'] === ADMIN_DIR && Admin::loggedin()) || $options['dir'] !== ADMIN_DIR){
-					$view = $options['dir'].'/'.$options['view'].EXT;
-					if(!file_exists($view)) $view = CONTENT_DIR.$view;
+				if(($options['dir'] === Config::get('views.admin') && Admin::loggedin()) || $options['dir'] !== Config::get('views.admin')){
+					$view = VIEWS_DIR.$options['dir'].'/'.$options['view'].EXT;
 				}
 			}else{
-				$view = WEB_DIR.$options['view'].EXT;
+				$view = VIEWS_DIR.Config::get('views.public').'/'.$options['view'].EXT;
 			}
 						
 			if(!file_exists($view)){
@@ -93,9 +92,7 @@
 				return Render::error(404)->render();
 			}else{
 				$master = self::$options['master'];
-				if(!file_exists($master)){
-					$master = Config::get('render.default_master');
-				}
+				if(!file_exists($master)) $master = Config::get('render.default_master');
 				
 				unset(self::$options['master']);
 				self::$options['content'] = self::__content();
@@ -193,11 +190,11 @@
 		
 		private function __render_view(){
 			if(isset(self::$options['dir'])){
-				if((self::$options['dir'] === ADMIN_DIR && Admin::loggedin()) || self::$options['dir'] !== ADMIN_DIR){
-					$view = CONTENT_DIR.self::$options['dir'].'/'.self::$options['view'].EXT;
+				if((self::$options['dir'] === Config::get('views.admin') && Admin::loggedin()) || self::$options['dir'] !== Config::get('views.admin')){
+					$view = VIEWS_DIR.self::$options['dir'].'/'.self::$options['view'].EXT;
 				}
 			}else{
-				$view = WEB_DIR.self::$options['view'].EXT;
+				$view = VIEWS_DIR.Config::get('views.public').'/'.self::$options['view'].EXT;
 			}
 			
 			if(!file_exists($view)){
@@ -232,7 +229,7 @@
 	
 		function __construct($file, $options){
 			Hooks::partial();
-			$options['dir'] = PARTIALS_DIR;
+			$options['dir'] = Config::get('views.partials');
 			$options['view'] = $file;
 			return new View($options);
 		}
@@ -256,7 +253,7 @@
 		}
 		
 		private function bootstrap($type){
-			self::$page = ERROR_PAGES.$type.EXT;
+			self::$page = VIEWS_DIR.Config::get('views.error').'/'.$type.EXT;
 		}
 		
 		public function render(){

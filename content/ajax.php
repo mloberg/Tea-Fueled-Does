@@ -12,8 +12,6 @@
 			if(method_exists(__CLASS__, self::$method)){
 				$method = self::$method;
 				return self::$method();
-			}elseif(file_exists(AJAX_DIR.$method.EXT)){
-				include AJAX_DIR.$method.EXT;
 			}else{
 				return self::error();
 			}

@@ -53,7 +53,7 @@
 				$errors = 'Login incorrect!';
 			}
 			$options = array(
-				'dir' => LOGIN_DIR,
+				'dir' => Config::get('views.login'),
 				'view' => 'login',
 				'title' => 'Login',
 				'errors' => $errors
@@ -125,13 +125,13 @@
 					$request = preg_replace('/^'.Config::get('admin.path').'\//', '', $request);
 					if(empty($request)) $request = 'index';
 					$render = array(
-						'dir' => ADMIN_DIR,
+						'dir' => Config::get('views.admin'),
 						'view' => $request,
 						'master' => 'admin'
 					);
 				}else{
 					$defaults = array(
-						'dir' => ADMIN_DIR,
+						'dir' => Config::get('views.admin'),
 						'master' => 'admin'
 					);
 					$render = $render + $defaults;
