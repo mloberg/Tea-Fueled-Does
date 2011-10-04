@@ -67,8 +67,8 @@
 				// Amazon S3 - http://aws.amazon.com/s3/
 				's3.access_key' => '',
 				's3.secret_key' => '',
-				's3.default_bucket' => '',
-				's3.default_acl' => 'public-read'
+				's3.bucket' => '',
+				's3.acl' => 'private'
 			));
 		}
 		
