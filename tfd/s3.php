@@ -119,19 +119,19 @@
 			$rest = new S3Rest('PUT', $bucket, '');
 			$rest->set_amz_header('x-amz-acl', $acl);
 			
-			// not working (InvalidBucketName: The specified bucket is not valid.)
 			if(!is_null($location)){
-				if(!preg_match('/EU|US-WEST-1|AP-SOUTHEAST-1|AP-NORTHEAST-1/', strtoupper($location)) || (empty($location) && is_string($location))){
+				if(!preg_match('/EU|us-west-1|ap-southeast-1|ap-northeast-1/', $location) || (empty($location) && is_string($location))){
 					throw new \TFD\Exception($location.' is not a valid Bucket location.');
 					return false;
 				}else{
 					$dom = new \DOMDocument;
 					$create_bucket_configuration = $dom->createElement('CreateBucketConfiguration');
-					$location_constraint = $dom->createElement('LocationConstraint', strtoupper($location));
+					$location_constraint = $dom->createElement('LocationConstraint', $location);
 					$create_bucket_configuration->appendChild($location_constraint);
 					$dom->appendChild($create_bucket_configuration);
-					$rest->data($dom->saveXML());
-					$rest->size(strlen($dom->saveXML()));
+					$data = $dom->saveXML();
+					$rest->data($data);
+					$rest->size(strlen($data));
 					$rest->set_header('Content-Type', 'application/xml');
 				}
 			}

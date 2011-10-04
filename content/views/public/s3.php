@@ -1,6 +1,6 @@
 <?php
 	//print_p(S3::put_object(PUBLIC_DIR.'uploads/placeholder_thumb.png'));
-	print_p(S3::create_bucket('mloberg_foo', 'private', 'us-west-1'));
+	print_p(S3::create_bucket('mlobergfoo', 'private', 'us-west-1'));
 ?>
 <!--
 <form method="post" action="" enctype="multipart/form-data">
