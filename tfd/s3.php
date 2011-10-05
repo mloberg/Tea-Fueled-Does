@@ -217,7 +217,8 @@
 		
 		private static function __put_object($file, $type = 'file', $options = array(), $headers = array(), $meta = array()){
 			$bucket = (is_null($options['bucket'])) ? self::get_bucket() : $options['bucket'];
-			$acl = (is_null($options['acl'])) ? self::get_acl() : $options['acl'];
+			if(!is_null($options['acl'])) self::set_acl($options['acl']);
+			$acl = self::get_acl();
 			$uri = (is_null($options['uri'])) ? basename($file) : $options['uri'];
 			
 			$rest = new S3Rest('PUT', $bucket, $uri);
@@ -268,33 +269,11 @@
 		}
 		
 		public static function put_object($file, $uri = null, $bucket = null, $acl = null, $storage = 'standard', $headers = array(), $meta = array()){
-			return self::__put_object(
-				$file,
-				'file',
-				array(
-					'uri' => $uri,
-					'bucket' => $bucket,
-					'acl' => $acl,
-					'storage' => $storage
-				),
-				$headers,
-				$meta
-			);
+			return self::__put_object($file, 'file', array('uri' => $uri, 'bucket' => $bucket, 'acl' => $acl, 'storage' => $storage), $headers, $meta);
 		}
 		
 		public static function put_object_from_string($file, $uri, $type = null, $bucket = null, $acl = null, $storage = 'standard', $headers = array(), $meta = array()){
-			return self::__put_object(
-				$file,
-				'string',
-				array(
-					'uri' => $uri,
-					'bucket' => $bucket,
-					'acl' => $acl,
-					'storage' => $storage
-				),
-				$headers,
-				$meta
-			);
+			return self::__put_object($file, 'string', array('uri' => $uri, 'bucket' => $bucket, 'acl' => $acl, 'storage' => $storage), $headers, $meta);
 		}
 		
 		public static function get_object($uri, $bucket = null, $save = false){
@@ -365,8 +344,37 @@
 			return true;
 		}
 		
-		public static function copy_object(){
-		
+		public static function copy_object($bucket, $uri, $acl = null, $src_bucket = null, $scr_uri = null, $headers = array(), $meta = array()){
+			if(is_null($src_bucket)) $src_bucket = self::get_bucket();
+			if(is_null($src_uri)) $src_uri = $uri;
+			if(!is_null($acl)) self::set_acl($acl);
+			$acl = self::get_acl();
+			
+			$rest = new S3Rest('PUT', $bucket, $uri);
+			$rest->set_header('Content-Length', 0);
+			foreach($headers as $header => $value){
+				$rest->set_header($header, $value);
+			}
+			foreach($meta as $h => $v){
+				$rest->set_amz_header('x-amz-meta-'.$h, $v);
+			}
+			$rest->set_amz_header('x-amz-acl', $acl);
+			$rest->set_amz_header('x-amz-copy-source', '/'.$src_bucket.'/'.$src_uri);
+			if(count($headers) > 0 || count($meta) > 0){
+				$rest->set_amz_header('x-amz-metadata-directive', 'REPLACE');
+			}
+			
+			$response = $rest->response();
+			
+			if(!isset($response['error']) && $response['code'] !== 200){
+				throw new \TFD\Exception("S3::copy_object(): Unexpected HTTP status.");
+				return false;
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::copy_object(): {$response['error']['code']}: {$response['error']['message']}");
+				return false;
+			}
+			
+			return true;
 		}
 		
 		public static function authenticated_url($uri, $lifetime, $bucket = null, $https = false){
