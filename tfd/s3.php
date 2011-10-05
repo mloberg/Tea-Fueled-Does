@@ -21,6 +21,7 @@
 				return false;
 			}
 			Config::set('s3.bucket', $bucket);
+			return true;
 		}
 		
 		public static function set_acl($acl){
@@ -29,6 +30,7 @@
 				return false;
 			}
 			Config::set('s3.acl', $acl);
+			return true;
 		}
 		
 		public static function get_bucket(){
@@ -166,24 +168,34 @@
 			return true;
 		}
 		
-		public static function put_object($file, $uri = null, $bucket = null, $acl = null, $storage = 'standard', $headers = array(), $meta = array()){
-			if(is_null($bucket)) $bucket = self::get_bucket();
-			if(is_null($acl)) $acl = self::get_acl();
-			if(is_null($uri)) $uri = basename($file);
+		private static function __put_object($file, $type = 'file', $options = array(), $headers = array(), $meta = array()){
+			$bucket = (is_null($options['bucket'])) ? self::get_bucket() : $options['bucket'];
+			$acl = (is_null($options['acl'])) ? self::get_acl() : $options['acl'];
+			$uri = (is_null($options['uri'])) ? basename($file) : $options['uri'];
 			
 			$rest = new S3Rest('PUT', $bucket, $uri);
 			
-			$rest->file(fopen($file, 'rb'));
-			$rest->size(filesize($file));
+			if($type == 'file' && file_exists($file)){
+				$rest->file(fopen($file, 'rb'));
+				$rest->size(filesize($file));
+				$headers['Content-MD5'] = base64_encode(md5_file($file, true));
+				if(!isset($headers['Content-Type'])){
+					$finfo = finfo_open(FILEINFO_MIME_TYPE);
+					$headers['Content-Type'] = finfo_file($finfo, $file);
+					finfo_close($finfo);
+				}
+			}elseif($type == 'string' && is_string($file)){
+				$rest->data($file);
+				$rest->size(strlen($file));
+				$headers['Content-MD5'] = base64_encode(md5($file, true));
+			}else{
+				throw new \TFD\Exception('Could not upload object.');
+				return false;
+			}
 			
-			$finfo = finfo_open(FILEINFO_MIME_TYPE);
-			$input = array(
-				'Content-MD5' => base64_encode(md5_file($file, true)),
-				'Content-Type' => finfo_file($finfo, $file)
-			);
-			finfo_close($finfo);
-			
-			$headers = $headers + $input;
+			if(!isset($headers['Content-Type'])){
+				$headers['Content-Type'] = 'application/octet-stream';
+			}
 			
 			foreach($headers as $header => $value){
 				$rest->set_header($header, $value);
@@ -206,6 +218,36 @@
 			}
 			
 			return true;
+		}
+		
+		public static function put_object($file, $uri = null, $bucket = null, $acl = null, $storage = 'standard', $headers = array(), $meta = array()){
+			return self::__put_object(
+				$file,
+				'file',
+				array(
+					'uri' => $uri,
+					'bucket' => $bucket,
+					'acl' => $acl,
+					'storage' => $storage
+				),
+				$headers,
+				$meta
+			);
+		}
+		
+		public static function put_object_from_string($file, $uri, $type = null, $bucket = null, $acl = null, $storage = 'standard', $headers = array(), $meta = array()){
+			return self::__put_object(
+				$file,
+				'string',
+				array(
+					'uri' => $uri,
+					'bucket' => $bucket,
+					'acl' => $acl,
+					'storage' => $storage
+				),
+				$headers,
+				$meta
+			);
 		}
 	
 	}
