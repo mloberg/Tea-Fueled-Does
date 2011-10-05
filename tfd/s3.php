@@ -104,7 +104,7 @@
 					$results[] = array(
 						'name' => (string)$object->Key,
 						'modified' => strtotime($object->LastModified),
-						'Size' => (string)$object->Size
+						'size' => (string)$object->Size
 					);
 				}
 			}

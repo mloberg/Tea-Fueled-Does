@@ -1,4 +1,4 @@
-<?php namespace TFD\Library;
+<?php namespace TFD\Form;
 
 	class Validate{
 	
