@@ -58,7 +58,8 @@
 				'title' => 'Login',
 				'errors' => $errors
 			);
-			return Render::page($options)->render();
+			$page = Render::page($options);
+			return Response::make($page->render(), $page->status());
 		}
 		
 		public static function logout(){
