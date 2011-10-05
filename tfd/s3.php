@@ -42,7 +42,7 @@
 		}
 		
 		/**
-		 * Class methods
+		 * Bucket Methods
 		 */
 		
 		public static function list_buckets($detail = false){
@@ -112,6 +112,49 @@
 			return $results;
 		}
 		
+		public static function bucket_acl($bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$rest = new S3Rest('GET', $bucket);
+			$rest->set_parameter('acl', null);
+			$response = $rest->response();
+			
+			if(!isset($response['error']) && $response['code'] !== 200){
+				throw new \TFD\Exception('S3::bucket_acl(): Unexpected HTTP status');
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::bucket_acl(): {$response['error']['code']}: {$response['error']['message']}");
+				return;
+			}
+			
+			$results = array();
+			$results['owner'] = (string)$response['response']->Owner->DisplayName;
+			foreach($response['response']->AccessControlList->Grant as $grant){
+				$results['access'][] = array(
+					'name' => (isset($grant->Grantee->DisplayName)) ? (string)$grant->Grantee->DisplayName : (string)$grant->Grantee->URI,
+					'permission' => (string)$grant->Permission
+				);
+			}
+			
+			return $results;
+		}
+		
+		public static function bucket_location($bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$rest = new S3Rest('GET', $bucket);
+			$rest->set_parameter('location', null);
+			$response = $rest->response();
+			
+			if(!isset($response['error']) && $response['code'] !== 200){
+				throw new \TFD\Exception('S3::bucket_location(): Unexpected HTTP status');
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::bucket_location(): {$response['error']['code']}: {$response['error']['message']}");
+				return;
+			}
+			
+			return (isset($response['response'][0]) && !empty($response['response'][0])) ? (string)$response['response'][0] : 'US Classic';
+		}
+		
 		public static function create_bucket($bucket = null, $acl = null, $location = null){
 			if(!is_null($bucket)) self::set_bucket($bucket);
 			if(!is_null($acl)) self::set_acl($acl);
@@ -167,6 +210,10 @@
 			
 			return true;
 		}
+		
+		/**
+		 * Object methods
+		 */
 		
 		private static function __put_object($file, $type = 'file', $options = array(), $headers = array(), $meta = array()){
 			$bucket = (is_null($options['bucket'])) ? self::get_bucket() : $options['bucket'];
@@ -247,6 +294,92 @@
 				),
 				$headers,
 				$meta
+			);
+		}
+		
+		public static function get_object($uri, $bucket = null, $save = false){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$rest = new S3Rest('GET', $bucket, $uri);
+			$response = $rest->response();
+			
+			if(!isset($response['error']) && $response['code'] !== 200){
+				throw new \TFD\Exception("S3::get_object(): Unexpected HTTP status.");
+				return false;
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::get_object(): {$response['error']['code']}: {$response['error']['message']}.");
+				return false;
+			}
+			
+			if(is_resource($save)){
+				fwrite($save, $response['response']);
+				return true;
+			}elseif($save !== false){
+				if(($fp = @fopen($save, 'wb')) !== false){
+					fwrite($fp, $response['response']);
+					@fclose($fp);
+					return true;
+				}else{
+					throw new \TFD\Exception('Could not open up file for saving.');
+					return false;
+				}
+			}
+			
+			return $response['response'];
+		}
+		
+		public static function object_info($uri, $bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$rest = new S3Rest('HEAD', $bucket, $uri);
+			$response = $rest->response();
+			
+			if($response['code'] === 404){
+				throw new \TFD\Exception("{$uri} does not exist in {$bucket}.");
+			}elseif(!isset($response['error']) && $response['code'] !== 200){
+				throw new \TFD\Exception("S3::object_info(): Unexpected HTTP status.");
+				return false;
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::object_info(): {$response['error']['code']}: {$response['error']['message']}.");
+				return false;
+			}
+			
+			return $response['headers'];
+		}
+		
+		public static function delete_object($uri, $bucket = null){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$rest = new S3Rest('DELETE', $bucket, $uri);
+			
+			$response = $rest->response();
+			
+			if(!isset($response['error']) && $response['code'] !== 204){
+				throw new \TFD\Exception("S3::delete_object(): Unexpected HTTP status.");
+				return false;
+			}elseif(is_array($response['error'])){
+				throw new \TFD\Exception("S3::delete_object(): {$response['error']['code']}: {$response['error']['message']}");
+				return false;
+			}
+			
+			return true;
+		}
+		
+		public static function copy_object(){
+		
+		}
+		
+		public static function authenticated_url($uri, $lifetime, $bucket = null, $https = false){
+			if(is_null($bucket)) $bucket = self::get_bucket();
+			
+			$expires = time() + $lifetime;
+			return sprintf('http%s://%s/%s?AWSAccessKeyId=%s&Expires=%u&Signature=%s',
+				$https ? 's' : '',
+				$bucket.'.s3.amazonaws.com',
+				str_replace('%2F', '/', rawurlencode($uri)),
+				Config::get('s3.access_key'),
+				$expires,
+				urlencode(self::__hash("GET\n\n\n{$expires}\n/{$bucket}/{$uri}"))
 			);
 		}
 	
@@ -367,8 +500,13 @@
 						curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 					}
 					break;
+				case 'HEAD':
+					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD');
+					curl_setopt($ch, CURLOPT_NOBODY, true);
+					break;
 				case 'DELETE':
 					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+					break;
 				case 'GET':
 				default:
 					break;
