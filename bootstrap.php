@@ -1,11 +1,10 @@
 <?php
 
 /**
- * You probably don't need to edit this file unless you've extended TFD or moved some core files around.
- *
- * Best to leave this alone if you don't know what you're doing.
+ * This file gets everything going. Unless you know what your doing, I wouldn't touch this file.
  */
 
+// our file extension
 define('EXT', '.php');
 
 // main directories
@@ -13,7 +12,7 @@ define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', realpath('..').'/');
 define('APP_DIR', realpath($app_dir).'/');
 define('CONTENT_DIR', realpath($content_dir).'/');
-unset($public_dir, $app_dir, $content_dir);
+unset($public_dir, $app_dir, $content_dir); // cleanup the global namespace
 
 // app directories
 define('FUNCTIONS_DIR', APP_DIR.'functions/');
@@ -32,6 +31,7 @@ include_once(FUNCTIONS_DIR.'helpful'.EXT);
 
 // Config class
 include_once(APP_DIR.'config'.EXT);
+// load some default config options
 TFD\Config::load(array(
 	'application.version' => '2.0a',
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
@@ -45,10 +45,10 @@ TFD\Config::load(array(
 	'views.error' => 'error'
 ));
 
-// include and load the config
+// include our environment file (with our application config)
 include_once(CONTENT_DIR.'config'.EXT);
 new Content\Environment($environment);
-unset($environment);
+unset($environment); // cleanup the global namespace
 
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);

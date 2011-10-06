@@ -58,7 +58,7 @@
 		 */
 		
 		private static function replace_wildcards($key){
-			return str_replace(array('/', '[:any]', '[:num]'), array('\/', '([\w\?\.\#_\-\+\*\^\/]+)?', '(\d+)'), $key);
+			return str_replace(array('/', '[:any]', '[:num]'), array('\/', '([\w\?\.\#\-\+\*\^\/]+)?', '(\d+)'), $key);
 		}
 	
 	}

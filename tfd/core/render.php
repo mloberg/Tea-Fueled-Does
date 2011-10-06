@@ -10,7 +10,7 @@
 	
 		protected function __render($file, $extra = array()){
 			ob_start();
-			extract($extra);
+			extract($extra, EXTR_SKIP);
 			include($file);
 			$render = ob_get_contents();
 			ob_end_clean();
