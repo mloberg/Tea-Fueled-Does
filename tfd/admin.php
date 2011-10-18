@@ -4,7 +4,6 @@
 	use Content\Hooks;
 	use TFD\Core\Render;
 	use TFD\Core\Response;
-	use TFD\Config;
 	
 	class Admin{
 	
@@ -77,9 +76,9 @@
 			// get user info
 			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get();
 			if(empty($user_info)) return false; // no user found
-			$salt = $user_info['salt'];
+			$hash = $user_info['hash'];
 			// check password
-			if(AdminValidation::check_password($salt, $pass)){
+			if(Crypter::verify($pass, $hash)){
 				// set session vars
 				$_SESSION['logged_in'] = true;
 				$_SESSION['user_id'] = $user_info['id'];
@@ -89,6 +88,7 @@
 				setcookie('user_id', $user_info['id'], time() + Config::get('admin.login_time'), '/');
 				setcookie('fingerprint', hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info['secret']), time() + Config::get('admin.login_time'), '/');
 				// run user hook
+				unset($user_info['hash'], $user_info['secret']);
 				Hooks::login($user_info);
 				// validated
 				return true;
@@ -99,23 +99,23 @@
 		}
 		
 		public static function validate_user_pass($user, $pass){
-			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get('salt');
+			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get('hash');
 			if(empty($user_info)) return false;
-			$salt = $user_info['salt'];
-			return AdminValidation::check_password($salt, $pass);
+			$hash = $user_info['hash'];
+			return Crypter::verify($pass, $hash);
 		}
 		
 		public static function validate_pass($pass){
-			$user_info = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('salt');
+			$user_info = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('hash');
 			if(empty($user_info)) return false;
-			$salt = $user_info['salt'];
-			return AdminValidation::check_password($salt, $pass);
+			$hash = $user_info['hash'];
+			return Crypter::verify($pass, $hash);
 		}
 		
 		public static function add_user($username, $password, $info = array()){
 			$info['username'] = $username;
 			// hash the pass
-			$info['salt'] = AdminValidation::hash($password);
+			$info['hash'] = Crypter::hash($password);
 			// generate a secret key
 			$info['secret'] = uniqid('', true);
 			// add to database
@@ -153,28 +153,7 @@
 		}
 		
 		public static function hash_pass($password){
-			return AdminValidation::hash($password);
-		}
-	
-	}
-	
-	class AdminValidation extends Admin{
-	
-		private static $algo = '$2a';
-		private static $cost = '$10';
-		
-		private static function unique_salt(){
-			return substr(sha1(mt_rand()), 0, 22);
-		}
-		
-		protected static function hash($password){
-			return crypt($password, self::$algo.self::$cost.'$'.self::unique_salt());
-		}
-		
-		protected static function check_password($hash, $password){
-			$full_salt = substr($hash, 0, 29);
-			$new_hash = crypt($password, $full_salt);
-			return ($hash == $new_hash);
+			return Crypter::hash($password);
 		}
 	
 	}

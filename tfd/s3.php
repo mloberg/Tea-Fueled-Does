@@ -377,7 +377,7 @@
 			return true;
 		}
 		
-		public static function authenticated_url($uri, $lifetime, $bucket = null, $https = false){
+		public static function authenticated_url($uri, $lifetime = 3600, $bucket = null, $https = false){
 			if(is_null($bucket)) $bucket = self::get_bucket();
 			
 			$expires = time() + $lifetime;

@@ -45,6 +45,8 @@
 				'admin.auth_key' => '123456',
 				'admin.login_time' => 3600,
 				
+				'crypter.rounds' => 12,
+				
 				'application.error_log' => '',
 				'application.admin_email' => BASE_DIR.'error.log',
 				
