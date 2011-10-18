@@ -1,5 +1,5 @@
 <?php
 
-	if(Validate::text('new text')->required()->passed()){
+	if(Validate::text('m@mloberg.com')->max_length(18)->email()->min_length(4)->passed()){
 		echo 'pass';
 	}

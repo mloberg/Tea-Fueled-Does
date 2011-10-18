@@ -26,38 +26,38 @@
 		}
 		
 		public function email(){
-			self::$passed = (preg_match('/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/', self::$text) && self::$passed !== false) ? true : false;
+			if(!preg_match('/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/', self::$text)) self::$passed = false;
 			return $this;
 		}
 		
 		public function length($int){
-			self::$passed = (strlen(self::$text) === $int && self::$passed !== false) ? true : false;
+			if(strlen(self::$text) !== (int)$int) self::$passed = false;
 			return $this;
 		}
 		
 		public function max_length($int){
-			self::$passed = (strlen(self::$text) <= $int && self::$passed !== false) ? true : false;
+			if(strlen(self::$text) >= (int)$int) self::$passed = false;
 			return $this;
 		}
 		
 		public function min_length($int){
-			self::$passed = (strlen(self::$text) >= $int && self::$passed !== false) ? true : false;
+			if(strlen(self::$text) <= (int)$int) self::$passed = false;
 			return $this;
 		}
 		
 		public function required(){
 			$text = preg_replace('/\s\s+/', '', self::$text);
-			self::$passed = ((!empty($text) || $text !== ' ') && self::$passed !== false) ? true : false;
+			if(empty($text) || $text === ' ') self::$passed = false;
 			return $this;
 		}
 		
 		public function match($match){
-			self::$passed = (self::$text === $match && self::$passed !== false) ? true : false;
+			if(self::$text !== $match) self::$passed = false;
 			return $this;
 		}
 		
 		public function number(){
-			self::$passed = (preg_match('/\d+/', self::$text) && self::$passed !== false) ? true : false;
+			if(!preg_match('/\d+/', self::$text)) self::$passed = false;
 			return $this;
 		}
 	
