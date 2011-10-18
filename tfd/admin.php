@@ -105,6 +105,13 @@
 			return AdminValidation::check_password($salt, $pass);
 		}
 		
+		public static function validate_pass($pass){
+			$user_info = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('salt');
+			if(empty($user_info)) return false;
+			$salt = $user_info['salt'];
+			return AdminValidation::check_password($salt, $pass);
+		}
+		
 		public static function add_user($username, $password, $info = array()){
 			$info['username'] = $username;
 			// hash the pass
