@@ -13,8 +13,9 @@
 				session_destroy();
 				return false;
 			}
-			$fingerprint = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id().$user['secret']);
-			return ($fingerprint === $_SESSION['fingerprint']);
+			$salt = Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id();
+			$hash = Crypter::hash_with_salt($user['secret'], $salt);
+			return ($hash === $_SESSION['fingerprint']);
 		}
 		
 		private static function __validate_cookie_fingerprint(){
@@ -26,8 +27,9 @@
 				setcookie('fingerprint', '', time() - 3600, '/');
 				return false;
 			}
-			$fingerprint = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user['secret']);
-			return ($fingerprint === $_COOKIE['fingerprint']);
+			$salt = Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'];
+			$hash = Crypter::hash_with_salt($user['secret'], $salt);
+			return ($hash === $_COOKIE['fingerprint']);
 		}
 		
 		public static function loggedin(){
@@ -83,11 +85,12 @@
 				// set session vars
 				$_SESSION['logged_in'] = true;
 				$_SESSION['user_id'] = $user_info['id'];
-				$_SESSION['fingerprint'] = hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id().$user_info['secret']);
+				$_SESSION['fingerprint'] = Crypter::hash_with_salt($user['secret'], Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id());
 				// set cookies
 				setcookie('logged_in', true, time() + Config::get('admin.login_time'), '/');
 				setcookie('user_id', $user_info['id'], time() + Config::get('admin.login_time'), '/');
-				setcookie('fingerprint', hash('sha1', Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$user_info['secret']), time() + Config::get('admin.login_time'), '/');
+				$hash = Crypter::hash_with_salt($user['secret'], Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+				setcookie('fingerprint', $hash, time() + Config::get('admin.login_time'), '/');
 				// run user hook
 				unset($user_info['hash'], $user_info['secret']);
 				Hooks::login($user_info);

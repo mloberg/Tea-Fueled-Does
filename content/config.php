@@ -44,8 +44,9 @@
 				'admin.table' => 'users',
 				'admin.auth_key' => '123456',
 				'admin.login_time' => 3600,
+				'admin.cost' => 12, // rounds for hashing passwords
 				
-				'crypter.rounds' => 12,
+				'crypter.rounds' => 10, // default rounds for the crypter class
 				
 				'application.error_log' => '',
 				'application.admin_email' => BASE_DIR.'error.log',
