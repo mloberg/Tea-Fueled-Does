@@ -49,7 +49,8 @@
 				}
 				return Response::redirect($redirect);
 			}elseif(isset($_POST['submit'])){
-				$errors = 'Login incorrect!';
+				Flash::redirect('The username or password you entered is not valid.', 'error', array('time' => 5));
+				redirect(Config::get('admin.login'));
 			}
 			$options = array(
 				'dir' => Config::get('views.login'),
