@@ -227,7 +227,7 @@
 	
 	class Partial extends Render{
 	
-		function __construct($file, $options){
+		function __construct($file, $options = array()){
 			Hooks::partial();
 			$options['dir'] = Config::get('views.partials');
 			$options['view'] = $file;
