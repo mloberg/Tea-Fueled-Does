@@ -7,7 +7,7 @@
 		private static $method;
 		
 		function __construct($request){
-			self::$method = $_SERVER['REQUEST_METHOD'];
+			self::$method = (isset($_REQUEST['REQUEST_METHOD'])) ? $_REQUEST['REQUEST_METHOD'] : $_SERVER['REQUEST_METHOD'];
 			self::$request = $request;
 			self::load_routes();
 		}

@@ -81,7 +81,7 @@
 		}
 		
 		public static function select($name, $options = array(), $selected = null, $attributes = array()){
-			$attributes = array_merge($attributes array('id' => self::id($name, $attributes), 'name' => $name));
+			$attributes = array_merge($attributes, array('id' => self::id($name, $attributes), 'name' => $name));
 			
 			$html = array();
 			
