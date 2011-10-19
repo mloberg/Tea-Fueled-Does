@@ -3,7 +3,6 @@
 	class MySQL implements Database{
 	
 		private static $connection;
-		private static $link;
 		private static $info = array();
 		
 		private static $table;
@@ -27,8 +26,14 @@
 		}
 		
 		private static function create_connection(){
-			$con = new Connection();
-			self::$connection = $con->mysql();
+			if(!is_object(self::$connection)){
+				$con = new Connection();
+				try{
+					self::$connection = $con->mysql();
+				}catch(Exception $e){
+					throw new \TFD\Exception($e);
+				}
+			}
 		}
 		
 		/**
@@ -56,7 +61,11 @@
 		 */
 		
 		public static function table($table){
+			// clear placeholders
+			self::$placeholders = array();
+			// set table
 			self::$table = $table;
+			// return new MySQL object
 			return new self();
 		}
 		
@@ -64,69 +73,76 @@
 		 * Run a raw SQL statement
 		 */
 		
-		public static function query($query, $return = false){
+		public static function query($query, $placeholders = array(), $return = false){
+			self::create_connection();
+			$stmt = self::$connection->prepare($query);
 			
+			// replace query placeholders for set::last_query
+			foreach($placeholders as $param => $value){
+				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
+			}
+			self::set('last_query', $query);
+			
+			// run query
+			try{
+				$stmt->execute($placeholders);
+				self::set('num_rows', $stmt->rowCount());
+				if($return === true){
+					$stmt->setFetchMode(\PDO::FETCH_ASSOC);
+					$data = array();
+					while($row = $stmt->fetch()){
+						// if limit one, just return the single row
+						if(preg_match('/LIMIT 1/', self::last_query())){
+							return $row;
+						}
+						$data[] = $row;
+					}
+					return $data;
+				}
+				return true;
+			}catch(PDOException $e){
+				throw new \TFD\Exception($e);
+				return false;
+			}
+		}
+		
+		/**
+		 * Return a PDO Object
+		 */
+		
+		public static function connection(){
+			self::create_connection();
+			return self::$connection;
 		}
 		
 		/**
 		 * SQL setters
 		 */
 		
-		private function __where($fields, $value, $type = 'AND'){
-			$where = self::$query['where'];
+		private function __where($fields, $bitwise_operator, $value, $type = 'AND'){
 			if(!is_array($fields)) $fields = array($fields => $value);
 			foreach($fields as $col => $value){
-				if(empty($where)){
-					$where = sprintf("`%s` = :%s", $col, $col);
+				if(empty(self::$query['where'])){
+					self::$query['where'] = sprintf("`%s` %s :%s", $col, $bitwise_operator, $col);
 				}else{
-					$where .= sprintf(" %s `%s` = :%s", $type, $col, $col);
+					self::$query['where'] .= sprintf(" %s `%s` %s :%s", $type, $col, $bitwise_operator, $col);
 				}
 				self::$placeholders[$col] = $value;
 			}
-			self::$query['where'] = $where;
 		}
 		
-		public function where($field, $equal = null){
-			self::__where($field, $equal);
+		public function where($field, $bitwise_operator = '=', $equal = null){
+			self::__where($field, $bitwise_operator, $equal);
 			return $this;
 		}
 		
-		public function and_where($field, $equal = null){
-			self::__where($field, $equal);
+		public function and_where($field, $bitwise_operator = '=', $equal = null){
+			self::__where($field, $bitwise_operator, $equal);
 			return $this;
 		}
 		
-		public function or_where($field, $equal = null){
-			self::__where($field, $equal, 'OR');
-			return $this;
-		}
-		
-		private function __like($fields, $value, $type = 'AND'){
-			$where = self::$query['where'];
-			if(!is_array($fields)) $fields = array($fields => $value);
-			foreach($fields as $col => $value){
-				if(empty($where)){
-					$where = sprintf("`%s` LIKE :%s", $col, $col);
-				}else{
-					$where .= sprintf(" %s `%s` LIKE :%s", $type, $col, $col);
-				}
-				self::$placeholders[$col] = $value.'%s';
-			}
-			self::$query['where'] = $where;
-		}
-		
-		public function like($field, $like = null){
-			self::__like($field, $like);
-			return $this;
-		}
-		
-		public function and_like($field, $like = null){
-			self::__like($field, $like);
-			return $this;
-		}
-		
-		public function or_like($field, $like = null){
-			self::__like($field, $like, 'OR');
+		public function or_where($field, $bitwise_operator = '=', $equal = null){
+			self::__where($field, $bitwise_operator, $equal, 'OR');
 			return $this;
 		}
 		
@@ -159,6 +175,7 @@
 		 */
 		
 		private function query_builder($query){
+			// append query helpers to the query
 			if(!empty(self::$query['where'])){
 				$query .= ' WHERE '.self::$query['where'];
 			}
@@ -169,15 +186,16 @@
 				$query .= ' LIMIT '.self::$query['limit'];
 			}
 			
+			// clear query helper info
 			self::$query = array();
 			
+			// create a PDO statement object
 			$stmt = self::$connection->prepare($query);
 			
+			// set the last query
 			foreach(self::$placeholders as $param => $value){
 				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
 			}
-						
-			// set last_query
 			self::set('last_query', $query);
 			
 			return $stmt;
@@ -211,7 +229,6 @@
 				}
 				$data[] = $row;
 			}
-			self::$placeholders = array();
 			return $data;
 		}
 		
@@ -230,11 +247,10 @@
 				try{
 					$stmt->execute(self::$placeholders);
 					self::set('insert_id', self::$connection->lastInsertId());
-					self::$placeholders = array();
+					self::set('num_rows', $stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
-					self::$placeholders = array();
 					return false;
 				}
 			}
@@ -255,16 +271,12 @@
 				}
 				$qry = sprintf("UPDATE %s SET %s", self::$table, substr($update, 0, -2));
 				$stmt = self::query_builder($qry);
-				print_p(self::$placeholders);
-				echo self::last_query().'<br />';
 				try{
 					$stmt->execute(self::$placeholders);
 					self::set('num_rows', $stmt->rowCount());
-					self::$placeholders = array();
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
-					self::$placeholders = array();
 					return false;
 				}
 			}
@@ -281,11 +293,9 @@
 				try{
 					$stmt->execute(self::$placeholders);
 					self::set('num_rows', $stmt->rowCount());
-					self::$placeholders = array();
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
-					self::$placeholders = array();
 					return false;
 				}
 			}
