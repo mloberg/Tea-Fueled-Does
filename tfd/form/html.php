@@ -87,7 +87,7 @@
 			
 			foreach($options as $value => $display){
 				$option_attributes = array('value' => h::entities($value), 'selected' => ($value == $selected) ? 'selected' : null);
-				$html[] = '<option'.h:attributes($option_attributes).'>'.h::entities($display).'</option>';
+				$html[] = '<option'.h::attributes($option_attributes).'>'.h::entities($display).'</option>';
 			}
 			
 			return '<select'.h::attributes($attributes).'>'.implode('', $html).'</select>';

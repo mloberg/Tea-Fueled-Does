@@ -1,3 +1,3 @@
 <?php
 
-	echo Form::open()
+	echo Form::open();

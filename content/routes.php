@@ -8,6 +8,21 @@
 
 return array(
 
+	/** Sample Routes
+	'GET form' => function(){
+		return array(
+			'dir' => 'protected',
+			'view' => 'upload',
+			'master' => 'custom_master',
+			'title' => 'Upload'
+		);
+	},
 	
+	'POST form/post' => function(){
+		// do something with the upload
+		
+		redirect('form');
+	}
+	**/
 
 );
