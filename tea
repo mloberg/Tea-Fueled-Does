@@ -27,7 +27,7 @@ error_reporting(E_ERROR|E_WARNING|E_PARSE);
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 
 // welcome message
-echo "== Tea Fueled Does Version ".TFD\Config::get('application.version')." ==\n";
+echo "== Tea-Fueled Does v".TFD\Config::get('application.version')." ==\n";
 
 // now let's get on with the show
 Config::set('tea.command', $_SERVER['argv'][1]);
@@ -40,7 +40,7 @@ if(Config::get('tea.command') == '' || Config::get('tea.command') == 'help' || C
 	// send Tea help
 	TFD\Tea\Tea::help();
 }else{
-	
+	call_user_func('TFD\Tea\\'.Config::get('tea.command').'::action', Config::get('tea.args'));
 }
 
 /*
