@@ -1,17 +1,49 @@
 <?php
 
 // define some app directories
-$public_dir = 'public/';
-$app_dir = 'tfd/';
-$content_dir = 'content/';
+$public_dir = __DIR__.'/public';
+$app_dir = 'tfd';
+$content_dir = 'content';
 
 // set the environment (by getting it from the .htaccess file)
-$htaccess = file_get_contents($public_dir.'.htaccess');
+$htaccess = file_get_contents($public_dir.'/.htaccess');
 preg_match('/SetEnv ENV (.*)/', $htaccess, $match);
 $environment = $match[1];
 
 // include the files to get this going
-require_once $app_dir.'bootstrap.php';
+require_once 'bootstrap.php';
+use TFD\Config;
+
+// set some tea config options
+Config::load(array(
+	'tea.migrations_dir' => CONTENT_DIR.'migrations/',
+	'tea.config_dir' => CONTENT_DIR.'tea_config/'
+));
+
+// run verbosely
+error_reporting(E_ERROR|E_WARNING|E_PARSE);
+
+// define STDIN if not already
+if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
+
+// welcome message
+echo "== Tea Fueled Does Version ".TFD\Config::get('application.version')." ==\n";
+
+// now let's get on with the show
+Config::set('tea.command', $_SERVER['argv'][1]);
+preg_match('/tea ([\w|\-|:]+) (.+)/', implode(' ', $_SERVER['argv']), $match);
+Config::set('tea.args', $match[2]);
+unset($match);
+
+// show some help if they need it
+if(Config::get('tea.command') == '' || Config::get('tea.command') == 'help' || Config::get('tea.command') == '-h'){
+	// send Tea help
+	TFD\Tea\Tea::help();
+}else{
+	
+}
+
+/*
 require_once TEA_DIR.'init.php';
 
 // some Tea settings
@@ -29,6 +61,7 @@ echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
 
 // run the command
 $tea->command($_SERVER['argv']);
+*/
 
 // exit the script properly
 exit(0);

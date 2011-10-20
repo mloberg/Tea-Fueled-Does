@@ -9,7 +9,7 @@ define('EXT', '.php');
 
 // main directories
 define('PUBLIC_DIR', $public_dir.'/');
-define('BASE_DIR', realpath('..').'/');
+define('BASE_DIR', __DIR__.'/');
 define('APP_DIR', realpath($app_dir).'/');
 define('CONTENT_DIR', realpath($content_dir).'/');
 unset($public_dir, $app_dir, $content_dir); // cleanup the global namespace

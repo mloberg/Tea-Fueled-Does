@@ -1,7 +1,5 @@
-<?php
+<?php namespace TFD\Tea;
 
-	$users_table = USERS_TABLE;
-	
 	class Tea{
 	
 		function __construct(){
@@ -17,6 +15,36 @@
 			include_once($file);
 			// so the constructor is called
 			$class = new $name();
+		}
+		
+		public static function help(){
+			$man_page = <<<MAN
+A CLI to interface with Tea-Fueled Does
+
+	Usage: tea <command> <args>
+
+Tea Commands:
+
+  init:		Quickly setup TFD.
+  user:		Manage users.
+  update:	Update TFD.
+  config:	Change a config option.
+  database:	Make changes to the database.
+  migrations:	Manage database migrations.
+
+
+Args:
+
+Each command has it's own set of commands,
+to see args for a specific comamnd run:
+
+	tea <command> -h
+
+TFD Homepage: http://teafueleddoes.com/
+Tea Homepage: http://teafueleddoes.com/v2/tea
+
+MAN;
+			echo $man_page;
 		}
 		
 		function command($arg){
