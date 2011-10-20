@@ -31,6 +31,7 @@
 			// call specific environment settings
 			$env = strtolower($env);
 			$this->$env();
+			Config::set('application.environment', $env);
 		}
 		
 		function general_config(){

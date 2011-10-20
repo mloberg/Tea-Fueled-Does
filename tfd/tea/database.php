@@ -1,49 +1,61 @@
-<?php
+<?php namespace TFD\Tea;
 
-	class Database extends Tea{
+	use TFD\Config;
+	use TFD\DB\MySQL;
+	
+	class Database{
 	
 		private static $env;
 		public static $config = array();
 		private static $db;
 		
-		function __construct(){
-			global $environment;
-			self::$env = strtolower(substr($environment, 0, 3));
-			self::$db = parent::db();
-			global $users_table;
-			self::$config['users_table'] = $users_table;
-			if(file_exists(TEA_CONFIG.'migrations'.EXT)) self::$config['migrations_table'] = include(TEA_CONFIG.'migrations'.EXT);
-		}
+		private static $commands = array(
+			'h' => 'help',
+			''
+		);
 		
 		public static function action($arg){
-			if(empty($arg[2]) || $arg[2] == 'help'){
-				$commands = array(
-					'init' => 'Set up the database class for the current evironment. (Must be run before any other command can be run.)',
-					'create_table' => 'Create a table in the database.',
-					'config' => 'Update your database config.'
-				);
-				echo "Looking for help?\n";
-				echo "Commands:\n";
-				foreach($commands as $name => $description){
-					echo "\t{$name}: {$description}\n";
-				}
-			}else{
-				// stop calls to private methods
-				$check = new ReflectionMethod(__CLASS__, $arg[2]);
-				if(!$check->isPrivate()){
-					self::$arg[2]();
-				}else{
-					echo "Error: Call to private method.\n";
-					exit(0);
-				}
-			}
+			self::init();
+		}
+		
+		public static function help(){
+			echo <<<MAN
+Interact with a database.
+
+	Usage: tea database <args>
+
+Arguments:
+
+	-h, help            This page
+
+TFD Homepage: http://teafueleddoes.com/
+Tea Homepage: http://teafueleddoes.com/v2/tea
+
+MAN;
+		}
+		
+		/**
+		 * Database methods
+		 */
+		
+		public static function table_exists($table){
+			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => $table), true);
+			return (empty($tables)) ? false : true;
 		}
 		
 		public static function init(){
-			if(DB_HOST === ''){
-				echo "It seems your database config is empty.\nPlease edit /content/_config/environments.php\n";
+			// if no database information was loaded, exit
+			if(!Config::is_set('mysql.host')){
+				echo "Empty database config. Exiting...\n";
 				exit(0);
 			}
+			
+			// check for user table
+			if(!self::table_exists(Config::get('admin.table'))){
+				echo "user table does exits!\n";
+			}
+			
+			exit(0);
 			echo 'MySQL Host: '.DB_HOST."\n";
 			echo 'MySQL User: '.DB_USER."\n";
 			echo 'MySQL Pass: '.DB_PASS."\n";

@@ -43,25 +43,5 @@ if(Config::get('tea.command') == '' || Config::get('tea.command') == 'help' || C
 	call_user_func('TFD\Tea\\'.Config::get('tea.command').'::action', Config::get('tea.args'));
 }
 
-/*
-require_once TEA_DIR.'init.php';
-
-// some Tea settings
-define('TEA_CONFIG', CONTENT_DIR.'tea_config/');
-define('MIGRATIONS_DIR', CONTENT_DIR.'migrations/');
-if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
-error_reporting(E_ERROR|E_WARNING|E_PARSE); // run verbose
-
-// create our objects
-$app = new TFD();
-$tea = new Tea();
-
-// welcome message
-echo "== Tea Fueled Does Version ".TFD_VERSION." ==\n";
-
-// run the command
-$tea->command($_SERVER['argv']);
-*/
-
 // exit the script properly
 exit(0);
