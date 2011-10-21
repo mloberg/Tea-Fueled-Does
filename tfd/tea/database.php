@@ -12,11 +12,30 @@
 		
 		private static $commands = array(
 			'h' => 'help',
-			''
+			'i' => 'init'
 		);
 		
 		public static function action($arg){
-			self::init();
+			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = trim($match[2]);
+				unset($match);
+			}elseif(preg_match('/^\-(\w)(.+)?/', $arg, $match)){
+				$run = self::$commands[$match[1]];
+				$args = trim($match[2]);
+				unset($match);
+			}else{
+				$arg = explode(' ', $arg);
+				$run = $arg[0];
+				$args = $run[1];
+			}
+			$method = new \ReflectionMethod(__CLASS__, $run);
+			if(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
+				self::$run($args);
+			}else{
+				echo "{$run} is not a valid argument!\n";
+				exit(0);
+			}
 		}
 		
 		public static function help(){
@@ -44,15 +63,69 @@ MAN;
 			return (empty($tables)) ? false : true;
 		}
 		
+/*
 		public static function create_table($table, $fields = array()){
-			
+			echo 'create table';
+		}
+*/
+		
+		private static function add_columns_prompt($columns = array()){
+			if(empty($columns['id'])){
+				echo "Create an id column? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) == 'y'){
+					$columns['id'] = array(
+						'type' => 'int',
+						'length' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => 'auto_increment',
+						'key' => 'primary'
+					);
+				}
+			}
+			do{
+				$exit = false;
+				echo "Field name ('q' when done): ";
+				$field = trim(fgets(STDIN));
+				if($field == 'q'){
+					$exit = true;
+				}elseif(array_key_exists($field, $columns)){
+					echo "\033[0;31mError:\033[0m Field exists!\n";
+				}elseif(!empty($field)){
+					// should get a list and make them a class variable
+					$default_types = array(
+						'varchar', 'int', 'text',
+						'timestamp', 'enum'
+					);
+					// same with this one
+					$default_values = array(
+						'varchar' => 128,
+						'int' => 11,
+						'text' => false,
+						'timestamp' => false
+					);
+					echo "Field types:\n";
+					foreach($default_types as $index => $type){
+						echo "\t {$index}:  {$type}\n";
+					}
+					echo "Enter a number above or another [valid] field type.\nField type: ";
+					$type = trim(fgets(STDIN));
+					$type = (isset($default_types[$type])) ? $default_types[$type] : $type;
+					
+					if($default_values[$type] !== false){
+						// get the default false
+						
+						// false means no default value
+					}
+				}
+			}while(!$exit);
 		}
 		
 		/**
 		 * Class Methods
 		 */
 		
-		public static function init(){
+		protected static function init(){
 			// if no database information was loaded, exit
 			if(!Config::is_set('mysql.host')){
 				echo "Empty database config. Exiting...\n";
@@ -73,7 +146,7 @@ MAN;
 					$columns = array(
 						'id' => array(
 							'type' => 'int',
-							'length' => '11',
+							'length' => 11,
 							'null' => false,
 							'default' => false,
 							'extra' => 'auto_increment',
@@ -81,7 +154,7 @@ MAN;
 						),
 						'username' => array(
 							'type' => 'varchar',
-							'length' => '128',
+							'length' => 128,
 							'null' => false,
 							'default' => false,
 							'extra' => '',
@@ -89,7 +162,7 @@ MAN;
 						),
 						'hash' => array(
 							'type' => 'varchar',
-							'length' => '1024',
+							'length' => 1024,
 							'null' => false,
 							'default' => false,
 							'extra' => '',
@@ -97,16 +170,16 @@ MAN;
 						),
 						'secret' => array(
 							'type' => 'varchar',
-							'length' => '1024',
+							'length' => 1024,
 							'null' => false,
 							'default' => '',
 							'extra' => '',
 							'key' => ''
 						)
 					);
-					echo "Add custom fields to the table? [y\n]: ";
+					echo "Add custom fields to the table? [y/n]: ";
 					if(strtolower(trim(fgets(STDIN))) == 'y'){
-					
+						self::add_columns_prompt($columns);
 					}
 					
 				}

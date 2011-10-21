@@ -38,7 +38,7 @@
 				$run = $arg[0];
 				$args = $arg[1];
 			}
-			$method = new ReflectionMethod(__CLASS__, $run);
+			$method = new \ReflectionMethod(__CLASS__, $run);
 			if(empty($run) || $run == 'help'){
 				self::help();
 			}elseif(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
