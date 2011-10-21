@@ -39,6 +39,7 @@ unset($match);
 if(Config::get('tea.command') == '' || Config::get('tea.command') == 'help' || Config::get('tea.command') == '-h'){
 	// send Tea help
 	TFD\Tea\Tea::help();
+// should add some sort of validation to make sure it's a valid command
 }else{
 	call_user_func('TFD\Tea\\'.Config::get('tea.command').'::action', Config::get('tea.args'));
 }

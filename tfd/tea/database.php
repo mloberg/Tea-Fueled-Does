@@ -2,6 +2,7 @@
 
 	use TFD\Config;
 	use TFD\DB\MySQL;
+	use TFD\Tea\Config as General;
 	
 	class Database{
 	
@@ -35,13 +36,21 @@ MAN;
 		}
 		
 		/**
-		 * Database methods
+		 * Database Methods
 		 */
 		
 		public static function table_exists($table){
 			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => $table), true);
 			return (empty($tables)) ? false : true;
 		}
+		
+		public static function create_table($table, $fields = array()){
+			
+		}
+		
+		/**
+		 * Class Methods
+		 */
 		
 		public static function init(){
 			// if no database information was loaded, exit
@@ -52,7 +61,55 @@ MAN;
 			
 			// check for user table
 			if(!self::table_exists(Config::get('admin.table'))){
-				echo "user table does exits!\n";
+				echo "Setup user table? [y/n]: ";
+				if(strtolower(trim(fgets(STDIN))) == 'y'){
+					echo 'Table name ['.Config::get('admin.table').']: ';
+					$table = trim(fgets(STDIN));
+					$table = (empty($table)) ? Config::get('admin.table') : $table;
+					if($table !== Config::get('admin.table')){
+						General::user_table($table);
+					}
+					// default columns
+					$columns = array(
+						'id' => array(
+							'type' => 'int',
+							'length' => '11',
+							'null' => false,
+							'default' => false,
+							'extra' => 'auto_increment',
+							'key' => 'primary'
+						),
+						'username' => array(
+							'type' => 'varchar',
+							'length' => '128',
+							'null' => false,
+							'default' => false,
+							'extra' => '',
+							'key' => 'unique'
+						),
+						'hash' => array(
+							'type' => 'varchar',
+							'length' => '1024',
+							'null' => false,
+							'default' => false,
+							'extra' => '',
+							'key' => ''
+						),
+						'secret' => array(
+							'type' => 'varchar',
+							'length' => '1024',
+							'null' => false,
+							'default' => '',
+							'extra' => '',
+							'key' => ''
+						)
+					);
+					echo "Add custom fields to the table? [y\n]: ";
+					if(strtolower(trim(fgets(STDIN))) == 'y'){
+					
+					}
+					
+				}
 			}
 			
 			exit(0);

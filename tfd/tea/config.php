@@ -1,5 +1,7 @@
 <?php namespace TFD\Tea;
 
+	use TFD\Config as C;
+	
 	class Config{
 	
 		private static $commands = array(
@@ -9,9 +11,21 @@
 		);
 		private static $config_file;
 		
+		private static function __fake_construct(){
+			self::$config_file = CONTENT_DIR.'config'.EXT;;
+		}
+		
+		public static function __callStatic($name, $arguments){
+			if(method_exists(__CLASS__, $name)){
+				self::__fake_construct();
+				call_user_func_array('self::'.$name, $arguments);
+			}
+		}
+		
 		public static function action($arg){
+			self::__fake_construct();
 			// arg comes in a string, let's parse it
-			if(preg_match('/^\-\-([\w|\-|:]+)(.+)?/', $arg, $match)){
+			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
 				$run = $match[1];
 				$args = trim($match[2], ' =');
 				unset($match);
@@ -24,10 +38,10 @@
 				$run = $arg[0];
 				$args = $arg[1];
 			}
+			$method = new ReflectionMethod(__CLASS__, $run);
 			if(empty($run) || $run == 'help'){
 				self::help();
-			}elseif(method_exists(__CLASS__, $run)){
-				self::$config_file = CONTENT_DIR.'config'.EXT;
+			}elseif(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
 				self::$run($args);
 			}else{
 				echo $run." is not a valid argument!\n";
@@ -35,7 +49,7 @@
 			}
 		}
 		
-		public static function help(){
+		private static function help(){
 			echo <<<MAN
 Set TFD config options.
 
@@ -53,7 +67,7 @@ Tea Homepage: http://teafueleddoes.com/v2/tea
 MAN;
 		}
 		
-		public static function auth_key(){
+		private static function auth_key(){
 			echo 'Generating new auth key...';
 			$new_auth_key = uniqid();
 			// load the file
@@ -71,7 +85,7 @@ MAN;
 			echo "\nNew auth key generated.\n";
 		}
 		
-		public static function maintenance($arg){
+		private static function maintenance($arg){
 			if(!preg_match('/on|off/', $arg)){
 				echo 'Error: expects "on" or "off"!'.PHP_EOL;
 				exit(0);
@@ -90,6 +104,24 @@ MAN;
 			// close file
 			fclose($fp);
 			echo "Turned maintenance mode {$arg}.\n";
+		}
+		
+		private static function user_table($arg = ''){
+			// if nothing was passed, ask for table name
+			if(empty($arg)){
+				echo 'User table name ['.C::get('admin.table').']: ';
+				$arg = trim(fgets(STDIN));
+			}
+			// if table name did not change (response was empty after asking) do nothing
+			if(!empty($arg)){
+				$conf = file_get_contents(self::$config_file);
+				$new_conf = preg_replace("/('admin\.table' \=\> ')(\w+)(',)/", '${1}'.$arg.'$3', $conf);
+				unlink(self::$config_file);
+				$fp = fopen(self::$config_file, 'c');
+				fwrite($fp, $new_conf);
+				fclose($fp);
+				echo "User table is {$arg}.\n";
+			}
 		}
 	
 	}
