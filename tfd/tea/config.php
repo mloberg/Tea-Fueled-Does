@@ -33,23 +33,23 @@
 				$run = self::$commands[$match[1]];
 				$args = trim($match[2], ' =');
 				unset($match);
+			}elseif(empty($arg)){
+				$run = 'help';
 			}else{
 				$arg = explode(' ', $arg);
 				$run = $arg[0];
 				$args = $arg[1];
 			}
 			$method = new \ReflectionMethod(__CLASS__, $run);
-			if(empty($run) || $run == 'help'){
-				self::help();
-			}elseif(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
+			if(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
 				self::$run($args);
 			}else{
-				echo $run." is not a valid argument!\n";
+				echo "'{$arg}' is not a valid argument!\n";
 				exit(0);
 			}
 		}
 		
-		private static function help(){
+		public static function help(){
 			echo <<<MAN
 Set TFD config options.
 
@@ -67,7 +67,7 @@ Tea Homepage: http://teafueleddoes.com/v2/tea
 MAN;
 		}
 		
-		private static function auth_key(){
+		protected static function auth_key(){
 			echo 'Generating new auth key...';
 			$new_auth_key = uniqid();
 			// load the file
@@ -85,7 +85,7 @@ MAN;
 			echo "\nNew auth key generated.\n";
 		}
 		
-		private static function maintenance($arg){
+		protected static function maintenance($arg){
 			if(!preg_match('/on|off/', $arg)){
 				echo 'Error: expects "on" or "off"!'.PHP_EOL;
 				exit(0);
@@ -106,11 +106,11 @@ MAN;
 			echo "Turned maintenance mode {$arg}.\n";
 		}
 		
-		private static function user_table($arg = ''){
+		protected static function user_table($arg = ''){
 			// if nothing was passed, ask for table name
 			if(empty($arg)){
 				echo 'User table name ['.C::get('admin.table').']: ';
-				$arg = trim(fgets(STDIN));
+				$arg = Tea::response();
 			}
 			// if table name did not change (response was empty after asking) do nothing
 			if(!empty($arg)){
@@ -121,7 +121,23 @@ MAN;
 				fwrite($fp, $new_conf);
 				fclose($fp);
 				echo "User table is {$arg}.\n";
+				C::set('admin.table', $arg);
 			}
+		}
+		
+		private static function add_tea_config($key, $value){
+			$file = CONTENT_DIR.'tea-config'.EXT;
+			// load the file
+			$conf = file_get_contents($file);
+			// add the line
+			$new_conf = preg_replace("/(\\n\)\)\; \/\/ end of tea config)/", "\t'{$key}' => '{$value}',".'${1}', $conf);
+			// delete file
+			unlink($file);
+			// create new config file
+			$fp = fopen($file, 'c');
+			fwrite($fp, $new_conf);
+			fclose($fp);
+			C::set($key, $value);
 		}
 	
 	}

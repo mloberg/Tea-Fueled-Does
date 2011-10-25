@@ -4,4 +4,4 @@ use TFD\Config;
 
 Config::load(array(
 
-));
+)); // end of tea config

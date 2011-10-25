@@ -16,25 +16,24 @@
 		);
 		
 		public static function action($arg){
+			if(empty($arg)) self::help();
+			
 			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
 				$run = $match[1];
 				$args = trim($match[2]);
-				unset($match);
 			}elseif(preg_match('/^\-(\w)(.+)?/', $arg, $match)){
 				$run = self::$commands[$match[1]];
 				$args = trim($match[2]);
-				unset($match);
-			}else{
-				$arg = explode(' ', $arg);
-				$run = $arg[0];
-				$args = $run[1];
+			}elseif(preg_match('/([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = trim($match[2]);
 			}
-			$method = new \ReflectionMethod(__CLASS__, $run);
-			if(method_exists(__CLASS__, $run) && ($method->isPublic() || $method->isProtected())){
-				self::$run($args);
-			}else{
-				echo "{$run} is not a valid argument!\n";
+			
+			if(!method_exists(__CLASS__, $run) || (($method = new \ReflectionMethod(__CLASS__, $run)) && $method->isPrivate())){
+				echo "\033[0;31mError:\033[0m '{$arg}' is not a valid argument!\n";
 				exit(0);
+			}else{
+				self::$run($args);
 			}
 		}
 		
@@ -52,6 +51,7 @@ TFD Homepage: http://teafueleddoes.com/
 Tea Homepage: http://teafueleddoes.com/v2/tea
 
 MAN;
+			exit(0);
 		}
 		
 		/**
@@ -59,20 +59,17 @@ MAN;
 		 */
 		
 		public static function table_exists($table){
-			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => $table), true);
+			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => (string)$table), true);
 			return (empty($tables)) ? false : true;
 		}
 		
-/*
 		public static function create_table($table, $fields = array()){
 			echo 'create table';
 		}
-*/
 		
 		private static function add_columns_prompt($columns = array()){
 			if(empty($columns['id'])){
-				echo "Create an id column? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) == 'y'){
+				if(Tea::yes_no('Create an id column?')){
 					$columns['id'] = array(
 						'type' => 'int',
 						'length' => 11,
@@ -86,7 +83,7 @@ MAN;
 			do{
 				$exit = false;
 				echo "Field name ('q' when done): ";
-				$field = trim(fgets(STDIN));
+				$field = Tea::response();
 				if($field == 'q'){
 					$exit = true;
 				}elseif(array_key_exists($field, $columns)){
@@ -106,19 +103,62 @@ MAN;
 					);
 					echo "Field types:\n";
 					foreach($default_types as $index => $type){
-						echo "\t {$index}:  {$type}\n";
+						echo "\t{$index}:  {$type}\n";
 					}
 					echo "Enter a number above or another [valid] field type.\nField type: ";
-					$type = trim(fgets(STDIN));
+					$type = Tea::response();
 					$type = (isset($default_types[$type])) ? $default_types[$type] : $type;
 					
-					if($default_values[$type] !== false){
+					if($default_values[$type] !== false && isset($default_values[$type])){
 						// get the default false
-						
-						// false means no default value
+						echo "Length: [{$default_values[$type]}] ";
+						$length = Tea::response($default_values[$type]);
+					}elseif(!isset($default_values[$type])){
+						echo "Length (FALSE for none): ";
+						$length = Tea::response();
+						if($length == 'FALSE') $length = false;
 					}
+					
+					$null = Tea::yes_no('Allow NULL?');
+					
+					echo "Default value (NULL for none): ";
+					$default = Tea::response();
+					if($default == 'NULL'){
+						$null = true;
+						$default = false;
+					}
+					
+					$key_types = array('primary key', 'unique key', 'key');
+					foreach($key_types as $index => $key){
+						echo "\t{$index}: {$key}\n";
+					}
+					do{
+						echo "Choose an index type (or blank for none): ";
+						$response = Tea::response();
+						if(empty($response)){
+							$key = '';
+							$exit = true;
+						}elseif(isset($key_types[$response])){
+							$key = $key_types[$response];
+							$exit = true;
+						}
+					}while(!$exit);
+					
+					echo "Extra: ";
+					$extra = Tea::response();
+					
+					$columns[$field] = array(
+						'type' => $type,
+						'length' => $length,
+						'null' => $null,
+						'default' => $default,
+						'extra' => $extra,
+						'key' => $key
+					);
 				}
 			}while(!$exit);
+			
+			return $columns;
 		}
 		
 		/**
@@ -134,11 +174,9 @@ MAN;
 			
 			// check for user table
 			if(!self::table_exists(Config::get('admin.table'))){
-				echo "Setup user table? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) == 'y'){
+				if(Tea::yes_no('Setup user table?')){
 					echo 'Table name ['.Config::get('admin.table').']: ';
-					$table = trim(fgets(STDIN));
-					$table = (empty($table)) ? Config::get('admin.table') : $table;
+					$table = Tea::response(Config::get('admin.table'));
 					if($table !== Config::get('admin.table')){
 						General::user_table($table);
 					}
@@ -177,10 +215,11 @@ MAN;
 							'key' => ''
 						)
 					);
-					echo "Add custom fields to the table? [y/n]: ";
-					if(strtolower(trim(fgets(STDIN))) == 'y'){
-						self::add_columns_prompt($columns);
+					if(Tea::yes_no('Add custom fields to the table?')){
+						$columns = self::add_columns_prompt($columns);
 					}
+					
+					// create table
 					
 				}
 			}
@@ -346,6 +385,7 @@ MAN;
 		 * 
 		 */
 		
+/*
 		public static function create_table($table_name = null, $columns = array()){
 			if(is_null($table_name)){
 				do{
@@ -465,6 +505,7 @@ MAN;
 			}
 			echo "Table {$table_name} created.\n";
 		}
+*/
 		
 		public function drop_table($table = null){
 			if(is_null($table)){

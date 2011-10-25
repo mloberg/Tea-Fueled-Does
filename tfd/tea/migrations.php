@@ -1,83 +1,103 @@
-<?php
+<?php namespace TFD\Tea;
 
-	class Migrations extends Tea{
+	use TFD\Config;
+	use TFD\Tea\Config as General;
 	
-		static protected $db;
-		static private $table;
-		
+	class Migrations{
+	
 		function __construct(){
 			self::$db = parent::db();
 			$conf_file = TEA_CONFIG.'migrations'.EXT;
 			if(file_exists($conf_file)) self::$table = include($conf_file);
 		}
 		
-		static function action($arg){
-			$args = array(
-				'i' => 'init',
-				'u' => 'run_up',
-				'l' => 'latest',
-				'd' => 'run_down',
-				's' => 'status',
-				'r' => 'delete_migration'
-			);
-			if(preg_match('/^\-('.implode('|', array_keys($args)).')$/', trim($arg[2]))){
-				$run = $args[trim(str_replace('-', '', $arg[2]))];
-			}elseif(preg_match('/(up|down)/', $arg[2])){
-				$run = 'run_'.$arg[2];
-			}else{
-				$run = $arg[2];
+		private static $commands = array(
+			'i' => 'init',
+			'h' => 'help',
+			's' => 'status',
+			'u' => 'run_up',
+			'd' => 'run_down',
+			'l' => 'latest',
+			'r' => 'delete_migration'
+		);
+		
+		public static function action($arg){
+			if(empty($arg)) self::help();
+			
+			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = trim($match[2]);
+			}elseif(preg_match('/^\-(\w)(.+)?/', $arg, $match)){
+				$run = self::$commands[$match[1]];
+				$args = trim($match[2]);
+			}elseif(preg_match('/([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = $match[2];
 			}
-			if(empty($run) || $run == 'help'){
-				$commands = array(
-					'init' => 'Set up migrations'
-				);
-				echo "Looking for help?\n";
-				echo "Commands:\n";
-				foreach($commands as $name => $description){
-					echo "\t{$name}: {$description}\n";
-				}
-			}elseif($run == 'generate_migration_file'){
-				echo "Invalid command.\n";
-				exit(0);
-			}elseif(empty(self::$table) && $run != 'init'){
-				echo "You have not set up migrations. Please run 'tea migrations init'.\n";
+			
+			if(!method_exists(__CLASS__, $run) || (($method = new \ReflectionMethod(__CLASS__, $run)) && $method->isPrivate())){
+				echo "\033[0;31mError:\033[0m '{$arg}' is not a valid argument!\n";
 				exit(0);
 			}else{
-				$check = new ReflectionMethod(__CLASS__, $run);
-				if(!$check->isPrivate()){
-					self::$run($arg);
-				}else{
-					echo "Error: Call to private method.\n";
-					exit(0);
-				}
+				self::$run($args);
 			}
 		}
 		
-		static function init(){
-			if(empty(self::$table)){
+		public static function help(){
+			echo <<<MAN
+Create and run database migrations.
+
+	Usage: tea migrations <args>
+
+Arguments:
+
+	-h, help         This page
+	-i, init         Set up migrations
+
+TFD Homepage: http://teafueleddoes.com/
+Tea Homepage: http://teafueleddoes.com/v2/tea
+
+MAN;
+			exit(0);
+		}
+		
+		public static function init(){
+			if(!Config::is_set('migrations.table')){
+				echo "Migrations table name [migrations]: ";
 				do{
-					echo "Migrations table name [migrations]: ";
-					$resp = trim(fgets(STDIN));
-					$table = (empty($resp)) ? 'migrations' : $resp;
-					if(self::$db->table_exists($table)){
+					$table = Tea::response('migrations');
+					if(Database::table_exists($table)){
 						$table = '';
-						echo "\tTable already exists.\n\tPlease enter a new table name.\n";
+						echo "\033[0;31mError:\033[0m Table already exists.\nPlease enter a new table name: ";
 					}
 				}while(empty($table));
-				self::$table = $table;
 				// write config file
-				$conf_file = <<<CONF
-<?php return '$table';
-CONF;
-				$file = TEA_CONFIG.'migrations'.EXT;
-				if(file_exists($file)) unlink($file);
-				$fp = fopen($file, 'c');
-				if(!fwrite($fp, $conf_file)){
-					echo "Error saving the config file!\n";
-					fclose($fp);
-					exit(0);
-				}
-				fclose($fp);
+//				General::add_tea_config('migrations.table', $table);
+				exit(0);
+				$columns = array(
+					'id' => array(
+						'type' => 'int',
+						'length' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => 'auto_increment',
+						'key' => 'primary key'
+					),
+					'number' => array(
+						'type' => 'int',
+						'length' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => '',
+						'key' => 'unique key',
+					),
+					'timestamp' => array(
+						
+					),
+					'active' => array(
+					
+					)
+				);
 				$sql = sprintf("CREATE TABLE `%s` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `number` int(11) NOT NULL,
