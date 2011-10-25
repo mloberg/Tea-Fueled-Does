@@ -100,7 +100,7 @@
 					return $data;
 				}
 				return true;
-			}catch(PDOException $e){
+			}catch(\PDOException $e){
 				throw new \TFD\Exception($e);
 				return false;
 			}

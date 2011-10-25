@@ -63,8 +63,117 @@ MAN;
 			return (empty($tables)) ? false : true;
 		}
 		
-		public static function create_table($table, $fields = array()){
-			echo 'create table';
+		public static function list_tables(){
+			$t = MySQL::query("SHOW TABLES", array(), true);
+			$tables = array();
+			foreach($t as $table){
+				$v = array_values($table);
+				$tables[] = $v[0];
+			}
+			return $tables;
+		}
+		
+		public static function list_columns($table){
+			try{
+				$fields = MySQL::query("SHOW FIELDS FROM `{$table}`", array(), true);
+			}catch(\TFD\Exception $e){
+				echo $e->getMessage();
+				echo MySQL::last_query();
+			}
+			$keys = array(
+				'PRI' => 'primary key',
+				'UNI' => 'unique key',
+				'MUL' => 'key'
+			);
+			$columns = array();
+			foreach($fields as $field){
+				preg_match('/(\w+)(\((.+)\))?/', $field['Type'], $match);
+				$type = $match[1];
+				$length = (isset($match[3])) ? $match[3] : false;
+				$columns[$field['Field']] = array(
+					'type' => $type,
+					'length' => $length,
+					'null' => ($field['Null'] == 'YES') ? true : false,
+					'default' => ($field['Default'] === null) ? false : $field['Default'],
+					'extra' => $field['Extra'],
+					'key' => $keys[$field['Key']]
+				);
+			}
+			return $columns;
+		}
+		
+		public static function test(){
+			$files = glob(CONTENT_DIR.'migrations/*.php');
+			$sort = array();
+			foreach($files as $file){
+				if(preg_match('/(\d+)'.preg_quote(EXT).'/', $file, $match)){
+					$sort[$match[1]] = $file;
+				}
+			}
+			echo max(array_keys($sort));
+		}
+		
+		public static function scan_db(){
+			$tables = self::list_tables();
+			$db = array();
+			foreach($tables as $table){
+				$db[$table] = self::list_columns($table);
+			}
+			print_r($db);
+			return $db;
+		}
+		
+		public static function create_table($table, $columns = array()){
+			$query = "CREATE TABLE `{$table}` (";
+			$keys = array();
+			foreach($columns as $name => $info){
+				$query .= "`{$name}` ";
+				// get type
+				if($info['length'] === false || empty($info['length'])){
+					$query .= $info['type'].' ';
+				}else{
+					$query .= "{$info['type']}({$info['length']}) ";
+				}
+				
+				if($info['null'] === true && $info['default'] === false){
+					$query .= "DEFAULT NULL ";
+				}elseif($info['null'] === true && $info['type'] == 'timestamp'){
+					$query .= "DEFAULT CURRENT_TIMESTAMP ";
+				}elseif($info['null'] === true){
+					$query .= "DEFAULT '{$info['default']}' ";
+				}elseif($info['null'] === false && $info['default'] === false){
+					$query .= "NOT NULL ";
+				}elseif($info['null'] === false && $info['type'] == 'timestamp'){
+					$query .= "NOT NULL DEFAULT CURRENT_TIMESTAMP ";
+				}elseif($info['null'] == false){
+					$query .= "NOT NULL DEFAULT '{$info['default']}' ";
+				}
+				
+				$query .= strtoupper($info['extra']).',';
+				
+				// if there is a key, save it to the key array for later
+				if(!empty($info['key'])){
+					$keys[$name] = $info['key'];
+				}
+			}
+			// add the keys to the query
+			foreach($keys as $name => $type){
+				$query .= strtoupper($type);
+				if($type !== 'primary key'){
+					$query .= " `{$name}`";
+				}
+				$query .= " (`{$name}`),";
+			}
+			$query = substr($query, 0, -1).')';
+			try{
+				if(MySQL::query($query)){
+					return true;
+					echo "{$table} created!";
+				}
+				return false;
+			}catch(\TFD\Exception $e){
+				return false;
+			}
 		}
 		
 		private static function add_columns_prompt($columns = array()){
@@ -76,7 +185,7 @@ MAN;
 						'null' => false,
 						'default' => false,
 						'extra' => 'auto_increment',
-						'key' => 'primary'
+						'key' => 'primary key'
 					);
 				}
 			}
@@ -145,7 +254,7 @@ MAN;
 					}while(!$exit);
 					
 					echo "Extra: ";
-					$extra = Tea::response();
+					$extra = Tea::response_to_upper();
 					
 					$columns[$field] = array(
 						'type' => $type,

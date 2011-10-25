@@ -59,6 +59,10 @@ MAN;
 			return strtolower(self::response($default));
 		}
 		
+		public static function response_to_upper($default = null){
+			return strtoupper(self::response($default));
+		}
+		
 		public static function yes_no($question){
 			do{
 				echo $question.' [y/n]: ';
@@ -69,11 +73,6 @@ MAN;
 					return false;
 				}
 			}while(!$exit);
-			echo $question.' [y/n]: ';
-			$response = self::response_to_lower();
-			if($response == 'y'){
-				
-			}
 		}
 	
 	}

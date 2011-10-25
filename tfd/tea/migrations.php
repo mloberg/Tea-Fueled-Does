@@ -2,6 +2,7 @@
 
 	use TFD\Config;
 	use TFD\Tea\Config as General;
+	use TFD\DB\MySQL;
 	
 	class Migrations{
 	
@@ -61,6 +62,55 @@ MAN;
 			exit(0);
 		}
 		
+		public static function create_migration($up, $down, $add = true){
+			$files = glob(CONTENT_DIR.'migrations/*.php');
+			if(empty($files)){
+				$number = '1';
+			}else{
+				$sort = array();
+				foreach($files as $f){
+					if(preg_match('/(\d+)'.preg_quote(EXT).'/', $f, $match)){
+						$sort[] = $match[1];
+					}
+				}
+				$number = max($sort) + 1;
+			}
+			
+			$file = <<<FILE
+<?php namespace Content\Migrations;
+
+	use TFD\Tea\Database;
+	
+	class TeaMigration_$number{
+	
+		public static function up(){
+			$up
+		}
+		
+		public static function down(){
+			$down
+		}
+	
+	}
+FILE;
+			$fp = fopen(CONTENT_DIR.'migrations/'.$number.EXT, 'c');
+			if(!fwrite($fp, $file)){
+				echo "Could not write migration!";
+				fclose($fp);
+				exit(0);
+			}
+			fclose($fp);
+			if($add){
+				try{
+					MySQL::table(Config::get('migrations.table'))->insert(array('number' => $number, 'active' => 1));
+				}catch(\TFD\Exception $e){
+					echo $e->getMessage()."\nExiting...\n";
+					exit(0);
+				}
+			}
+			return $number;
+		}
+		
 		public static function init(){
 			if(!Config::is_set('migrations.table')){
 				echo "Migrations table name [migrations]: ";
@@ -72,8 +122,7 @@ MAN;
 					}
 				}while(empty($table));
 				// write config file
-//				General::add_tea_config('migrations.table', $table);
-				exit(0);
+				General::add_tea_config('migrations.table', $table);
 				$columns = array(
 					'id' => array(
 						'type' => 'int',
@@ -92,98 +141,99 @@ MAN;
 						'key' => 'unique key',
 					),
 					'timestamp' => array(
-						
+						'type' => 'timestamp',
+						'length' => false,
+						'null' => false,
+						'default' => 'CURRENT_TIMESTAMP',
+						'extra' => 'on update current_timestamp',
+						'key' => '',
 					),
 					'active' => array(
-					
+						'type' => 'tinyint',
+						'length' => 1,
+						'null' => false,
+						'default' => '0',
+						'extra' => '',
+						'key' => '',
 					)
 				);
-				$sql = sprintf("CREATE TABLE `%s` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `number` int(11) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `number` (`number`)
-)", $table);
-				try{
-					self::$db->query($sql);
-				}catch(Exception $e){
-					echo $e->getMessage();
-					exit(0);
+				if(!Database::create_table($table, $columns)){
+					echo "Could not create migrations table! Exiting...\n";
+					exit(0); 
 				}
 			}
 			
-			$migration_files = glob(MIGRATIONS_DIR.'*.php');
+			if(!Config::is_set('migrations.table')){
+				echo "Migrations table is not set! Exiting...\n";
+				exit(0);
+			}
+			
+			$migration_files = glob(CONTENT_DIR.'migrations/*.php');
 			if(empty($migration_files)){
-				echo "Scan the database for current schema? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					$sql = sprintf("SHOW TABLES FROM `%s`", DB);
-					$tables = self::$db->query($sql, true);
-					foreach($tables as $table){
-						$table = $table['Tables_in_'.DB];
-						if($table !== self::$table){
-							$sql = sprintf("SHOW FIELDS FROM `%s`", $table);
-							$table_columns = self::$db->query($sql, true);
-							$columns = array();
-							$keys = array(
-								'PRI' => 'primary',
-								'UNI' => 'unique',
-								'MUL' => 'index'
-							);
-							foreach($table_columns as $c){
-								preg_match('/\((\d+)\)/', $c['Type'], $match);
-								$type = str_replace(array($match[0], 'unsigned'), '', $c['Type']);
-								$null = ($c['Null'] === 'NO') ? 'false' : 'true';
-								$columns[$c['Field']] = array(
-									'type' => $type,
-									'length' => $match[1],
-									'null' => $null,
-									'default' => $c['Default'],
-									'extra' => $c['Extra'],
-									'key' => $keys[$c['Key']]
-								);
-							}
-							$col_str = var_export($columns, true);
-							$up .= "parent::\$db->create_table('{$table}', $col_str);\n";
-							$down .= "parent::\$db->drop_table('{$table}');\n";
-						}
+				if(Tea::yes_no('Scan database for current schema?')){
+					// get database schema
+					$db = Database::scan_db();
+					// unset the migrations table
+					unset($db[Config::get('migrations.table')]);
+					// our up and down methods
+					$up = $down = '';
+					foreach($db as $table => $columns){
+						$columns = var_export($columns, true);
+						$up .= "Database::create_table('{$table}', {$columns});\n";
+						$down .= "Database::drop_table('{$table}');\n";
 					}
-					$number = self::write_migration_file(1, $up, $down);
-					// add migration to database so we don't run it
-					self::$db->insert(self::$table, array('number' => $number, 'active' => 1));
+					
+					$number = self::create_migration($up, $down);
 				}
 			}
 			
-			// run migrations if migrations are completely empty (in the database)
-			if(!self::$db->table_exists(self::$table)){
-				$sql = sprintf("CREATE TABLE `%s` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `number` int(11) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `number` (`number`)
-)", self::$table);
-				try{
-					self::$db->query($sql);
-				}catch(Exception $e){
-					echo $e->getMessage();
-					exit(0);
+			// if the migrations table doesn't exist, create it
+			if(!Database::table_exists(Config::get('migrations.table'))){
+				$columns = array(
+					'id' => array(
+						'type' => 'int',
+						'length' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => 'auto_increment',
+						'key' => 'primary key'
+					),
+					'number' => array(
+						'type' => 'int',
+						'length' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => '',
+						'key' => 'unique key',
+					),
+					'timestamp' => array(
+						'type' => 'timestamp',
+						'length' => false,
+						'null' => false,
+						'default' => 'CURRENT_TIMESTAMP',
+						'extra' => 'on update current_timestamp',
+						'key' => '',
+					),
+					'active' => array(
+						'type' => 'tinyint',
+						'length' => 1,
+						'null' => false,
+						'default' => '0',
+						'extra' => '',
+						'key' => '',
+					)
+				);
+				if(!Database::create_table($table, $columns)){
+					echo "Could not create migrations table! Exiting...\n";
+					exit(0); 
 				}
 			}
-			$migrations = self::$db->get(self::$table);
+			
+			// make sure we're running the latest migration
+			$migrations = MySQL::table(Config::get('migrations.table'))->get('id');
 			if(empty($migrations) && !empty($migration_files)){
-				echo "Run migrations? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					foreach($migration_files as $file){
-						preg_match('/\/(\d+)'.preg_quote(EXT).'/', $file, $match);
-						include_once($file);
-						$migration_name = 'TeaMigrations_'.$match[1];
-						$migration_name::up();
-						self::$db->where('active', '1')->update(self::$table, array('active' => 0));
-						self::$db->insert(self::$table, array('number' => $match[1], 'active' => 1));
-					}
+				if(Tea::yes_no('Run migrations?')){
+					//self::latest();
 				}
 			}
 		}
