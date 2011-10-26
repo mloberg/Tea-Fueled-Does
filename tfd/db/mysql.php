@@ -6,7 +6,7 @@
 		private static $info = array();
 		
 		private static $table;
-		private static $placeholders = array();
+		private static $params = array();
 		private static $query = array();
 		
 		function __construct(){
@@ -62,7 +62,7 @@
 		
 		public static function table($table){
 			// clear placeholders
-			self::$placeholders = array();
+			self::$params = array();
 			// set table
 			self::$table = $table;
 			// return new MySQL object
@@ -73,19 +73,19 @@
 		 * Run a raw SQL statement
 		 */
 		
-		public static function query($query, $placeholders = array(), $return = false){
+		public static function query($query, $params = array(), $return = false){
 			self::create_connection();
 			$stmt = self::$connection->prepare($query);
 			
 			// replace query placeholders for set::last_query
-			foreach($placeholders as $param => $value){
-				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
+			foreach($params as $param => $value){
+				$query = str_replace(':'.$param, $value, $query);
 			}
 			self::set('last_query', $query);
 			
 			// run query
 			try{
-				$stmt->execute($placeholders);
+				$stmt->execute($params);
 				self::set('num_rows', $stmt->rowCount());
 				if($return === true){
 					$stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -122,12 +122,18 @@
 		private function __where($fields, $bitwise_operator, $value, $type = 'AND'){
 			if(!is_array($fields)) $fields = array($fields => $value);
 			foreach($fields as $col => $value){
-				if(empty(self::$query['where'])){
-					self::$query['where'] = sprintf("`%s` %s :%s", $col, $bitwise_operator, $col);
-				}else{
-					self::$query['where'] .= sprintf(" %s `%s` %s :%s", $type, $col, $bitwise_operator, $col);
+				// make sure we don't have two placeholders with the same name
+				$i = 1;$orig = $col;
+				while(isset(self::$params[$col])){
+					$col = $orig.$i;
+					$i++;
 				}
-				self::$placeholders[$col] = $value;
+				if(empty(self::$query['where'])){
+					self::$query['where'] = sprintf("`%s` %s :%s", $orig, $bitwise_operator, $col);
+				}else{
+					self::$query['where'] .= sprintf(" %s `%s` %s :%s", $type, $orig, $bitwise_operator, $col);
+				}
+				self::$params[$col] = $value;
 			}
 		}
 		
@@ -193,8 +199,9 @@
 			$stmt = self::$connection->prepare($query);
 			
 			// set the last query
-			foreach(self::$placeholders as $param => $value){
+			foreach(self::$params as $param => $value){
 				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
+				$stmt->bindParam(':'.$param, $value);
 			}
 			self::set('last_query', $query);
 			
@@ -215,7 +222,7 @@
 			$qry = sprintf("SELECT %s FROM %s", $fields, self::$table);
 			$stmt = self::query_builder($qry);
 			try{
-				$stmt->execute(self::$placeholders);
+				$stmt->execute(self::$params);
 			}catch(\PDOException $e){
 				throw new \TFD\Exception($e);
 			}
@@ -238,14 +245,19 @@
 				throw new \LogicException("MySQL::insert() expects an array, {$type} given.");
 			}else{
 				foreach($data as $field => $value){
-					$fields .= sprintf("`%s`, ", $field);
+					$i = 0;$orig = $field;
+					while(isset(self::$params[$field])){
+						$field = $orig.$i;
+						$i++;
+					}
+					$fields .= sprintf("`%s`, ", $orig);
 					$values .= sprintf(":%s, ", $field);
-					self::$placeholders[$field] = $value;
+					self::$params[$field] = $value;
 				}
 				$qry = sprintf("INSERT INTO %s (%s) VALUES (%s)", self::$table, substr($fields, 0, -2), substr($values, 0, -2));
 				$stmt = self::query_builder($qry);
 				try{
-					$stmt->execute(self::$placeholders);
+					$stmt->execute(self::$params);
 					self::set('insert_id', self::$connection->lastInsertId());
 					self::set('num_rows', $stmt->rowCount());
 					return true;
@@ -266,13 +278,18 @@
 				return false;
 			}else{
 				foreach($data as $field => $value){
-					$update .= sprintf("`%s` = :%s, ", $field, $field);
-					self::$placeholders[$field] = $value;
+					$i = 0;$orig = $field;
+					while(isset(self::$params[$field])){
+						$field = $orig.$i;
+						$i++;
+					}
+					$update .= sprintf("`%s` = :%s, ", $orig, $field);
+					self::$params[$field] = $value;
 				}
 				$qry = sprintf("UPDATE %s SET %s", self::$table, substr($update, 0, -2));
 				$stmt = self::query_builder($qry);
 				try{
-					$stmt->execute(self::$placeholders);
+					$stmt->execute(self::$params);
 					self::set('num_rows', $stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
@@ -291,7 +308,7 @@
 				$qry = sprintf("DELETE FROM %s", self::$table);
 				$stmt = self::query_builder($qry);
 				try{
-					$stmt->execute(self::$placeholders);
+					$stmt->execute(self::$params);
 					self::set('num_rows', $stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){

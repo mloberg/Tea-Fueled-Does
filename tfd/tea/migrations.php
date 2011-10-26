@@ -339,7 +339,7 @@ FILE;
 					// and run the up method
 					$class::up();
 					// set the active in the db
-					MySQL::table(Config::get('migrations.table'))->where('active', '=', '1')->update(array('active' => 0));
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
 					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
 				}
 			}
