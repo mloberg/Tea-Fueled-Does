@@ -58,7 +58,7 @@ Arguments:
 	-l, --list-migrations   List migrations
 	-u, --up                Update to a migration
 	-d, --down              Roll-back to a migration
-	--latest                Update to latest migration
+	--latest                SUpdate to latest migration
 
 TFD Homepage: http://teafueleddoes.com/
 Tea Homepage: http://teafueleddoes.com/v2/tea
@@ -67,7 +67,7 @@ MAN;
 			exit(0);
 		}
 		
-		private static function name_response($default = null){
+		public static function name_response($default = null){
 			$response = Tea::response_to_lower($default);
 			$response = ucwords($response);
 			$response = preg_replace('/[^a-zA-Z]/', '', $response);
@@ -121,6 +121,7 @@ FILE;
 			fclose($fp);
 			if($add){
 				try{
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
 					MySQL::table(Config::get('migrations.table'))->insert(array('number' => $number, 'active' => 1));
 				}catch(\TFD\Exception $e){
 					echo $e->getMessage()."\nExiting...\n";
