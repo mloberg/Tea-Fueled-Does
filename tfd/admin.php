@@ -8,7 +8,12 @@
 	class Admin{
 	
 		private static function __validate_session_fingerprint(){
-			$user = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('secret');
+			try{
+				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('secret');
+			}catch(Exception $e){
+				echo '<pre>'.$e->getMessage().'</pre>';
+				exit;
+			}
 			if(empty($user)){
 				session_destroy();
 				return false;
@@ -20,7 +25,12 @@
 		
 		private static function __validate_cookie_fingerprint(){
 			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
-			$user = MySQL::table(Config::get('admin.table'))->where('id', $_COOKIE['user_id'])->limit(1)->get('secret');
+			try{
+				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_COOKIE['user_id'])->limit(1)->get('secret');
+			}catch(Exception $e){
+				echo '<pre>'.$e->getMessage().'</pre>';
+				exit;
+			}
 			if(empty($user)){
 				setcookie('logged_in', false, time() - 3600, '/');
 				setcookie('user_id', '', time() - 3600, '/');
@@ -77,7 +87,12 @@
 			$user = $_POST['username'];
 			$pass = $_POST['password'];
 			// get user info
-			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get();
+			try{
+				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get();
+			}catch(Exception $e){
+				echo '<pre>'.$e->getMessage().'</pre>';
+				exit;
+			}
 			if(empty($user_info)) return false; // no user found
 			$hash = $user_info['hash'];
 			// check password
@@ -85,7 +100,7 @@
 				// set session vars
 				$_SESSION['logged_in'] = true;
 				$_SESSION['user_id'] = $user_info['id'];
-				$_SESSION['fingerprint'] = Crypter::hash_with_salt($user['secret'], Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id());
+				$_SESSION['fingerprint'] = Crypter::hash_with_salt($user_info['secret'], Config::get('admin.auth_key').$_SERVER['HTTP_USER_AGENT'].session_id());
 				// set cookies
 				setcookie('logged_in', true, time() + Config::get('admin.login_time'), '/');
 				setcookie('user_id', $user_info['id'], time() + Config::get('admin.login_time'), '/');
@@ -103,14 +118,24 @@
 		}
 		
 		public static function validate_user_pass($user, $pass){
-			$user_info = MySQL::table(Config::get('admin.table'))->where('username', $user)->limit(1)->get('hash');
+			try{
+				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get('hash');
+			}catch(Exception $e){
+				echo '<pre>'.$e->getMessage().'</pre>';
+				exit;
+			}
 			if(empty($user_info)) return false;
 			$hash = $user_info['hash'];
 			return Crypter::verify($pass, $hash);
 		}
 		
 		public static function validate_pass($pass){
-			$user_info = MySQL::table(Config::get('admin.table'))->where('id', $_SESSION['user_id'])->limit(1)->get('hash');
+			try{
+				$user_info = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('hash');
+			}catch(Exception $e){
+				echo '<pre>'.$e->getMessage().'</pre>';
+				exit;
+			}
 			if(empty($user_info)) return false;
 			$hash = $user_info['hash'];
 			return Crypter::verify($pass, $hash);
@@ -123,10 +148,12 @@
 			// generate a secret key
 			$info['secret'] = uniqid('', true);
 			// add to database
-			if(MySQL::table(Config::get('admin.table'))->insert($info)){
+			try{
+				MySQL::table(Config::get('admin.table'))->insert($info);
 				return true;
+			}catch(Exception $e){
+				return false;
 			}
-			return false;
 		}
 		
 		public function dashboard($render = null){
