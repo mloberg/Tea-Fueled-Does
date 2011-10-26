@@ -130,7 +130,7 @@ MAN;
 			// load the file
 			$conf = file_get_contents($file);
 			// add the line
-			$new_conf = preg_replace("/(\\n\)\)\; \/\/ end of tea config)/", "\t'{$key}' => '{$value}',".'${1}', $conf);
+			$new_conf = preg_replace("/(\\n\)\)\; \/\/ end of tea config)/", "\n\t'{$key}' => '{$value}',".'${1}', $conf);
 			// delete file
 			unlink($file);
 			// create new config file

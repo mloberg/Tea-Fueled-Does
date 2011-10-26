@@ -119,7 +119,6 @@ MAN;
 			foreach($tables as $table){
 				$db[$table] = self::list_columns($table);
 			}
-			print_r($db);
 			return $db;
 		}
 		

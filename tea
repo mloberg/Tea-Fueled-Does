@@ -15,10 +15,8 @@ require_once 'bootstrap.php';
 use TFD\Config;
 
 // set some tea config options
-Config::load(array(
-	'tea.migrations_dir' => CONTENT_DIR.'migrations/',
-	'tea.config_dir' => CONTENT_DIR.'tea_config/'
-));
+Config::set('migrations.dir', CONTENT_DIR.'migrations/');
+include_once(CONTENT_DIR.'tea-config'.EXT);
 
 // run verbosely
 error_reporting(E_ERROR|E_WARNING|E_PARSE);

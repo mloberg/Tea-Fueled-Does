@@ -3,5 +3,5 @@
 use TFD\Config;
 
 Config::load(array(
-
+	'migrations.table' => 'migrations',
 )); // end of tea config

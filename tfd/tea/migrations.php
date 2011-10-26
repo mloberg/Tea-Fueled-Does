@@ -33,7 +33,7 @@
 				$args = trim($match[2]);
 			}elseif(preg_match('/([\w|\-]+)(.+)?/', $arg, $match)){
 				$run = $match[1];
-				$args = $match[2];
+				$args = trim($match[2]);
 			}
 			
 			if(!method_exists(__CLASS__, $run) || (($method = new \ReflectionMethod(__CLASS__, $run)) && $method->isPrivate())){
@@ -62,26 +62,40 @@ MAN;
 			exit(0);
 		}
 		
-		public static function create_migration($up, $down, $add = true){
-			$files = glob(CONTENT_DIR.'migrations/*.php');
-			if(empty($files)){
-				$number = '1';
-			}else{
-				$sort = array();
-				foreach($files as $f){
-					if(preg_match('/(\d+)'.preg_quote(EXT).'/', $f, $match)){
-						$sort[] = $match[1];
-					}
+		private static function name_response($default = null){
+			$response = Tea::response_to_lower($default);
+			$response = ucwords($response);
+			$response = preg_replace('/[^a-zA-Z]/', '', $response);
+			return $response;
+		}
+		
+		private static function get_migrations(){
+			$files = glob(Config::get('migrations.dir').'*'.EXT);
+			if(empty($files)) return false;
+			$migrations = array();
+			foreach($files as $file){
+				if(preg_match('/([a-zA-Z]+)_(\d+)'.preg_quote(EXT).'$/', $file, $match)){
+					$migrations[$match[2]] = $match[1];
 				}
-				$number = max($sort) + 1;
 			}
+			return $migrations;
+		}
+		
+		public static function create_migration($name, $up, $down, $add = true){
+			$migrations = self::get_migrations();
+			if($migrations === false){
+				$number = 1;
+			}else{
+				$number = max(array_keys($migrations)) + 1;
+			}
+			$name = $name.'_'.$number;
 			
 			$file = <<<FILE
 <?php namespace Content\Migrations;
 
 	use TFD\Tea\Database;
 	
-	class TeaMigration_$number{
+	class $name{
 	
 		public static function up(){
 			$up
@@ -93,7 +107,7 @@ MAN;
 	
 	}
 FILE;
-			$fp = fopen(CONTENT_DIR.'migrations/'.$number.EXT, 'c');
+			$fp = fopen(Config::get('migrations.dir').$name.EXT, 'c');
 			if(!fwrite($fp, $file)){
 				echo "Could not write migration!";
 				fclose($fp);
@@ -113,12 +127,13 @@ FILE;
 		
 		public static function init(){
 			if(!Config::is_set('migrations.table')){
+				echo "This is the migrations class provided by Tea.\nMigrations is an easy way to \"version control\" your database schema.\nFirst we need to setup the table that Tea will use to track active migrations.\n";
 				echo "Migrations table name [migrations]: ";
 				do{
 					$table = Tea::response('migrations');
 					if(Database::table_exists($table)){
 						$table = '';
-						echo "\033[0;31mError:\033[0m Table already exists.\nPlease enter a new table name: ";
+						echo "\033[1;31mError:\033[0m Table already exists.\nPlease enter a new table name: ";
 					}
 				}while(empty($table));
 				// write config file
@@ -168,23 +183,27 @@ FILE;
 				exit(0);
 			}
 			
-			$migration_files = glob(CONTENT_DIR.'migrations/*.php');
+			$migration_files = glob(Config::get('migrations.dir').'*'.EXT);
 			if(empty($migration_files)){
-				if(Tea::yes_no('Scan database for current schema?')){
-					// get database schema
-					$db = Database::scan_db();
-					// unset the migrations table
-					unset($db[Config::get('migrations.table')]);
-					// our up and down methods
-					$up = $down = '';
-					foreach($db as $table => $columns){
-						$columns = var_export($columns, true);
-						$up .= "Database::create_table('{$table}', {$columns});\n";
-						$down .= "Database::drop_table('{$table}');\n";
-					}
-					
-					$number = self::create_migration($up, $down);
+				echo "To get started, Tea will scan your current database and generate your first migration (not including the migration table).\n\n";
+				// get database schema
+				$db = Database::scan_db();
+				// unset the migrations table
+				unset($db[Config::get('migrations.table')]);
+				
+				echo "Each migration needs a short name, and when I say short, I just a few characters long. Names should only include letters (no numbers or underscores), having names with other characters can cause the migration not to run.\nWe recommend 'init' for this first migration.\n";
+				// get migration name
+				echo "Migration description [init]: ";
+				$name = self::name_response('init');
+				// our up and down methods
+				$up = $down = '';
+				foreach($db as $table => $columns){
+					$columns = var_export($columns, true);
+					$up .= "Database::create_table('{$table}', {$columns});\n";
+					$down .= "Database::drop_table('{$table}');\n";
 				}
+				
+				$number = self::create_migration($name, $up, $down);
 			}
 			
 			// if the migrations table doesn't exist, create it
@@ -230,30 +249,100 @@ FILE;
 			}
 			
 			// make sure we're running the latest migration
-			$migrations = MySQL::table(Config::get('migrations.table'))->get('id');
-			if(empty($migrations) && !empty($migration_files)){
+			if(!empty($migration_files)){
 				if(Tea::yes_no('Run migrations?')){
 					//self::latest();
 				}
 			}
 		}
 		
-		private static function _list_migrations($up = true){
-			$active_migration = self::$db->where('active', 1)->limit(1)->get(self::$table);
-			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
-			$max = max(array_keys($migrations));
-			foreach($migrations as $i => $m){
-				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $m, $match)){
-					echo ($active_migration['number'] == $match[1]) ? '* ' : '  ';
-					echo "{$match[1]}\n";
-					if($active_migration['number'] == $match[1] && $i == $max && $up === true) return true;
-					$migrations[$i] = $match[1];
-				}
-			}
+		private static function get_migration_info(){
+			$active = (Config::is_set('migrations.active')) ? Config::get('migrations.active') : MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->limit(1)->get('number');
+			$migrations = (Config::is_set('migrations.list')) ? Config::get('migrations.list') : self::get_migrations();
+			$max = (Config::is_set('migrations.max')) ? Config::get('migrations.max') : @max(array_keys($migrations));
+			Config::load(array(
+				'migrations.active' => $active,
+				'migrations.list' => $migrations,
+				'migrations.max' => $max
+			));
 			return array(
-				'active' => $active_migration['number'],
+				'active' => $active['number'],
+				'max' => $max,
 				'migrations' => $migrations
 			);
+		}
+		
+		public static function status(){
+			$info = self::get_migration_info();
+			extract($info);
+			if(empty($migrations)){
+				echo "There are no migrations.\n";
+			}else{
+				echo "You are running migration {$active} of {$max}.\n";
+			}
+		}
+		
+		public static function list_migrations(){
+			$info = self::get_migration_info();
+			extract($info);
+			if(empty($migrations)){
+				echo "There are no migrations.\n";
+				return false;
+			}elseif($max == $active){
+				echo "You are running the latest migration.\n";
+				return false;
+			}else{
+				echo "Migrations:\n";
+				ksort($migrations);
+				foreach($migrations as $key => $value){
+					echo "  - {$key}";
+					echo ($key == $active) ? " (active)\n" : "\n";
+				}
+				return true;
+			}
+		}
+		
+		public function up($arg){
+			$info = self::get_migration_info();
+			$migrations = $info['migrations'];
+			// determine migration
+			if(isset($migrations[$arg]) && $arg > $info['active']){
+				$migration = $arg;
+			}elseif(self::list_migrations()){
+				echo "Select migration: ";
+				do{
+					$migration = Tea::response();
+					if(!isset($migrations[$migration])){
+						$migration = '';
+						echo "\033[1;31mError:\033[0m Not a valid migration. Please select a valid migration: ";
+					}elseif($migration <= $info['active']){
+						$migration = '';
+						echo "\033[1;31mError:\033[0m Migration less then current migration. Use 'tea migrations -d' if you want to roll-back to a migration.\n";
+						echo 'Please select a valid migration: ';
+					}
+				}while(empty($migration));
+			}
+			
+			// run the migrations
+			if(isset($migration)){
+				// get the migrations from current to the up
+				foreach($migrations as $key => $value){
+					if($key > $migration || $key <= $info['active']){
+						unset($migrations[$key]);
+					}
+				}
+				// sort so we run in the right order
+				ksort($migrations);
+				foreach($migrations as $number => $name){
+					// get the class name
+					$class = '\Content\Migrations\\'.$name.'_'.$number;
+					// and run the up method
+					$class::up();
+					// set the active in the db
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', '1')->update(array('active' => 0));
+					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
+				}
+			}
 		}
 		
 		public static function run_up($arg){
@@ -353,6 +442,7 @@ FILE;
 			self::$db->where('number', preg_replace('/^0/', '', $run))->update(self::$table, array('active' => 1));
 		}
 		
+/*
 		public static function status(){
 			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
 			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
@@ -361,6 +451,7 @@ FILE;
 			$max = preg_replace('/^0/', '', $match[1]);
 			echo "Currently on migration {$active['number']} of {$max}\n";
 		}
+*/
 		
 		public static function delete_migration(){
 			// we can only delete the latest migration right now
