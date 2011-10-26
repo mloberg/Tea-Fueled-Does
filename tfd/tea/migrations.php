@@ -16,10 +16,9 @@
 			'i' => 'init',
 			'h' => 'help',
 			's' => 'status',
-			'u' => 'run_up',
-			'd' => 'run_down',
-			'l' => 'latest',
-			'r' => 'delete_migration'
+			'u' => 'up',
+			'd' => 'down',
+			'l' => 'list_migrations'
 		);
 		
 		public static function action($arg){
@@ -35,6 +34,7 @@
 				$run = $match[1];
 				$args = trim($match[2]);
 			}
+			$run = str_replace('-', '_', $run);
 			
 			if(!method_exists(__CLASS__, $run) || (($method = new \ReflectionMethod(__CLASS__, $run)) && $method->isPrivate())){
 				echo "\033[0;31mError:\033[0m '{$arg}' is not a valid argument!\n";
@@ -52,8 +52,13 @@ Create and run database migrations.
 
 Arguments:
 
-	-h, help         This page
-	-i, init         Set up migrations
+	-h, --help              This page
+	-i, --init              Set up migrations
+	-s, --status            Get current migration
+	-l, --list-migrations   List migrations
+	-u, --up                Update to a migration
+	-d, --down              Roll-back to a migration
+	--latest                Update to latest migration
 
 TFD Homepage: http://teafueleddoes.com/
 Tea Homepage: http://teafueleddoes.com/v2/tea
@@ -282,27 +287,27 @@ FILE;
 			}
 		}
 		
-		public static function list_migrations(){
+		public static function list_migrations($down = false){
 			$info = self::get_migration_info();
 			extract($info);
 			if(empty($migrations)){
 				echo "There are no migrations.\n";
 				return false;
-			}elseif($max == $active){
+			}elseif($max == $active && $down !== true){
 				echo "You are running the latest migration.\n";
 				return false;
 			}else{
 				echo "Migrations:\n";
 				ksort($migrations);
 				foreach($migrations as $key => $value){
-					echo "  - {$key}";
+					echo "  {$key}: {$value}";
 					echo ($key == $active) ? " (active)\n" : "\n";
 				}
 				return true;
 			}
 		}
 		
-		public function up($arg){
+		public static function up($arg){
 			$info = self::get_migration_info();
 			$migrations = $info['migrations'];
 			// determine migration
@@ -317,7 +322,7 @@ FILE;
 						echo "\033[1;31mError:\033[0m Not a valid migration. Please select a valid migration: ";
 					}elseif($migration <= $info['active']){
 						$migration = '';
-						echo "\033[1;31mError:\033[0m Migration less then current migration. Use 'tea migrations -d' if you want to roll-back to a migration.\n";
+						echo "\033[1;31mError:\033[0m Migration less than current migration. Use 'tea migrations -d' if you want to roll-back to a migration.\n";
 						echo 'Please select a valid migration: ';
 					}
 				}while(empty($migration));
@@ -333,197 +338,73 @@ FILE;
 				}
 				// sort so we run in the right order
 				ksort($migrations);
+				// clear the active migration
+				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
 				foreach($migrations as $number => $name){
 					// get the class name
 					$class = '\Content\Migrations\\'.$name.'_'.$number;
 					// and run the up method
 					$class::up();
-					// set the active in the db
-					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
-					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
+					// and make sure we know what's the latest migration
+					Config::set('migrations.active', $number);
 				}
+				MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $migration));
 			}
 		}
 		
-		public static function run_up($arg){
-			// list migrations
-			$info = self::_list_migrations();
-			if($info === true){
-				echo "You are running the latest migration.\n";
+		public static function down($arg){
+			$info = self::get_migration_info();
+			$migrations = $info['migrations'];
+			if($info['active'] == 1){
+				echo "You are running the first migration.\n";
 				exit(0);
 			}
-			// match keys to value
-			$migrations = array();
-			foreach($info['migrations'] as $m){
-				$migrations[$m] = $m;
-			}
-			if(!empty($arg[3])){
-				$run = $migrations[$arg[3]];
-				if(empty($run)){
-					echo "That's an invalid migration.\n";
-					exit(0);
-				}
-			}else{
+			// determine the migration
+			if(isset($migrations[$arg]) && $arg < $info['active']){
+				$migration = $arg;
+			}elseif(self::list_migrations(true)){
+				echo "Select migration: ";
 				do{
-					echo "Which migration would you like update to? ";
-					$run = $migrations[trim(fgets(STDIN))];
-				}while(empty($run));
+					$migration = Tea::response();
+					if(!isset($migrations[$migration])){
+						$migration = '';
+						echo "\033[1;31mError:\033[0m Not a valid migration. Please select a valid migration: ";
+					}elseif($migration > $info['active']){
+						$migration = '';
+						echo "\033[1;31mError:\033[0m Migration greater than current migration. Use 'tea migrations -u' if you want to update to a migration.\n";
+						echo 'Please select a valid migration: ';
+					}
+				}while(empty($migration));
 			}
-			// run all migrations from active up to selected migration
-			for($i = $info['active'] + 1; $i <= $run; $i++){
-				$n = (strlen($i) == 1) ? '0'.$i : $i;
-				include_once(MIGRATIONS_DIR.$n.EXT);
-				$migration_name = 'TeaMigrations_'.$n;
-				$migration_name::up();
-				self::$db->where('active', 1)->update(self::$table, array('active' => 0));
-				$tmp = self::$db->where('number', $i)->get(self::$table);
-				if(empty($tmp)){
-					self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
-				}else{
-					self::$db->where('number', $i)->update(self::$table, array('active' => 1));
+			
+			// run the migrations
+			if(isset($migration)){
+				// get the migrations from current down to selected
+				foreach($migrations as $key => $value){
+					if($key > $info['active'] || $key <= $migration){
+						unset($migrations[$key]);
+					}
 				}
+				// sort so we run in the right order
+				krsort($migrations);
+				// clear the active migration
+				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
+				foreach($migrations as $number => $name){
+					// get class name
+					$class = '\Content\Migrations\\'.$name.'_'.$number;
+					// run the down method
+					$class::down();
+					// and make sure we know what's the latest migration
+					Config::set('migrations.active', $number);
+				}
+				// set the active migration
+				MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $migration));
 			}
 		}
 		
 		public static function latest(){
-			$active_migration = self::$db->where('active', 1)->limit(1)->get(self::$table);
-			$migration_files = glob(MIGRATIONS_DIR.'*'.EXT);
-			$migrations = array();
-			$latest = 0;
-			foreach($migration_files as $i => $m){
-				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $m, $match)){
-					$migrations[$match[1]] = $m;
-					$latest = ($match[1] > $latest) ? $match[1] : $latest;
-				}
-			}
-			for($i = $active_migration['number'] + 1; $i <= $latest; $i++){
-				$n = (strlen($i) == 1) ? '0'.$i : $i;
-				include_once($migrations[$n]);
-				$migration_name = 'TeaMigrations_'.$n;
-				$migration_name::up();
-				self::$db->where('active', 1)->update(self::$table, array('active' => 0));
-				$tmp = self::$db->where('number', $i)->get(self::$table);
-				if(empty($tmp)){
-					self::$db->insert(self::$table, array('number' => $i, 'active' => 1));
-				}else{
-					self::$db->where('number', $i)->update(self::$table, array('active' => 1));
-				}
-			}
-			echo "Database updated to latest version.\n";
-		}
-		
-		public static function run_down($arg){
-			// list migrations
-			$info = self::_list_migrations(false);
-			$migrations = array();
-			foreach($info['migrations'] as $m){
-				$migrations[$m] = $m;
-			}
-			if(!empty($arg[3])){
-				$run = $migrations[$arg[3]];
-				if(empty($run)){
-					echo "That's an invalid migration.\n.";
-					exit(0);
-				}
-			}else{
-				do{
-					echo "Which migration would like to go back to? ";
-					$run = $migrations[trim(fgets(STDIN))];
-				}while(empty($run));
-			}
-			// run all migrations from active down to selected migration
-			for($i = $info['active']; $i > $run; $i--){
-				$n = (strlen($i) == 1) ? '0'.$i : $i;
-				include_once(MIGRATIONS_DIR.$n.EXT);
-				$migration_name = 'TeaMigrations_'.$n;
-				$migration_name::down();
-			}
-			self::$db->where('active', 1)->update(self::$table, array('active' => 0));
-			self::$db->where('number', preg_replace('/^0/', '', $run))->update(self::$table, array('active' => 1));
-		}
-		
-/*
-		public static function status(){
-			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
-			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
-			sort($migrations);
-			preg_match('/\/(\d+)'.preg_quote(EXT).'$/', max($migrations), $match);
-			$max = preg_replace('/^0/', '', $match[1]);
-			echo "Currently on migration {$active['number']} of {$max}\n";
-		}
-*/
-		
-		public static function delete_migration(){
-			// we can only delete the latest migration right now
-			echo "Delete the latest migration? [y/n]: ";
-			if(strtolower(trim(fgets(STDIN))) !== 'y'){
-				exit(0);
-			}
-			$active = self::$db->where('active', 1)->limit(1)->get(self::$table);
-			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
-			sort($migrations);
-			// get the highest migration
-			preg_match('/\/(\d+)'.preg_quote(EXT).'$/', max($migrations), $match);
-			$max = preg_replace('/^0/', '', $match[1]);
-			// if that's not the latest, run up to it
-			if($max !== $active['number']){
-				self::run_up(array(3 => $match[1]));
-			}
-			// run the down method
-			include_once(MIGRATIONS_DIR.$match[1].EXT);
-			$migration_name = 'TeaMigrations_'.$match[1];
-			$migration_name::down();
-			self::$db->where('number', $max - 1)->update(self::$table, array('active' => 1));
-			// delete file
-			unlink(MIGRATIONS_DIR.$match[1].EXT);
-			// delete from db
-			self::$db->where('number', $max)->delete(self::$table);
-			echo "Migration {$max} deleted.\n";
-		}
-		
-		public static function generate_migration_file($up, $down, $add_to_db = false){
-			$migrations = glob(MIGRATIONS_DIR.'*'.EXT);
-			foreach($migrations as $key => $value){
-				if(preg_match('/\/(\d+)'.preg_quote(EXT).'$/', $value, $match)){
-					$migrations[$key] = $match[1];
-				}else{
-					unset($migrations[$key]);
-				}
-			}
-			if(empty($migrations)){
-				$number = 1;
-			}else{
-				$max = max(array_values($migrations));
-				$number = $max + 1;
-			}
-			if($add_to_db === true){
-				self::$db->where('active', '1')->update(self::$table, array('active' => 0));
-				self::$db->insert(self::$table, array('number' => $number, 'active' => 1));
-			}
-			self::write_migration_file($number, $up, $down);
-		}
-		
-		private static function write_migration_file($number, $up, $down){
-			if(strlen($number) == 1) $number = '0'.$number;
-			$file = <<<FILE
-<?php
-
-	class TeaMigrations_$number extends Migrations{
-	
-		function up(){
-			$up
-		}
-		
-		function down(){
-			$down
-		}
-	
-	}
-FILE;
-			$fp = fopen(MIGRATIONS_DIR.$number.EXT, 'c');
-			fwrite($fp, $file);
-			fclose($fp);
-			return $number;
+			$info = self::get_migration_info();
+			self::up($info['max']);
 		}
 	
 	}
