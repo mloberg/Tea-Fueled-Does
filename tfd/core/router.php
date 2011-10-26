@@ -36,7 +36,7 @@
 			$request = self::$method.' '.self::$request;
 			$routes =& self::$routes;
 			
-			if(empty($routes)) return false;
+			if(empty($routes)) return null;
 			
 			if(isset($routes[$request])){
 				return $routes[$request]();
@@ -50,7 +50,7 @@
 					}
 				}
 			}
-			return false;
+			return null;
 		}
 		
 		/**

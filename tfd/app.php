@@ -65,6 +65,8 @@
 					return Admin::dashboard($route);
 				}
 				$render_info = $route;
+			}elseif(!is_null($route)){
+				return $route;
 			}elseif(($do = self::$request->run()) !== false){
 				return $do;
 			}else{
