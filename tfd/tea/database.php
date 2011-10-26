@@ -14,11 +14,14 @@
 			'h' => 'help',
 			'i' => 'init',
 			'c' => 'create_table_prompt',
-			'd' => 'drop_table_prompt'
+			'd' => 'drop_table_prompt',
+			'a' => 'add_column_prompt'
 		);
 		private static $aliases = array(
 			'create-table' => 'create_table_prompt',
-			'drop-table' => 'drop_table_prompt'
+			'drop-table' => 'drop_table_prompt',
+			'add-columns' => 'add_column_prompt',
+			'add-column' => 'add_column_prompt'
 		);
 		
 		public static function action($arg){
@@ -432,6 +435,48 @@ MAN;
 			}
 			self::drop_table($table);
 			echo "Dropped table {$table}.\n";
+		}
+		
+		public static function add_column_prompt($table = null){
+			if(empty($table)){
+				$tables = self::list_tables();
+				if(empty($tables)){
+					echo "No tables! Exiting...\n";
+					exit(0);
+				}
+				echo "Tables:\n";
+				foreach($tables as $index => $value){
+					echo "  {$index}: {$value}\n";
+				}
+				echo "Which table would you like to add columns to? ";
+				do{
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}else{
+						echo "That's not a valid selection: ";
+					}
+				}while(empty($table));
+			}elseif(!self::table_exists($table)){
+				echo "Table does not exist! Exiting...\n";
+				exit(0);
+			}
+			
+			$original_columns = self::list_columns($table);
+			$columns = self::add_columns_prompt($original_columns);
+			
+			foreach($original_columns as $k => $v){
+				unset($columns[$k]);
+			}
+			
+			print_r($columns);
+			
+			if((Config::is_set('migrations.table') && self::table_exists(Config::get('migrations.table'))) && Tea::yes_no('Create migration file?')){
+				echo "Migration name [{$table}Cols]: ";
+				$name = Migrations::name_response($table.'Cols');
+				
+				
+			}
 		}
 		
 		/**
