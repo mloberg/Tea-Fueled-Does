@@ -22,7 +22,39 @@
 			'drop-table' => 'drop_table_prompt',
 			'add-columns' => 'add_column_prompt',
 			'add-column' => 'add_column_prompt',
-			'drop-columns' => 'drop_column_prompt'
+			'drop-columns' => 'drop_column_prompt',
+			'add-key' => 'add_key_prompt',
+			'drop-key' => 'drop_key_prompt'
+		);
+		
+		private static $field_types = array(
+			'varchar', 'int', 'text', 'timestamp', 'enum',
+			'float', 'double', 'tinyint', 'smallint', 'mediumint', 'bigint', 'decimal',
+			'tinytext', 'mediumtext', 'longtext', 'bit', 'char',
+			'date', 'datetime', 'time', 'year'
+		);
+		private static $default_types = array(
+			'varchar' => 128,
+			'int' => 11,
+			'text' => false,
+			'timestamp' => false,
+			'enum' => "'option 1', 'option 2'",
+			'float' => false,
+			'double' => false,
+			'tinyint' => 4,
+			'smallint' => 6,
+			'mediumint' => 9,
+			'bigint' => 20,
+			'decimal' => '10,0',
+			'tinytext' => false,
+			'mediumtext' => false,
+			'longtext' => false,
+			'bit' => 1,
+			'char' => 1,
+			'date' => false,
+			'datetime' => false,
+			'time' => false,
+			'year' => 4
 		);
 		
 		public static function action($arg){
@@ -266,6 +298,34 @@ MAN;
 			}
 		}
 		
+		public static function add_key($table, $column, $type){
+			if(!self::table_exists($table)){
+				echo "{$table} does not exist! Exiting...\n";
+				exit(0);
+			}
+			$query = sprintf("ALTER TABLE `%s` ADD %s (`%s`)", $table, strtoupper($type), $column);
+			try{
+				MySQL::query($query);
+			}catch(\TFD\Exception $e){
+				echo "Could not add key. Error: {$e->getMessage()}\n";
+				exit(0);
+			}
+		}
+		
+		public static function drop_key($table, $column){
+			if(!self::table_exists($table)){
+				echo "{$table} does not exist! Exiting...\n";
+				exit(0);
+			}
+			$query = sprintf("ALTER TABLE `%s` DROP KEY `%s`", $table, $column);
+			try{
+				MySQL::query($query);
+			}catch(\TFD\Exception $e){
+				echo "Could not drop key. Error: {$e->getMessage()}\n";
+				exit(0);
+			}
+		}
+		
 		private static function add_columns_prompt($columns = array()){
 			if(empty($columns['id'])){
 				if(Tea::yes_no('Create an id column?')){
@@ -288,34 +348,21 @@ MAN;
 				}elseif(array_key_exists($field, $columns)){
 					echo "\033[0;31mError:\033[0m Field exists!\n";
 				}elseif(!empty($field)){
-					// should get a list and make them a class variable
-					$default_types = array(
-						'varchar', 'int', 'text',
-						'timestamp', 'enum'
-					);
-					// same with this one
-					$default_values = array(
-						'varchar' => 128,
-						'int' => 11,
-						'text' => false,
-						'timestamp' => false
-					);
 					echo "Field types:\n";
-					foreach($default_types as $index => $type){
+					foreach(self::$field_types as $index => $type){
 						echo "\t{$index}:  {$type}\n";
 					}
-					echo "Enter a number above or another [valid] field type.\nField type: ";
-					$type = Tea::response();
-					$type = (isset($default_types[$type])) ? $default_types[$type] : $type;
+					do{
+						echo "Field type. Enter a number above: ";
+						$type = Tea::response();
+						$type = (isset($default_types[$type])) ? $default_types[$type] : null;
+					}while(is_null($type));
 					
-					if($default_values[$type] !== false && isset($default_values[$type])){
+					if(self::$default_values[$type] !== false && isset(self::$default_values[$type])){
 						// get the default false
-						echo "Length: [{$default_values[$type]}] ";
+						$default_length = self::$default_values[$type];
+						echo "Length: [{$default_length}] ";
 						$length = Tea::response($default_values[$type]);
-					}elseif(!isset($default_values[$type])){
-						echo "Length (FALSE for none): ";
-						$length = Tea::response();
-						if($length == 'FALSE') $length = false;
 					}
 					
 					$null = Tea::yes_no('Allow NULL?');
@@ -625,139 +672,131 @@ MAN;
 			self::drop_columns($table, $drop);
 		}
 		
-		/**
-		 * 
-		 */
-		
-/*
-		if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time|varchar|int|tinyint|smallint|mediumint|bigint|decimal|bit|char|mediumtext|year|enum)/', $type)){
-			echo "\tError: We do not support that field type.\n";
-		}else{
-			if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time)/', $type)){
-				switch($type){
-					case 'tinyint':
-						$default = '4';
-						break;
-					case 'smallint':
-						$default = '6';
-						break;
-					case 'mediumint':
-						$default = '9';
-						break;
-					case 'int':
-						$default = '11';
-						break;
-					case 'bigint':
-						$default = '20';
-						break;
-					case 'char':
-						$default = '1';
-					case 'varchar':
-						$default = '128';
-						break;
-					case 'bit':
-						$default = '1';
-						break;
-					case 'decimal':
-						$default = '10,0';
-						break;
-					case 'year':
-						$default = '4';
-						break;
+		public static function add_key_prompt($table = null){
+			if(empty($table)){
+				$tables = self::list_tables();
+				if(empty($tables)){
+					echo "No tables! Exiting...\n";
+					exit(0);
 				}
-*/
-		
-		public static function add_key($table = null, $col = null, $type = null){
-			if(is_null($column) || is_null($table)){
-				if(is_null($table)){
-					$tables = self::get_db_tables();
-					foreach($tables as $index => $t){
-						echo "{$index}: {$t}\n";
+				echo "Tables:\n";
+				foreach($tables as $index => $value){
+					echo "  {$index}: {$value}\n";
+				}
+				echo "Which table would you like to add a key to? ";
+				do{
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}else{
+						echo "That's not a valid selection: ";
 					}
-					$max = max(array_keys($tables));
-					$min = min(array_keys($tables));
-					do{
-						echo "Which table would you like to add the key to? [{$min} - {$max}]: ";
-						$table = $tables[trim(fgets(STDIN))];
-					}while(empty($table));
-				}
-				if(is_null($col)){
-					$cols = self::get_table_fields($table);
-					foreach($cols as $index => $c){
-						echo "{$index}: {$c}\n";
-					}
-					$max = max(array_keys($cols));
-					$min = min(array_keys($cols));
-					do{
-						echo "Which column would you like to add the key to? [{$min} - {$max}]: ";
-						$resp = trim(fgets(STDIN));
-						$col = $cols[$resp];
-					}while(empty($col));
-				}
+				}while(empty($table));
+			}elseif(!self::table_exists($table)){
+				echo "Table does not exist! Exiting...\n";
+				exit(0);
 			}
-			if(is_null($type)){
-				echo "Key type (primary, unique, index): ";
-				$type = trim(fgets(STDIN));
+			
+			$original_columns = self::list_columns($table);
+			$columns = array_keys($original_columns);
+			
+			echo "Columns:\n";
+			foreach($columns as $index => $name){
+				echo "  {$index}: {$name}\n";
 			}
-			if(!empty(self::$config['migrations_table'])){
-				echo "Create migration? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					$up = "parent::\$db->add_key('{$table}', '{$col}', '{$type}');\n";
-					$down = "parent::\$db->remove_key('{$table}', '{$col}');\n";
-					Migrations::generate_migration_file($up, $down, true);
+			do{
+				echo "Which column would you like to add the key to?: ";
+				$resp = Tea::response();
+				if(!isset($columns[$resp])){
+					echo "Not a valid selection!\n";
+				}else{
+					$col = $columns[$resp];
 				}
+			}while(empty($col));
+			
+			$keys = array('primary key', 'unique key', 'key');
+			echo "Key type:\n";
+			foreach($keys as $i => $v){
+				echo "  {$i}: {$v}\n";
 			}
-			self::$db->add_key($table, $col, $type);
+			do{
+				echo "Key type: ";
+				$key = $keys[Tea::response()];
+			}while(empty($key));
+			
+			if((Config::is_set('migrations.table') && self::table_exists(Config::get('migrations.table'))) && Tea::yes_no('Create migration file?')){
+				echo "Migration name [{$table}Key]: ";
+				$name = Migrations::name_response($table.'Key');
+				
+				$up = "Database::add_key('{$table}', '{$col}', '{$key}');";
+				$down = "Database::drop_key('{$table}', '{$col}');";
+				$number = Migrations::create_migration($name, $up, $down);
+			}
+			
+			self::add_key($table, $col, $key);
 		}
 		
-		public static function remove_key($table = null, $col = null){
-			if(is_null($column) || is_null($table)){
-				if(is_null($table)){
-					$tables = self::get_db_tables();
-					foreach($tables as $index => $t){
-						echo "{$index}: {$t}\n";
-					}
-					$max = max(array_keys($tables));
-					$min = min(array_keys($tables));
-					do{
-						echo "Which table would you like to add the key to? [{$min} - {$max}]: ";
-						$table = $tables[trim(fgets(STDIN))];
-					}while(empty($table));
+		public static function drop_key_prompt($table = null){
+			if(empty($table)){
+				$tables = self::list_tables();
+				if(empty($tables)){
+					echo "No tables! Exiting...\n";
+					exit(0);
 				}
-				if(is_null($col)){
-					$cols = self::get_table_fields($table);
-					foreach($cols as $index => $c){
-						echo "{$index}: {$c}\n";
+				echo "Tables:\n";
+				foreach($tables as $index => $value){
+					echo "  {$index}: {$value}\n";
+				}
+				echo "Which table would you like to drop a key from? ";
+				do{
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}else{
+						echo "That's not a valid selection: ";
 					}
-					$max = max(array_keys($cols));
-					$min = min(array_keys($cols));
-					do{
-						echo "Which column would you remove the key from? [{$min} - {$max}]: ";
-						$resp = trim(fgets(STDIN));
-						$col = $cols[$resp];
-					}while(empty($col));
+				}while(empty($table));
+			}elseif(!self::table_exists($table)){
+				echo "Table does not exist! Exiting...\n";
+				exit(0);
+			}
+			
+			$columns = self::list_columns($table);
+			$col_keys = array();
+			
+			echo "Columns:\n";
+			$i = 0;
+			foreach($columns as $name => $info){
+				if(!empty($info['key'])){
+					$col_keys[$i] = $name;
+					echo "  {$i}: {$name}\n";
+					$i++;
 				}
 			}
-			if(!empty(self::$config['migrations_table'])){
-				echo "Create migration? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					// get key type
-					$sql = sprintf("SHOW FIELDS FROM `%s` WHERE `Field` = '%s'", mysql_real_escape_string($table), mysql_real_escape_string($column));
-					$col_info = self::$db->query($sql, true);
-					switch($col_info[0]['Key']){
-						case 'UNI':
-							$type = 'unique';
-						case 'PRI':
-							$type = 'primary';
-						default:
-							$type = 'index';
-					}
-					$up = "parent::\$db->remove_key('{$table}', '{$col}');\n";
-					$down = "parent::\$db->add_key('{$table}', '{$col}', '{$type}');\n";
-					Migrations::generate_migration_file($up, $down, true);
-				}
+			if(empty($col_keys)){
+				echo "No keys. Exiting...\n";
+				exit(0);
 			}
-			self::$db->remove_key($table, $col);
+			do{
+				echo "Which column would you like to drop the key from?: ";
+				$resp = Tea::response();
+				if(!isset($col_keys[$resp])){
+					echo "Not a valid selection!\n";
+				}else{
+					$col = $col_keys[$resp];
+				}
+			}while(empty($col));
+			
+			if((Config::is_set('migrations.table') && self::table_exists(Config::get('migrations.table'))) && Tea::yes_no('Create migration file?')){
+				echo "Migration name [{$table}DropKey]: ";
+				$name = Migrations::name_response($table.'DropKey');
+				
+				$up = "Database::drop_key('{$table}', '{$col}');";
+				$down = "Database::add_key('{$table}', '{$col}', '{$columns[$col]['key']}');";
+				$number = Migrations::create_migration($name, $up, $down);
+			}
+			
+			self::drop_key($table, $col);
 		}
 	
 	}
