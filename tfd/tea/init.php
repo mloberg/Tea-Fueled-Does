@@ -4,13 +4,20 @@
 	 * Get TFD ready to go
 	 */
 	
-	use TFD\Tea\Database;
-	
 	class Init{
 	
 		public static function action($args){
+			if(!empty($arg)){
+				echo "We're not expecting an argument...\n";
+			}
+			// Migrations init
+			Migrations::init();
 			// database init
-			Database::action('-i');
+			Database::init();
+			// Add a user
+			if(Tea::yes_no("Add a user?")){
+				User::add();
+			}
 		}
 	
 	}

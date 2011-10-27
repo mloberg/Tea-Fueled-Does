@@ -408,7 +408,7 @@ MAN;
 		 * Class Methods
 		 */
 		
-		protected static function init(){
+		public static function init(){
 			// if no database information was loaded, exit
 			if(!Config::is_set('mysql.host')){
 				echo "Empty database config. Exiting...\n";
@@ -479,7 +479,7 @@ MAN;
 			echo "Database setup.\n";
 		}
 		
-		protected static function create_table_prompt($table = null, $columns = array()){
+		public static function create_table_prompt($table = null, $columns = array()){
 			// table name
 			if(empty($table)){
 				do{
@@ -511,7 +511,7 @@ MAN;
 			echo "Created table {$table}.\n";
 		}
 		
-		protected static function drop_table_prompt($table = null){
+		public static function drop_table_prompt($table = null){
 			if(empty($table)){
 				$tables = self::list_tables();
 				if(empty($tables)){
