@@ -21,7 +21,8 @@
 			'create-table' => 'create_table_prompt',
 			'drop-table' => 'drop_table_prompt',
 			'add-columns' => 'add_column_prompt',
-			'add-column' => 'add_column_prompt'
+			'add-column' => 'add_column_prompt',
+			'drop-columns' => 'drop_column_prompt'
 		);
 		
 		public static function action($arg){
@@ -193,6 +194,75 @@ MAN;
 				return false;
 			}catch(\TFD\Exception $e){
 				return false;
+			}
+		}
+		
+		public static function add_columns($table, $columns){
+			if(!self::table_exists($table)){
+				echo "{$table} does not exist! Exiting...\n";
+				exit(0);
+			}
+			$keys = array();
+			$query = "ALTER TABLE `{$table}`";
+			foreach($columns as $name => $info){
+				$query .= " ADD COLUMN `{$name}` ";
+				// get type
+				if($info['length'] === false || empty($info['length'])){
+					$query .= $info['type'].' ';
+				}else{
+					$query .= "{$info['type']}({$info['length']}) ";
+				}
+				
+				if($info['null'] === true && $info['default'] === false){
+					$query .= "DEFAULT NULL ";
+				}elseif($info['null'] === true && $info['type'] == 'timestamp'){
+					$query .= "DEFAULT CURRENT_TIMESTAMP ";
+				}elseif($info['null'] === true){
+					$query .= "DEFAULT '{$info['default']}' ";
+				}elseif($info['null'] === false && $info['default'] === false){
+					$query .= "NOT NULL ";
+				}elseif($info['null'] === false && $info['type'] == 'timestamp'){
+					$query .= "NOT NULL DEFAULT CURRENT_TIMESTAMP ";
+				}elseif($info['null'] == false){
+					$query .= "NOT NULL DEFAULT '{$info['default']}' ";
+				}
+				
+				$query .= strtoupper($info['extra']).',';
+				
+				// if there is a key, save it to the key array for later
+				if(!empty($info['key'])){
+					$keys[$name] = $info['key'];
+				}
+			}
+			if(!empty($keys)){
+				foreach($keys as $name => $type){
+					$query .= sprintf(" ADD %s (`%s`),", strtoupper($type), $name);
+				}
+			}
+			try{
+				MySQL::query(substr($query, 0, -1));
+				echo "Columns added!\n";
+			}catch(\TFD\Exception $e){
+				echo "Could not add columns. Error: {$e->getMessage()}\n";
+				exit(0);
+			}
+		}
+		
+		public static function drop_columns($table, $columns){
+			if(!self::table_exists($table)){
+				echo "{$table} does not exist! Exiting...\n";
+				exit(0);
+			}
+			$query = "ALTER TABLE `{$table}`";
+			foreach($columns as $column){
+				$query .= " DROP `{$column}`,";
+			}
+			try{
+				MySQL::query(substr($query, 0, -1));
+				echo "Columns dropped!\n";
+			}catch(\TFD\Exception $e){
+				echo "Could not drop columns. Error: {$e->getMessage()}\n";
+				exit(0);
 			}
 		}
 		
@@ -463,6 +533,10 @@ MAN;
 			}
 			
 			$original_columns = self::list_columns($table);
+			echo "Current columns:\n";
+			foreach($original_columns as $name => $info){
+				echo "  - {$name}\n";
+			}
 			$columns = self::add_columns_prompt($original_columns);
 			
 			foreach($original_columns as $k => $v){
@@ -473,8 +547,82 @@ MAN;
 				echo "Migration name [{$table}Cols]: ";
 				$name = Migrations::name_response($table.'Cols');
 				
+				$col_str = var_export($columns, true);
+				$col_down = var_export(array_keys($columns), true);
 				
+				$up = "Database::add_columns('{$table}', {$col_str});";
+				$down = "Database::drop_columns('{$table}', {$col_down});";
+				$number = Migrations::create_migration($name, $up, $down);
 			}
+			
+			self::add_columns($table, $columns);
+		}
+		
+		public static function drop_column_prompt($table = null){
+			if(empty($table)){
+				$tables = self::list_tables();
+				if(empty($tables)){
+					echo "No tables! Exiting...\n";
+					exit(0);
+				}
+				echo "Tables:\n";
+				foreach($tables as $index => $value){
+					echo "  {$index}: {$value}\n";
+				}
+				echo "Which table would you like to add columns to? ";
+				do{
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}else{
+						echo "That's not a valid selection: ";
+					}
+				}while(empty($table));
+			}elseif(!self::table_exists($table)){
+				echo "Table does not exist! Exiting...\n";
+				exit(0);
+			}
+			
+			$original_columns = self::list_columns($table);
+			$columns = array_keys($original_columns);
+			$drop = array();
+			
+			echo "Columns:\n";
+			foreach($columns as $index => $name){
+				echo "  {$index}: {$name}\n";
+			}
+			do{
+				echo "Which column would you like to drop? ('q' when done): ";
+				$resp = Tea::response();
+				if($resp == 'q'){
+					$exit = true;
+				}elseif(!isset($columns[$resp])){
+					echo "Not a valid selection!\n";
+				}else{
+					$drop[] = $columns[$resp];
+					unset($columns[$resp]);
+				}
+				if(empty($columns)) $exit = true;
+			}while($exit !== true);
+			
+			if((Config::is_set('migrations.table') && self::table_exists(Config::get('migrations.table'))) && Tea::yes_no('Create migration file?')){
+				echo "Migration name [{$table}DropCols]: ";
+				$name = Migrations::name_response($table.'DropCols');
+				
+				$up = var_export($drop, true);
+				
+				$down = array();
+				foreach($drop as $col){
+					$down[$col] = $original_columns[$col];
+				}
+				$down = var_export($down, true);
+				
+				$up = "Database::drop_columns('{$table}', {$up});";
+				$down = "Database::add_columns('{$table}', {$down});";
+				$number = Migrations::create_migration($name, $up, $down);
+			}
+			
+			self::drop_columns($table, $drop);
 		}
 		
 		/**
@@ -518,174 +666,6 @@ MAN;
 						break;
 				}
 */
-		
-		public static function add_column(){
-			// which table?
-			$tables = self::get_db_tables();
-			foreach($tables as $index => $table){
-				echo "{$index}: {$table}\n";
-			}
-			do{
-				echo "Which table would you like to add the column to? ";
-				$table = $tables[trim(fgets(STDIN))];
-			}while(empty($table));
-			// after what column?
-			$fields = self::get_table_fields($table);
-			foreach($fields as $index => $field){
-				echo "{$index}: {$field}\n";
-			}
-			do{
-				echo "What field would you like to add it after? ";
-				$after = $fields[trim(fgets(STDIN))];
-			}while(empty($after));
-			// name of column
-			do{
-				echo "Name of field? ";
-				$column = trim(fgets(STDIN));
-				if(array_search($column, $fields)) $column = '';
-			}while(empty($column));
-			// column info
-			echo "Field type [varchar]: ";
-			$type = trim(fgets(STDIN));
-			$type = (!empty($type)) ? $type : 'varchar';
-			if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time|varchar|int|tinyint|smallint|mediumint|bigint|decimal|bit|char|mediumtext|year|enum)/', $type)){
-				echo "\tError: We do not support that field type.\n";
-			}else{
-				if(!preg_match('/(float|double|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time)/', $type)){
-					switch($type){
-						case 'tinyint':
-							$default = '4';
-							break;
-						case 'smallint':
-							$default = '6';
-							break;
-						case 'mediumint':
-							$default = '9';
-							break;
-						case 'int':
-							$default = '11';
-							break;
-						case 'bigint':
-							$default = '20';
-							break;
-						case 'char':
-							$default = '1';
-						case 'varchar':
-							$default = '128';
-							break;
-						case 'bit':
-							$default = '1';
-							break;
-						case 'decimal':
-							$default = '10,0';
-							break;
-						case 'year':
-							$default = '4';
-							break;
-					}
-					do{
-						echo "Field Length/Content [$default]:";
-						$length = trim(fgets(STDIN));
-						if(!empty($default) && empty($length)) $length = $default;
-					}while(empty($length));
-				}
-				do{
-					echo "Allow Null (true, false) [true]: ";
-					$null = trim(fgets(STDIN));
-					$null = (!empty($null)) ? $null : 'true';
-				}while(!preg_match('/(true|false)/', $null));
-				echo "Default value: ";
-				$default_val = trim(fgets(STDIN));
-				echo "Extra (auto_increment, etc.): ";
-				$extra = trim(fgets(STDIN));
-				do{
-					$pass = false;
-					echo "Index (primary, unique, key): ";
-					$key = trim(fgets(STDIN));
-					if(preg_match('/(primary|unique|key)/', $key) || empty($key)) $pass = true;
-				}while(!$pass);
-				$info = array(
-					'type' => $type,
-					'length' => $length,
-					'null' => $null,
-					'default' => $default_val,
-					'extra' => $extra,
-					'key' => $key
-				);
-				self::$db->add_column($table, $column, $info, $after);
-			}
-			// if migrations are setup, generate migration
-			if(!empty(self::$config['migrations_table'])){
-				echo "Create migration? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					$col_str = var_export($info, true);
-					$up = "parent::\$db->add_column('{$table}', '{$column}', {$col_str}, '{$after}');\n";
-					$down = "parent::\$db->drop_column('{$table}', '{$column}');\n";
-					Migrations::generate_migration_file($up, $down, true);
-				}
-			}
-			echo "Column {$column} added to table {$table}.\n";
-		}
-		
-		public static function drop_column($table = null, $col = null){
-			if(is_null($column) || is_null($table)){
-				if(is_null($table)){
-					$tables = self::get_db_tables();
-					foreach($tables as $index => $t){
-						echo "{$index}: {$t}\n";
-					}
-					$max = max(array_keys($tables));
-					$min = min(array_keys($tables));
-					do{
-						echo "Which table would you like to drop? [{$min} - {$max}]: ";
-						$table = $tables[trim(fgets(STDIN))];
-					}while(empty($table));
-				}
-				$cols = self::get_table_fields($table);
-				foreach($cols as $index => $c){
-					echo "{$index}: {$c}\n";
-				}
-				$max = max(array_keys($cols));
-				$min = min(array_keys($cols));
-				do{
-					echo "Which column would you like to drop? [{$min} - {$max}]: ";
-					$resp = trim(fgets(STDIN));
-					$after = $cols[$resp - 1];
-					$col = $cols[$resp];
-				}while(empty($col));
-			}
-			// if migrations are setup, generate migration
-			if(!empty(self::$config['migrations_table'])){
-				echo "Create migration? [y/n]: ";
-				if(strtolower(trim(fgets(STDIN))) === 'y'){
-					$sql = sprintf("SHOW FIELDS FROM `%s` WHERE `Field` = '%s'", $table, $col);
-					$col_info = self::$db->query($sql, true);
-					$col_info = $col_info[0];
-					$keys = array(
-						'PRI' => 'primary',
-						'UNI' => 'unique',
-						'MUL' => 'index'
-					);
-					preg_match('/\((\d+)\)/', $col_info['Type'], $match);
-					$type = str_replace(array($match[0], 'unsigned'), '', $col_info['Type']);
-					$null = ($col_info['Null'] === 'NO') ? 'false' : 'true';
-					$info = array(
-						'type' => $type,
-						'length' => $match[1],
-						'null' => $null,
-						'default' => $col_info['Default'],
-						'extra' => $col_info['Extra'],
-						'key' => $keys[$col_info['Key']]
-					);
-					$col_str = var_export($info, true);
-					$up = "parent::\$db->drop_column('{$table}', '{$col}');\n";
-					$down = "parent::\$db->add_column('{$table}', '{$col}', {$col_str}, '{$after}');\n";
-					Migrations::generate_migration_file($up, $down, true);
-				}
-			}
-			// drop column
-			self::$db->drop_column($table, $col);
-		}
 		
 		public static function add_key($table = null, $col = null, $type = null){
 			if(is_null($column) || is_null($table)){
