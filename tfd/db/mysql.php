@@ -40,19 +40,18 @@
 		 * Accessors
 		 */
 		
-		protected static function set($name, $value){
-			self::$info[$name] = $value;
-		}
-		
-		public static function last_query(){
+		public static function last_query($query = null){
+			if(!is_null($query)) self::$info['last_query'] = $query;
 			return self::$info['last_query'];
 		}
 		
-		public static function num_rows(){
+		public static function num_rows($num_rows = null){
+			if(!is_null($num_rows)) self::$info['num_rows'] = $num_rows;
 			return self::$info['num_rows'];
 		}
 		
-		public static function insert_id(){
+		public static function insert_id($id = null){
+			if(!is_null($id)) self::$info['insert_id'] = $id;
 			return self::$info['insert_id'];
 		}
 		
@@ -81,12 +80,12 @@
 			foreach($params as $param => $value){
 				$query = str_replace(':'.$param, $value, $query);
 			}
-			self::set('last_query', $query);
+			self::last_query($query);
 			
 			// run query
 			try{
 				$stmt->execute($params);
-				self::set('num_rows', $stmt->rowCount());
+				self::num_rows($stmt->rowCount());
 				if($return === true){
 					$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 					$data = array();
@@ -203,7 +202,7 @@
 				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
 				$stmt->bindParam(':'.$param, $value);
 			}
-			self::set('last_query', $query);
+			self::last_query($query);
 			
 			return $stmt;
 		}
@@ -226,7 +225,7 @@
 			}catch(\PDOException $e){
 				throw new \TFD\Exception($e);
 			}
-			self::set('num_rows', $stmt->rowCount());
+			self::num_rows($stmt->rowCount());
 			$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 			$data = array();
 			while($row = $stmt->fetch()){
@@ -258,8 +257,8 @@
 				$stmt = self::query_builder($qry);
 				try{
 					$stmt->execute(self::$params);
-					self::set('insert_id', self::$connection->lastInsertId());
-					self::set('num_rows', $stmt->rowCount());
+					self::insert_id(self::$connection->lastInsertId());
+					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
@@ -273,6 +272,7 @@
 			if(!is_array($data)){
 				$type = gettype($data);
 				throw new \LogicException("MySQL::update expects an array, {$type} given.");
+				return false;
 			}elseif(empty(self::$query['where']) && $where !== true){
 				throw new \TFD\Exception('WHERE is not set in your query, this will update all rows. Skipping query.');
 				return false;
@@ -290,12 +290,25 @@
 				$stmt = self::query_builder($qry);
 				try{
 					$stmt->execute(self::$params);
-					self::set('num_rows', $stmt->rowCount());
+					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);
 					return false;
 				}
+			}
+		}
+		
+		public function set($key, $value, $where = null){
+			if(is_array($where)) self::where($where);
+			if(is_array($key) || is_array($value)){
+				throw new \LogicException("MySQL::set is used for setting a single column. If you wish to set multiple columns, use MySQL::update");
+				return false;
+			}elseif(empty(self::$query['where']) && $where !== true){
+				throw new \TFD\Exception('WHERE is not set in your query, this will update all rows. Skipping query.');
+				return false;
+			}else{
+				return $this->update(array($key => $value));
 			}
 		}
 		
@@ -309,7 +322,7 @@
 				$stmt = self::query_builder($qry);
 				try{
 					$stmt->execute(self::$params);
-					self::set('num_rows', $stmt->rowCount());
+					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
 					throw new \TFD\Exception($e);

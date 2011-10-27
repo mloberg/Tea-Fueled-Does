@@ -6,12 +6,6 @@
 	
 	class Migrations{
 	
-		function __construct(){
-			self::$db = parent::db();
-			$conf_file = TEA_CONFIG.'migrations'.EXT;
-			if(file_exists($conf_file)) self::$table = include($conf_file);
-		}
-		
 		private static $commands = array(
 			'i' => 'init',
 			'h' => 'help',
@@ -121,7 +115,7 @@ FILE;
 			fclose($fp);
 			if($add){
 				try{
-					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 					MySQL::table(Config::get('migrations.table'))->insert(array('number' => $number, 'active' => 1));
 				}catch(\TFD\Exception $e){
 					echo $e->getMessage()."\nExiting...\n";
@@ -257,7 +251,7 @@ FILE;
 			// make sure we're running the latest migration
 			if(!empty($migration_files)){
 				if(Tea::yes_no('Run migrations?')){
-					//self::latest();
+					self::latest();
 				}
 			}
 		}
@@ -339,17 +333,17 @@ FILE;
 				}
 				// sort so we run in the right order
 				ksort($migrations);
-				// clear the active migration
-				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
 				foreach($migrations as $number => $name){
 					// get the class name
 					$class = '\Content\Migrations\\'.$name.'_'.$number;
 					// and run the up method
 					$class::up();
+					// clear the active migration
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
+					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
 					// and make sure we know what's the latest migration
 					Config::set('migrations.active', $number);
 				}
-				MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $migration));
 			}
 		}
 		
@@ -389,7 +383,7 @@ FILE;
 				// sort so we run in the right order
 				krsort($migrations);
 				// clear the active migration
-				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->update(array('active' => 0));
+				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 				foreach($migrations as $number => $name){
 					// get class name
 					$class = '\Content\Migrations\\'.$name.'_'.$number;

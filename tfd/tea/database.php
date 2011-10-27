@@ -469,8 +469,6 @@ MAN;
 				unset($columns[$k]);
 			}
 			
-			print_r($columns);
-			
 			if((Config::is_set('migrations.table') && self::table_exists(Config::get('migrations.table'))) && Tea::yes_no('Create migration file?')){
 				echo "Migration name [{$table}Cols]: ";
 				$name = Migrations::name_response($table.'Cols');
