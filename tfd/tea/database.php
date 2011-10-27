@@ -6,10 +6,6 @@
 	
 	class Database{
 	
-		private static $env;
-		public static $config = array();
-		private static $db;
-		
 		private static $commands = array(
 			'h' => 'help',
 			'i' => 'init',
