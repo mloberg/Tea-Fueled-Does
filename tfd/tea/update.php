@@ -8,6 +8,18 @@
 		
 		public static function action($arg){
 			if(empty($arg)) self::help();
+			
+			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = trim($match[2]);
+			}elseif(preg_match('/^\-(\w)(.+)?/', $arg, $match)){
+				$run = self::$commands[$match[1]];
+				$args = trim($match[2]);
+			}elseif(preg_match('/([\w|\-]+)(.+)?/', $arg, $match)){
+				$run = $match[1];
+				$args = trim($match[2]);
+			}
+			
 		}
 		
 		public static function help(){
