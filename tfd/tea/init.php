@@ -10,11 +10,12 @@
 			if(!empty($arg)){
 				echo "We're not expecting an argument...\n";
 			}
-			echo "Migrations Init:\n";
-			Migrations::init();
 			echo "\nDatabase Init:\n";
 			Database::init();
-			echo "\n";
+			if(Tea::yes_no('Setup Migrations?')){
+				Migrations::init();
+				echo "\n";
+			}
 			// Add a user
 			if(Tea::yes_no("Add a user?")){
 				User::add();

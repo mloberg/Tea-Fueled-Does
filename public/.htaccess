@@ -1,18 +1,13 @@
-### PHP settings (these may not work on all servers) ###
-### These rules will be deleted in an upcoming version ###
-	php_flag display_errors on
-	php_flag register_globals off
-	php_flag magic_quotes_gpc off
-	php_flag register_long_arrays off
-	php_flag short_open_tag on
-
 ### Set Server Environment ###
 	SetEnv ENV DEVELOPMENT
+
+### Turn errors on by default (can be turned off later) ###
+	php_flag display_errors on
 
 ### Rewrite on ###
 	RewriteEngine On
 
-### Not recommended to have the content and tfd folder in the root, but if they did... ###
+### Not recommended to have the content and tfd folder in the root, but if you needed to ###
 	RewriteRule ^content/(.*)$ 404 [L]
 	RewriteRule ^tfd/(.*)$ 404 [L]
 

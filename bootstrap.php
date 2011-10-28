@@ -76,9 +76,5 @@ Loader::create_aliases(array(
 	'S3' => 'TFD\S3'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Email\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
-if(APP_DIR !== BASE_DIR.'tfd/'){
-	Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
-}
-if(CONTENT_DIR !== BASE_DIR.'content/'){
-	Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));
-}
+if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
+if(CONTENT_DIR !== BASE_DIR.'content/') Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));
