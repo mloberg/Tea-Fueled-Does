@@ -15,7 +15,7 @@
 	// get the public dir
 	$public_dir = __DIR__;
 	
-	// define the location of the app and content dir. Without the begin slash and with the trailing slash (/)
+	// define the location of the app and content dir. Without the begin slash or trailing slash /
 	$app_dir = '../tfd';
 	$content_dir = '../content';
 	

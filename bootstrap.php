@@ -57,22 +57,28 @@ spl_autoload_register(array('TFD\Loader', 'load'));
 // create some class aliases
 use TFD\Loader;
 Loader::create_aliases(array(
-	'CSS' => '\TFD\CSS',
-	'JavaScript' => '\TFD\JavaScript',
-	'Flash' => '\TFD\Flash',
-	'MySQL' => '\TFD\DB\MySQL',
-	'ReCAPTCHA' => '\TFD\Form\ReCAPTCHA',
-	'Postmark' => '\TFD\Email\Postmark',
-	'Image' => '\TFD\Image',
-	'Validate' => '\TFD\Form\Validate',
-	'Template' => '\TFD\Template',
-	'Benchmark' => '\TFD\Benchmark',
-	'Render' => '\TFD\Core\Render',
-	'Redis' => '\TFD\Redis',
-	'Upload' => '\TFD\Upload\File',
-	'Config' => '\TFD\Config',
-	'HTML' => '\TFD\HTML',
-	'Form' => '\TFD\Form\HTML',
-	'S3' => '\TFD\S3'
+	'CSS' => 'TFD\CSS',
+	'JavaScript' => 'TFD\JavaScript',
+	'Flash' => 'TFD\Flash',
+	'MySQL' => 'TFD\DB\MySQL',
+	'ReCAPTCHA' => 'TFD\Form\ReCAPTCHA',
+	'Postmark' => 'TFD\Email\Postmark',
+	'Image' => 'TFD\Image',
+	'Validate' => 'TFD\Form\Validate',
+	'Template' => 'TFD\Template',
+	'Benchmark' => 'TFD\Benchmark',
+	'Render' => 'TFD\Core\Render',
+	'Redis' => 'TFD\Redis',
+	'Upload' => 'TFD\Upload\File',
+	'Config' => 'TFD\Config',
+	'HTML' => 'TFD\HTML',
+	'Form' => 'TFD\Form\HTML',
+	'S3' => 'TFD\S3'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\Email\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
+if(APP_DIR !== BASE_DIR.'tfd/'){
+	Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
+}
+if(CONTENT_DIR !== BASE_DIR.'content/'){
+	Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));
+}
