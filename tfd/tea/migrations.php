@@ -350,18 +350,14 @@ FILE;
 		public static function down($arg){
 			$info = self::get_migration_info();
 			$migrations = $info['migrations'];
-			if($info['active'] == 1){
-				echo "You are running the first migration.\n";
-				exit(0);
-			}
 			// determine the migration
 			if(isset($migrations[$arg]) && $arg < $info['active']){
 				$migration = $arg;
 			}elseif(self::list_migrations(true)){
-				echo "Select migration: ";
+				echo "Select migration (0 to run all down migrations): ";
 				do{
 					$migration = Tea::response();
-					if(!isset($migrations[$migration])){
+					if(!isset($migrations[$migration]) && $migration != 0){
 						$migration = '';
 						echo "\033[1;31mError:\033[0m Not a valid migration. Please select a valid migration: ";
 					}elseif($migration > $info['active']){
@@ -382,18 +378,21 @@ FILE;
 				}
 				// sort so we run in the right order
 				krsort($migrations);
-				// clear the active migration
-				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 				foreach($migrations as $number => $name){
 					// get class name
 					$class = '\Content\Migrations\\'.$name.'_'.$number;
 					// run the down method
 					$class::down();
+					// clear the active migration
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
+					// set the active migration
+					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
 					// and make sure we know what's the latest migration
 					Config::set('migrations.active', $number);
 				}
-				// set the active migration
-				MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $migration));
+				if($migration == 0){
+					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
+				}
 			}
 		}
 		
