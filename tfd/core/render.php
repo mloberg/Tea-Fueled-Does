@@ -25,8 +25,11 @@
 			return new View($options);
 		}
 		
-		public static function partial($file, $options){
-			return new Partial($file, $options);
+		public static function partial($file, $options = array()){
+			Hooks::partial();
+			$options['dir'] = Config::get('views.partials');
+			$options['view'] = $file;
+			return new View($options);
 		}
 		
 		public static function error($type){
@@ -217,21 +220,6 @@
 		
 		public function render(){
 			return $this->__render_view();
-		}
-	
-	}
-	
-	/**
-	 * Render a partial
-	 */
-	
-	class Partial extends Render{
-	
-		function __construct($file, $options = array()){
-			Hooks::partial();
-			$options['dir'] = Config::get('views.partials');
-			$options['view'] = $file;
-			return new View($options);
 		}
 	
 	}
