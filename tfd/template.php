@@ -1,4 +1,4 @@
-<?php namespace TFD\Library;
+<?php namespace TFD;
 
 /**
  * A Mustache implementation in PHP.
@@ -10,7 +10,6 @@
  *
  * @author Justin Hileman {@link http://justinhileman.com}
  *
- * Modified for Tea-Fueled Does (https://github.com/mloberg/Tea-Fueled-Does/) by Matthew Loberg (http://mloberg.com)
  */
 class Template{
 
@@ -59,6 +58,10 @@ class Template{
 				$this->_context[$last] =& $this;
 			}
 		}
+	}
+	
+	public static function make($template = null, $view = null, $partials = null){
+		return new self($template, $view, $partials);
 	}
 	
 	public function render($template = null, $view = null, $partials = null){

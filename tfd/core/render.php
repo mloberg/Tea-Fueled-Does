@@ -3,7 +3,7 @@
 	use TFD\Admin;
 	use TFD\App;
 	use Content\Hooks;
-	use TFD\Library\Template;
+	use TFD\Template;
 	use TFD\Config;
 	
 	class Render{
