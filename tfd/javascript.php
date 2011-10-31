@@ -10,9 +10,9 @@
 		private static $config = array();
 		
 		private static $libraries = array(
-			'mootools' => 'js/mootools-core-1.3.1.min.js',
-			'mootools-more' => 'js/mootools-more-1.3.1.1.min.js',
-			'jquery' => 'js/jquery-1.6.2.min.js',
+			'mootools' => 'js/mootools-core-1.4.1-min.js',
+			'mootools-more' => 'js/mootools-more-1.4.0.1-min.js',
+			'jquery' => 'js/jquery-1.6.4.min.js',
 			'jquery-ui' => 'js/jquery-ui-1.8.14.min.js',
 			'tfd' => 'js/tfd.js'
 		);
@@ -66,7 +66,12 @@
 		
 		public static function add_library($name, $src, $load = false, $order = null){
 			self::$libraries[$name] = $src;
-			if($load) self::library($name, $order, true);
+			if($load) self::library($name, true, $order);
+		}
+		
+		public static function update_library($name, $src, $load = false, $order = null){
+			self::$libraries[$name] = $src;
+			if($load) self::library($name, true, $order);
 		}
 		
 		public static function library($lib, $load = true, $order = null){
