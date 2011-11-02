@@ -88,7 +88,19 @@
 				
 				'redis.host' => '',
 				'redis.port' => 6379,
-				'redis.pass' => ''
+				'redis.pass' => '',
+				
+				'cache.driver' => 'file',
+				'cache.key' => '',
+				
+				'memcached.class' => '', // defaults to memcache
+				'memcached.servers' => array(
+					array(
+						'host' => '192.168.1.222',
+						'port' => 11211,
+						'weight' => 100,
+					)
+				)
 			));
 		}
 		

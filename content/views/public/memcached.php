@@ -1,0 +1,3 @@
+<?php
+
+TFD\Memcached::instance();
