@@ -1,6 +1,6 @@
 <?php namespace TFD\Cache;
 
-	class APC{
+	class APC implements Driver{
 	
 		public static function has($key){
 			return (!is_null(self::get($key)));
@@ -15,7 +15,7 @@
 		}
 		
 		public static function delete($key){
-			apc_delete($key);
+			return apc_delete($key);
 		}
 	
 	}
