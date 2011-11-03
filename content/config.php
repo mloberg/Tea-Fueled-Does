@@ -44,7 +44,9 @@
 				'application.admin_email' => BASE_DIR.'error.log',
 				
 				'ajax.path' => 'ajax',
-				'ajax.parameter' => 'method'
+				'ajax.parameter' => 'method',
+				
+				'cache.key' => ''
 			));
 		}
 		
@@ -88,16 +90,15 @@
 				
 				'redis.host' => '',
 				'redis.port' => 6379,
-				'redis.pass' => '',
+				'redis.pass' => '', // blank for none
 				
 				'cache.driver' => 'file',
-				'cache.key' => '',
 				'cache.dir' => BASE_DIR.'cache/',
 				
 				'memcached.class' => '', // defaults to memcache
 				'memcached.servers' => array(
 					array(
-						'host' => '192.168.1.222',
+						'host' => '',
 						'port' => 11211,
 						'weight' => 100,
 					)
@@ -121,7 +122,19 @@
 				
 				'redis.host' => '',
 				'redis.port' => 6379,
-				'redis.pass' => '' // blank for none
+				'redis.pass' => '', // blank for none
+				
+				'cache.driver' => 'file',
+				'cache.dir' => BASE_DIR.'cache/',
+				
+				'memcached.class' => '', // defaults to memcache
+				'memcached.servers' => array(
+					array(
+						'host' => '',
+						'port' => 11211,
+						'weight' => 100,
+					)
+				)
 			));
 		}
 		
@@ -141,7 +154,19 @@
 				
 				'redis.host' => '',
 				'redis.port' => 6379,
-				'redis.pass' => '' // blank for none
+				'redis.pass' => '', // blank for none
+				
+				'cache.driver' => 'file',
+				'cache.dir' => BASE_DIR.'cache/',
+				
+				'memcached.class' => '', // defaults to memcache
+				'memcached.servers' => array(
+					array(
+						'host' => '',
+						'port' => 11211,
+						'weight' => 100,
+					)
+				)
 			));
 		}
 	

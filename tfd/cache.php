@@ -29,7 +29,7 @@
 		 * Check for existance of a key in the cache
 		 */
 		
-		public static function exists($key, $driver = null){
+		public static function has($key, $driver = null){
 			return self::driver($driver)->has($key);
 		}
 		

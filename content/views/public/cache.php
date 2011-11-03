@@ -1,13 +1,12 @@
 <?php
 
-use TFD\Cache\File;
+// store an item for 5 minutes
+Cache::store('foo', 'bar', 300);
 
-//File::set('foo', 'bar', 10);
+// Check for item
+if(Cache::has('foo')){
+	echo 'foo exists!';
+}
 
-print_p(Cache::has('foo'));
-	
-//	Cache::store('foo', TFD\Core\Render::partial('test')->render(), 300);
-	
-//	print_p(Cache::get('foo'));
-	
-//	Cache::delete('foo');
+// delete item
+Cache::clear('foo');
