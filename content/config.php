@@ -92,6 +92,7 @@
 				
 				'cache.driver' => 'file',
 				'cache.key' => '',
+				'cache.dir' => BASE_DIR.'cache/',
 				
 				'memcached.class' => '', // defaults to memcache
 				'memcached.servers' => array(

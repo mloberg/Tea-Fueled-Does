@@ -2,19 +2,19 @@
 
 	class APC implements Driver{
 	
-		public static function has($key){
-			return (!is_null(self::get($key)));
+		public function has($key){
+			return (!is_null(this->get($key)));
 		}
 		
-		public static function get($key){
+		public function get($key){
 			return (($cache = apc_fetch($key)) !== false) ? $cache : null;
 		}
 		
-		public static function set($key, $value, $time){
+		public function set($key, $value, $time){
 			apc_store($key, $value, $time);
 		}
 		
-		public static function delete($key){
+		public function delete($key){
 			return apc_delete($key);
 		}
 	

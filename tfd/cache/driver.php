@@ -6,24 +6,24 @@
 		 * Check for the existance of a key
 		 */
 		
-		public static function has($key);
+		public function has($key);
 		
 		/**
 		 * Get the value of a key
 		 */
 		
-		public static function get($key);
+		public function get($key);
 		
 		/**
 		 * Set a key
 		 */
 		
-		public static function set($key, $value, $time);
+		public function set($key, $value, $time);
 		
 		/**
 		 * Delete a key
 		 */
 		
-		public static function delete($key);
+		public function delete($key);
 	
 	}

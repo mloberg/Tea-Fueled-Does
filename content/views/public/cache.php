@@ -1,5 +1,13 @@
 <?php
 
-	use TFD\Cache\APC as Cache;
+use TFD\Cache\File;
+
+//File::set('foo', 'bar', 10);
+
+print_p(Cache::has('foo'));
 	
-	echo (Cache::has('foo')) ? "true" : "false";
+//	Cache::store('foo', TFD\Core\Render::partial('test')->render(), 300);
+	
+//	print_p(Cache::get('foo'));
+	
+//	Cache::delete('foo');
