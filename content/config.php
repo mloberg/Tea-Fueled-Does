@@ -79,9 +79,6 @@
 			Config::load(array(
 				'site.url' => 'http://localhost/', // with trailing slash
 				
-				'application.mode' => 'testing', // testing or production
-				'application.add_user' => true, // ablity to add a user with a url (example.com/?add_user&username=user&password=pass)
-				
 				'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
 				'mysql.port' => '8889', // MySQL default is 3306
 				'mysql.user' => 'root',
@@ -110,9 +107,7 @@
 			// php error reporting
 			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 			Config::load(array(
-				'site.url' => '',
-				
-				'application.add_user' => false,
+				'site.url' => '', // with trailing slash
 				
 				'mysql.host' => '',
 				'mysql.port' => 3306,
@@ -142,9 +137,7 @@
 			// php error reporting
 			error_reporting(0); // no reporting
 			Config::load(array(
-				'site.url' => '',
-				
-				'application.add_user' => false,
+				'site.url' => '', // with trailing slash
 				
 				'mysql.host' => '',
 				'mysql.port' => 3306,

@@ -37,8 +37,6 @@
 				return Admin::login();
 			}elseif(self::is_admin()){
 				return Admin::dashboard();
-			}elseif(self::is_add_user()){
-				
 			}
 			
 			return false;
@@ -66,10 +64,6 @@
 		
 		private static function is_admin(){
 			return (Config::is_set('admin.path') && preg_match('/^'.preg_quote(Config::get('admin.path')).'\/?(.*)?$/', self::$request)) ? true : false;
-		}
-		
-		private static function is_add_user(){
-			return (Config::is_set('application.add_user') && Config::get('application.add_user') && self::$request === 'index' && isset($_GET['add_user']) && !empty($_GET['username']) && $_GET['password']) ? true : false;
 		}
 	
 	}
