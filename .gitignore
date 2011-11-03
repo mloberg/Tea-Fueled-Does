@@ -13,3 +13,4 @@ Icon?
 logs/*
 
 # TFD specific files
+tfd/tea/update.php

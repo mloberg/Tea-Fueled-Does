@@ -12,7 +12,6 @@ Tea Commands:
 
 	init:        Quickly setup TFD.
 	user:        Manage users.
-	update:      Update TFD.
 	config:      Change a config option.
 	database:    Make changes to the database.
 	migrations:  Manage database migrations.
