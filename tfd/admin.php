@@ -121,8 +121,7 @@
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get('hash');
 			}catch(Exception $e){
-				echo '<pre>'.$e->getMessage().'</pre>';
-				exit;
+				return false;
 			}
 			if(empty($user_info)) return false;
 			$hash = $user_info['hash'];
@@ -133,8 +132,7 @@
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('hash');
 			}catch(Exception $e){
-				echo '<pre>'.$e->getMessage().'</pre>';
-				exit;
+				return false;
 			}
 			if(empty($user_info)) return false;
 			$hash = $user_info['hash'];

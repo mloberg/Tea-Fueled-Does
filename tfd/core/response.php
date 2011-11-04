@@ -85,7 +85,7 @@
 			
 			if(!headers_sent()) $this->send_headers();
 			
-			echo (string) self::$content;
+			return (string)self::$content;
 		}
 		
 		public function send_headers(){

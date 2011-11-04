@@ -2,6 +2,16 @@
 
 	Benchmark::start('test');
 	
-	sleep(10);
+	Benchmark::memory('test');
 	
-	echo Benchmark::check('test');
+	$foo = array();
+	
+	for($i = 0; $i < 100; $i++){
+		$foo[$i] = 'bar'.$i;
+	}
+	
+	print_r($foo);
+	
+	echo '<br />'.Benchmark::check('test').'<br />';
+	
+	echo Benchmark::used_memory('test');

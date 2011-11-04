@@ -1,4 +1,4 @@
-<?php namespace TFD\Email;
+<?php namespace TFD;
 
 	use TFD\Config;
 	

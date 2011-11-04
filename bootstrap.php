@@ -54,6 +54,15 @@ unset($environment); // cleanup the global namespace
 include_once(APP_DIR.'loader'.EXT);
 spl_autoload_register(array('TFD\Loader', 'load'));
 
+// Error Handlers
+set_exception_handler(function($e){
+	\TFD\Exception\Handler::make($e)->handle();
+});
+
+set_error_handler(function($number, $error, $file, $line){
+	\TFD\Exception\Handler::make(new \ErrorException($error, $number, 0, $file, $line))->handle();
+}, E_ALL);
+
 // create some class aliases
 use TFD\Loader;
 Loader::create_aliases(array(
@@ -62,7 +71,7 @@ Loader::create_aliases(array(
 	'Flash' => 'TFD\Flash',
 	'MySQL' => 'TFD\DB\MySQL',
 	'ReCAPTCHA' => 'TFD\Form\ReCAPTCHA',
-	'Postmark' => 'TFD\Email\Postmark',
+	'Postmark' => 'TFD\Postmark',
 	'Image' => 'TFD\Image',
 	'Validate' => 'TFD\Form\Validate',
 	'Template' => 'TFD\Template',
@@ -76,6 +85,6 @@ Loader::create_aliases(array(
 	'S3' => 'TFD\S3',
 	'Cache' => 'TFD\Cache'
 ));
-Loader::add_alias('PostmarkBatch', '\TFD\Email\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
+Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
 if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
 if(CONTENT_DIR !== BASE_DIR.'content/') Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));

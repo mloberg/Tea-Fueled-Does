@@ -3,13 +3,6 @@
 	class Exception extends \Exception{
 	
 		public function __construct($message, $code = 0, Exception $previous = null){
-			// add a stack trace to the message
-/*
-			ob_start();
-			debug_print_backtrace();
-			$trace = ob_get_contents();
-			ob_end_clean();
-*/
 			parent::__construct($message, $code, $previous);
 			$this->bootstrap($message, $code);
 		}

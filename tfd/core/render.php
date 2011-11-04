@@ -32,8 +32,8 @@
 			return new View($options);
 		}
 		
-		public static function error($type){
-			return new ErrorPage($type);
+		public static function error($type, $data = array()){
+			return new ErrorPage($type, $data);
 		}
 		
 		public static function template($template = null, $options = null, $partials = null){
@@ -227,9 +227,10 @@
 	class ErrorPage extends Render{
 	
 		private static $page;
+		private static $data;
 		
-		function __construct($type){
-			$this->bootstrap($type);
+		function __construct($type, $data = array()){
+			$this->bootstrap($type, $data);
 		}
 		
 		function __toString(){
@@ -237,11 +238,12 @@
 		}
 		
 		private function __render_page(){
-			return parent::__render(self::$page);
+			return parent::__render(self::$page, self::$data);
 		}
 		
-		private function bootstrap($type){
+		private function bootstrap($type, $data){
 			self::$page = VIEWS_DIR.Config::get('views.error').'/'.$type.EXT;
+			self::$data = $data;
 		}
 		
 		public function render(){

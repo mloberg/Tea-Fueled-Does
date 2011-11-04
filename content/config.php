@@ -40,9 +40,6 @@
 				
 				'crypter.rounds' => 10, // default rounds for the crypter class
 				
-				'application.error_log' => '',
-				'application.admin_email' => BASE_DIR.'error.log',
-				
 				'ajax.path' => 'ajax',
 				'ajax.parameter' => 'method',
 				
@@ -79,6 +76,9 @@
 			Config::load(array(
 				'site.url' => 'http://localhost/', // with trailing slash
 				
+				'error.log' => false,
+				'error.detailed' => true,
+				
 				'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
 				'mysql.port' => '8889', // MySQL default is 3306
 				'mysql.user' => 'root',
@@ -109,6 +109,9 @@
 			Config::load(array(
 				'site.url' => '', // with trailing slash
 				
+				'error.log' => BASE_DIR.'error.log',
+				'error.detailed' => true,
+				
 				'mysql.host' => '',
 				'mysql.port' => 3306,
 				'mysql.user' => '',
@@ -138,6 +141,9 @@
 			error_reporting(0); // no reporting
 			Config::load(array(
 				'site.url' => '', // with trailing slash
+				
+				'error.log' => BASE_DIR.'error.log',
+				'error.detailed' => false,
 				
 				'mysql.host' => '',
 				'mysql.port' => 3306,
