@@ -6,7 +6,7 @@
 		
 		function __construct($file){
 			if(!isset($_FILES[$file])){
-				throw new \TFD\Exception("\$_FILES[{$file}] not set!");
+				throw new \Exception("\$_FILES[{$file}] not set");
 			}else{
 				self::$info = $_FILES[$file];
 				print_p(self::$info);
@@ -49,7 +49,7 @@
 			if(!preg_match('/\/$/', $path)) $path .= '/';
 			$target = $path.$name;
 			if(file_exists($target) && $force !== true){
-				throw new \TFD\Exception("{$target} exists. If you wish to overwrite this file, pass true as the third parameter.");
+				throw new \Exception("{$target} exists. If you wish to overwrite this file, pass true as the third parameter");
 				return false;
 			}else{
 				return (move_uploaded_file(self::$info['tmp_name'], $target));

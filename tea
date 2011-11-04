@@ -21,6 +21,13 @@ include_once(CONTENT_DIR.'tea-config'.EXT);
 // run verbosely
 error_reporting(E_ERROR|E_WARNING|E_PARSE);
 
+// deal with exceptions differently
+set_exception_handler(function($e){
+	$e = new \TFD\Exception\Examiner($e);
+	echo $e->message();
+	exit(1);
+});
+
 // define STDIN if not already
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 

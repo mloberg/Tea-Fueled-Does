@@ -21,7 +21,7 @@
 		
 		protected function __send($data, $endpoint = null){
 			if(!is_array($data) || empty($data)){
-				throw new \LogicException('');
+				throw new \Exception('Email data is empty. Cannot send email');
 			}else{
 				if(is_null($endpoint) || empty($endpoint)) $endpoint = self::API_ENDPOINT;
 				$headers = array(
@@ -68,7 +68,7 @@
 		
 		public function send(){
 			if(empty($this->data['To'])){
-				throw new \TFD\Exception('Postmark::to() has not been set!');
+				throw new \Exception('Postmark::to() has not been set');
 			}else{
 				$this->data['From'] = $this->from;
 				$this->data['ReplyTo'] = $this->reply_to;
@@ -115,7 +115,7 @@
 		
 		public function send(){
 			if(empty($this->batch)){
-				throw new \TFD\Exception('No information has been set!');
+				throw new \Exception('No information has been set');
 			}else{
 				$resp = $this->__send($this->batch, self::BATCH_ENDPOINT);
 				$this->batch = array();
@@ -126,7 +126,7 @@
 		public function add(){
 			$email = $this->data();
 			if(empty($email['To'])){
-				throw new \TFD\Exception('PostmarkBatch::to() has not been set!');
+				throw new \Exception('PostmarkBatch::to() has not been set');
 			}else{
 				$email['From'] = $this->from;
 				$email['ReplyTo'] = $this->reply;

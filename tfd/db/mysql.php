@@ -30,8 +30,8 @@
 				$con = new Connection();
 				try{
 					self::$connection = $con->mysql();
-				}catch(Exception $e){
-					throw new \TFD\Exception($e);
+				}catch(\Exception $e){
+					throw new \Exception($e);
 				}
 			}
 		}
@@ -100,7 +100,7 @@
 				}
 				return true;
 			}catch(\PDOException $e){
-				throw new \TFD\Exception($e);
+				throw new \Exception($e);
 				return false;
 			}
 		}
@@ -154,7 +154,7 @@
 		public function limit($limit){
 			if(!is_int($limit)){
 				$type = gettype($limit);
-				throw new \LogicException("MySQL::limit() expects an integer, {$type} given.");
+				throw new \LogicException("MySQL::limit() expects an integer, {$type} given");
 			}else{
 				self::$query['limit'] = $limit;
 			}
@@ -223,7 +223,7 @@
 			try{
 				$stmt->execute(self::$params);
 			}catch(\PDOException $e){
-				throw new \TFD\Exception($e);
+				throw new \Exception($e);
 			}
 			self::num_rows($stmt->rowCount());
 			$stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -241,7 +241,7 @@
 		public function insert($data){
 			if(!is_array($data)){
 				$type = gettype($data);
-				throw new \LogicException("MySQL::insert() expects an array, {$type} given.");
+				throw new \LogicException("MySQL::insert() expects an array, {$type} given");
 			}else{
 				foreach($data as $field => $value){
 					$i = 0;$orig = $field;
@@ -261,7 +261,7 @@
 					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
-					throw new \TFD\Exception($e);
+					throw new \Exception($e);
 					return false;
 				}
 			}
@@ -271,10 +271,10 @@
 			if(is_array($where)) self::where($where);
 			if(!is_array($data)){
 				$type = gettype($data);
-				throw new \LogicException("MySQL::update expects an array, {$type} given.");
+				throw new \LogicException("MySQL::update expects an array, {$type} given");
 				return false;
 			}elseif(empty(self::$query['where']) && $where !== true){
-				throw new \TFD\Exception('WHERE is not set in your query, this will update all rows. Skipping query.');
+				throw new \Exception('WHERE is not set in your query, this will update all rows. Skipping query');
 				return false;
 			}else{
 				foreach($data as $field => $value){
@@ -293,7 +293,7 @@
 					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
-					throw new \TFD\Exception($e);
+					throw new \Exception($e);
 					return false;
 				}
 			}
@@ -305,7 +305,7 @@
 				throw new \LogicException("MySQL::set is used for setting a single column. If you wish to set multiple columns, use MySQL::update");
 				return false;
 			}elseif(empty(self::$query['where']) && $where !== true){
-				throw new \TFD\Exception('WHERE is not set in your query, this will update all rows. Skipping query.');
+				throw new \Exception('WHERE is not set in your query, this will update all rows. Skipping query');
 				return false;
 			}else{
 				return $this->update(array($key => $value));
@@ -315,7 +315,7 @@
 		public function delete($where = null){
 			if(is_array($where)) $this->where($where);
 			if(empty(self::$query['where']) && $where !== true){
-				throw new \TFD\Exception('WHERE is not set in your query, this will delete all rows. Skipping query.');
+				throw new \Exception('WHERE is not set in your query, this will delete all rows. Skipping query');
 				return false;
 			}else{
 				$qry = sprintf("DELETE FROM %s", self::$table);
@@ -325,7 +325,7 @@
 					self::num_rows($stmt->rowCount());
 					return true;
 				}catch(\PDOException $e){
-					throw new \TFD\Exception($e);
+					throw new \Exception($e);
 					return false;
 				}
 			}

@@ -10,9 +10,8 @@
 		private static function __validate_session_fingerprint(){
 			try{
 				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('secret');
-			}catch(Exception $e){
-				echo '<pre>'.$e->getMessage().'</pre>';
-				exit;
+			}catch(\Exception $e){
+				return false;
 			}
 			if(empty($user)){
 				session_destroy();
@@ -27,9 +26,8 @@
 			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
 			try{
 				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_COOKIE['user_id'])->limit(1)->get('secret');
-			}catch(Exception $e){
-				echo '<pre>'.$e->getMessage().'</pre>';
-				exit;
+			}catch(\Exception $e){
+				return false;
 			}
 			if(empty($user)){
 				setcookie('logged_in', false, time() - 3600, '/');
@@ -67,8 +65,7 @@
 			$options = array(
 				'dir' => Config::get('views.login'),
 				'view' => 'login',
-				'title' => 'Login',
-				'errors' => $errors
+				'title' => 'Login'
 			);
 			$page = Render::page($options);
 			return Response::make($page->render(), $page->status());
@@ -89,9 +86,8 @@
 			// get user info
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get();
-			}catch(Exception $e){
-				echo '<pre>'.$e->getMessage().'</pre>';
-				exit;
+			}catch(\Exception $e){
+				return false;
 			}
 			if(empty($user_info)) return false; // no user found
 			$hash = $user_info['hash'];
@@ -120,7 +116,7 @@
 		public static function validate_user_pass($user, $pass){
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get('hash');
-			}catch(Exception $e){
+			}catch(\Exception $e){
 				return false;
 			}
 			if(empty($user_info)) return false;
@@ -131,7 +127,7 @@
 		public static function validate_pass($pass){
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('hash');
-			}catch(Exception $e){
+			}catch(\Exception $e){
 				return false;
 			}
 			if(empty($user_info)) return false;
@@ -149,7 +145,7 @@
 			try{
 				MySQL::table(Config::get('admin.table'))->insert($info);
 				return true;
-			}catch(Exception $e){
+			}catch(\Exception $e){
 				return false;
 			}
 		}

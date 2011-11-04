@@ -19,7 +19,7 @@
 					case 'apc':
 						return self::$drivers[$driver] = new APC();
 					default:
-						throw new Exception("Cache driver {$driver} is not supported.");
+						throw new \Exception("Cache driver {$driver} is not supported");
 				}
 			}
 			return self::$drivers[$driver];

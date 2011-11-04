@@ -112,7 +112,7 @@
 		public static function ul($list, $attributes = array(), $entities = true){
 			if(!is_array($list)){
 				$type = gettype($list);
-				throw new \LogicException("HTML::ul() expects an array, {$type} sent.");
+				throw new \LogicException("HTML::ul() expects an array, {$type} sent");
 				return '';
 			}else{
 				return self::__build_list('ul', $list, $attributes, $entities);
@@ -122,7 +122,7 @@
 		public static function ol($list, $attributes = array(), $entities = true){
 			if(!is_array($list)){
 				$type = gettype($list);
-				throw new \LogicException("HTML::ol() expects an array, {$type} sent.");
+				throw new \LogicException("HTML::ol() expects an array, {$type} sent");
 				return '';
 			}else{
 				return self::__build_list('ol', $list, $attributes, $entities);

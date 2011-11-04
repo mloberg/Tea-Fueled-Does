@@ -127,7 +127,7 @@
 		public function master($master){
 			$master = MASTERS_DIR.$master.EXT;
 			if(!file_exists($master)){
-				throw new \TFD\Exception("Master {$master} not found.");
+				throw new \Exception("Master {$master} not found.");
 			}else{
 				self::$options['master'] = $master;
 			}
@@ -201,7 +201,7 @@
 			}
 			
 			if(!file_exists($view)){
-				throw new \TFD\Exception("Could not find {$view}!");
+				throw new \Exception("Could not find view {$view}.");
 				return '';
 			}else{
 				unset(self::$options['view']);

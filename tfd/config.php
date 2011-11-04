@@ -25,7 +25,7 @@
 		public static function load($keys){
 			if(!is_array($keys)){
 				$type = gettype($keys);
-				throw new \LogicException("Config::load() expects an array, {$type} sent.");
+				throw new \LogicException("Config::load() expects an array, {$type} sent");
 			}elseif(!empty($keys)){
 				foreach($keys as $key => $value){
 					if(($key = self::parse($key)) !== false){

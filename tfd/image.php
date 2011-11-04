@@ -31,13 +31,13 @@
 					$this->info['type'] = 'png';
 					break;
 				default:
-					throw new \TFD\Exception('Not a valid image type!');
+					throw new \Exception('Not a valid image type');
 			}
 		}
 		
 		private function __save($path, $name, $type = null, $quality = 80){
 			if(!is_null($type) && !preg_match('/^(gif|jpg|jpeg|png)$/', $type)){
-				throw new \TFD\Exception('Not a valid save type!');
+				throw new \Exception('Not a valid save type');
 			}else{
 				if(!is_dir($path)) $path = PUBLIC_DIR.$path;
 				if(!preg_match('/\/$/', $path)) $path .= '/';
@@ -59,7 +59,7 @@
 						imagepng($this->image, $output);
 						break;
 					default:
-						throw new \TFD\Exception('Not a valid image type!');
+						throw new \Exception('Not a valid image type');
 				}
 				// check to see if the image was saved
 				return (file_exists($output)) ? true : false;
@@ -69,9 +69,9 @@
 		private function __crop($options){
 			if(is_resource($this->image)){
 				if(!is_array($options)){
-					throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given.');
+					throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given');
 				}elseif(!isset($options['width']) || !isset($options['height'])){
-					throw new \LogicException('Width and height are required!');
+					throw new \LogicException('Width and height are required');
 				}else{
 					$default = array(
 						'x' => 0,
@@ -114,7 +114,7 @@
 		
 		public function resize($width, $height){
 			if(!is_int($width) || !is_int($height)){
-				throw new \LogicException('Image::resize, expects width and height to be integers.');
+				throw new \LogicException('Image::resize, expects width and height to be integers');
 			}else{
 				$options = array(
 					'x' => 0,
@@ -129,7 +129,7 @@
 		
 		public function scale($options){
 			if(!is_array($options)){
-				throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given.');
+				throw new \LogicException('Image::crop() expects an array, '.gettype($options).' given');
 			}else{
 				if($options['percent']){
 					$scale = '.'.$options['percent'];
@@ -140,11 +140,11 @@
 				}elseif((!isset($options['width']) && isset($options['height'])) || ($this->info['height'] > $this->info['width'])){
 					$options['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
 				}else{
-					throw new \LogicException('Width, height, or percent not set!');
+					throw new \LogicException('Width, height, or percent not set');
 				}
 				// don't scale up
 				if(($options['width'] > $this->info['width']) || ($options['height'] > $this->info['height'])){
-					throw new \TFD\Exception('Error: Trying to scale image up.');
+					throw new \Exception('Trying to scale image up. Can\'t scale up');
 				}elseif(isset($options['width']) && isset($options['height'])){
 					$options['x'] = 0;
 					$options['y'] = 0;
@@ -156,7 +156,7 @@
 		
 		function crop($width, $height, $x = 0, $y = 0){
 			if(!is_int($width) || !is_int($height)){
-				throw new \LogicException('Image::crop, expects width and height to be integers.');
+				throw new \LogicException('Image::crop, expects width and height to be integers');
 			}else{
 				$options = array(
 					'width' => $width,
@@ -193,7 +193,7 @@
 					$type = 'png';
 					break;
 				default:
-					throw new \TFD\Exception('Not a valid image type!');
+					throw new \TFD\Exception('Not a valid image type');
 			}
 			
 			switch($options['x']){

@@ -22,7 +22,7 @@
 			$class = (empty($class)) ? 'memcache' : $class;
 			
 			if(!class_exists($class, false)){
-				throw new Exception("The class '{$class}' is not available on this system.");
+				throw new \Exception("The class '{$class}' is not available on this system");
 			}elseif($class == 'memcached'){
 				$m = new \Memcached();
 				$map_func = function($value){ return array_values($value); };
@@ -36,7 +36,7 @@
 			}
 			
 			if($m->getVersion() === false){
-				throw new Exception('No connections could be made.');
+				throw new \Exception('No connections could be made');
 			}
 			
 			return $m;

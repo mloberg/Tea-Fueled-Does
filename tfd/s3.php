@@ -17,7 +17,7 @@
 		public static function set_bucket($bucket){
 			if(!is_string($bucket)){
 				$type = gettype($bucket);
-				throw new \TFD\Exception("S3::set_bucket() expects a string, {$type} sent.");
+				throw new \LogicException("S3::set_bucket() expects a string, {$type} sent");
 				return false;
 			}
 			Config::set('s3.bucket', $bucket);
@@ -26,7 +26,7 @@
 		
 		public static function set_acl($acl){
 			if(!preg_match('/private|public-read|public-read-write|authenticated-read|bucket-owner-read|bucket-owner-full-control/', strtolower($acl))){
-				throw new \TFD\Exception('Not a valid ACL type!');
+				throw new \LogicException('Not a valid ACL type');
 				return false;
 			}
 			Config::set('s3.acl', $acl);
@@ -50,10 +50,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::list_buckets(): Unexpected HTTP status.");
+				throw new \Exception("S3::list_buckets(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::list_buckets(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::list_buckets(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -87,10 +87,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::list_objects(): Unexpected HTTP status.");
+				throw new \Exception("S3::list_objects(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::list_objects(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::list_objects(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -120,9 +120,9 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception('S3::bucket_acl(): Unexpected HTTP status');
+				throw new \Exception('S3::bucket_acl(): Unexpected HTTP status');
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::bucket_acl(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::bucket_acl(): {$response['error']['code']}: {$response['error']['message']}");
 				return;
 			}
 			
@@ -146,9 +146,9 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception('S3::bucket_location(): Unexpected HTTP status');
+				throw new \Exception('S3::bucket_location(): Unexpected HTTP status');
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::bucket_location(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::bucket_location(): {$response['error']['code']}: {$response['error']['message']}");
 				return;
 			}
 			
@@ -166,7 +166,7 @@
 			
 			if(!is_null($location)){
 				if(!preg_match('/EU|us-west-1|ap-southeast-1|ap-northeast-1/', $location) || (empty($location) && is_string($location))){
-					throw new \TFD\Exception($location.' is not a valid Bucket location.');
+					throw new \LogicException($location.' is not a valid Bucket location');
 					return false;
 				}else{
 					$dom = new \DOMDocument;
@@ -184,10 +184,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::create_bucket(): Unexpected HTTP status.");
+				throw new \Exception("S3::create_bucket(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::create_bucket(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::create_bucket(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -201,10 +201,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 204){
-				throw new \TFD\Exception("S3::delete_bucket(): Unexpected HTTP status.");
+				throw new \Exception("S3::delete_bucket(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::delete_bucket(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::delete_bucket(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -237,7 +237,7 @@
 				$rest->size(strlen($file));
 				$headers['Content-MD5'] = base64_encode(md5($file, true));
 			}else{
-				throw new \TFD\Exception('Could not upload object.');
+				throw new \Exception('Could not upload object');
 				return false;
 			}
 			
@@ -258,10 +258,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::put_object(): Unexpected HTTP status.");
+				throw new \Exception("S3::put_object(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::put_object(): {$response['error']['code']}: {$response['error']['message']}.");
+				throw new \Exception("S3::put_object(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -283,10 +283,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::get_object(): Unexpected HTTP status.");
+				throw new \Exception("S3::get_object(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::get_object(): {$response['error']['code']}: {$response['error']['message']}.");
+				throw new \Exception("S3::get_object(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -299,7 +299,7 @@
 					@fclose($fp);
 					return true;
 				}else{
-					throw new \TFD\Exception('Could not open up file for saving.');
+					throw new \Exception('Could not open up file for saving');
 					return false;
 				}
 			}
@@ -314,12 +314,12 @@
 			$response = $rest->response();
 			
 			if($response['code'] === 404){
-				throw new \TFD\Exception("{$uri} does not exist in {$bucket}.");
+				throw new \Exception("{$uri} does not exist in {$bucket}");
 			}elseif(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::object_info(): Unexpected HTTP status.");
+				throw new \Exception("S3::object_info(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::object_info(): {$response['error']['code']}: {$response['error']['message']}.");
+				throw new \Exception("S3::object_info(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -334,10 +334,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 204){
-				throw new \TFD\Exception("S3::delete_object(): Unexpected HTTP status.");
+				throw new \Exception("S3::delete_object(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::delete_object(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::delete_object(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			
@@ -367,10 +367,10 @@
 			$response = $rest->response();
 			
 			if(!isset($response['error']) && $response['code'] !== 200){
-				throw new \TFD\Exception("S3::copy_object(): Unexpected HTTP status.");
+				throw new \Exception("S3::copy_object(): Unexpected HTTP status");
 				return false;
 			}elseif(is_array($response['error'])){
-				throw new \TFD\Exception("S3::copy_object(): {$response['error']['code']}: {$response['error']['message']}");
+				throw new \Exception("S3::copy_object(): {$response['error']['code']}: {$response['error']['message']}");
 				return false;
 			}
 			

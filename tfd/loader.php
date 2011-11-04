@@ -26,12 +26,12 @@
 					include_once($file);
 					class_alias(self::$alias[$name]['class'], $name);
 				}else{
-					throw new Exception("Could not load class {$name}! No file found at {$file}.");
+					throw new \Exception("Could not load class {$name}. No file found at {$file}");
 				}
 			}elseif(preg_match('/^models/', strtolower($name))){
 				self::load_model($name);
 			}else{
-				throw new Exception("Could not load class {$name}! No file found at {$file}.");
+				throw new \Exception("Could not load class {$name}. No file found at {$file}");
 			}
 		}
 		
@@ -49,7 +49,7 @@
 				include_once($file);
 				class_alias('\Content\\'.$model, $model);
 			}else{
-				throw new Exception("Could not load model {$model}! No file found at {$file}.");
+				throw new \Exception("Could not load model {$model}. No file found at {$file}");
 			}
 		}
 		
@@ -63,7 +63,7 @@
 		public static function create_aliases($aliases){
 			if(!is_array($aliases)){
 				$type = gettype($aliases);
-				throw new LogicException("Loader::create_aliases expects an array, {$type} sent.");
+				throw new \LogicException("Loader::create_aliases expects an array, {$type} sent");
 			}else{
 				foreach($aliases as $name => $class){
 					self::add_alias($name, $class);

@@ -61,7 +61,7 @@ set_exception_handler(function($e){
 
 set_error_handler(function($number, $error, $file, $line){
 	\TFD\Exception\Handler::make(new \ErrorException($error, $number, 0, $file, $line))->handle();
-}, E_ALL);
+}, E_ALL ^ E_NOTICE);
 
 // create some class aliases
 use TFD\Loader;

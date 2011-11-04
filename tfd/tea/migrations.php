@@ -117,7 +117,7 @@ FILE;
 				try{
 					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 					MySQL::table(Config::get('migrations.table'))->insert(array('number' => $number, 'active' => 1));
-				}catch(\TFD\Exception $e){
+				}catch(\Exception $e){
 					echo $e->getMessage()."\nExiting...\n";
 					exit(0);
 				}

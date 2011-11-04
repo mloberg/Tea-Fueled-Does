@@ -118,7 +118,7 @@ MAN;
 		public static function list_columns($table){
 			try{
 				$fields = MySQL::query("SHOW FIELDS FROM `{$table}`", array(), true);
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				echo $e->getMessage();
 				echo MySQL::last_query();
 			}
@@ -204,7 +204,7 @@ MAN;
 					return true;
 				}
 				return false;
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				return false;
 			}
 		}
@@ -220,7 +220,7 @@ MAN;
 					return true;
 				}
 				return false;
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				return false;
 			}
 		}
@@ -270,7 +270,7 @@ MAN;
 			try{
 				MySQL::query(substr($query, 0, -1));
 				echo "Columns added!\n";
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				echo "Could not add columns. Error: {$e->getMessage()}\n";
 				exit(0);
 			}
@@ -288,7 +288,7 @@ MAN;
 			try{
 				MySQL::query(substr($query, 0, -1));
 				echo "Columns dropped!\n";
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				echo "Could not drop columns. Error: {$e->getMessage()}\n";
 				exit(0);
 			}
@@ -302,7 +302,7 @@ MAN;
 			$query = sprintf("ALTER TABLE `%s` ADD %s (`%s`)", $table, strtoupper($type), $column);
 			try{
 				MySQL::query($query);
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				echo "Could not add key. Error: {$e->getMessage()}\n";
 				exit(0);
 			}
@@ -316,7 +316,7 @@ MAN;
 			$query = sprintf("ALTER TABLE `%s` DROP KEY `%s`", $table, $column);
 			try{
 				MySQL::query($query);
-			}catch(\TFD\Exception $e){
+			}catch(\Exception $e){
 				echo "Could not drop key. Error: {$e->getMessage()}\n";
 				exit(0);
 			}

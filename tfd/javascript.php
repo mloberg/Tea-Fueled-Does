@@ -76,7 +76,7 @@
 		
 		public static function library($lib, $load = true, $order = null){
 			if(!array_key_exists($lib, self::$libraries)){
-				throw new \TFD\Exception("No such JavaScript library, {$lib}! Must invoke JavaScript::add_library before JavaScript::library.");
+				throw new \Exception("No such JavaScript library, {$lib}");
 				return false;
 			}
 			if($load && !in_array($src, self::$scripts)){

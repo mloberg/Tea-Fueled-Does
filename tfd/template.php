@@ -91,7 +91,7 @@ class Template{
 		try{
 			$result = $this->render();
 			return $result;
-		}catch(Exception $e){
+		}catch(\Exception $e){
 			return "Error rendering mustache: " . $e->getMessage();
 		}
 	}
