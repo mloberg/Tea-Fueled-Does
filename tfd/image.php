@@ -193,7 +193,7 @@
 					$type = 'png';
 					break;
 				default:
-					throw new \TFD\Exception('Not a valid image type');
+					throw new \Exception('Not a valid image type');
 			}
 			
 			switch($options['x']){
