@@ -16,6 +16,7 @@
 		}
 		
 		private function __open($file){
+			if(!file_exists($file)) throw new \Exception("No such file {$file}.");
 			list($this->info['width'], $this->info['height'], $this->info['type'], $this->info['attr']) = getimagesize($file);
 			switch($this->info['type']){
 				case 1:
@@ -41,12 +42,11 @@
 			}else{
 				if(!is_dir($path)) $path = PUBLIC_DIR.$path;
 				if(!preg_match('/\/$/', $path)) $path .= '/';
-				$output = $path.$name;
 				// figure out the extension and type to save it as
-				if(is_null($type)){
-					$type = $this->info['type'];
-				}
-				$output .= '.'.$type;
+				if(is_null($type)) $type = $this->info['type'];
+				// remove extension from name
+				$name = preg_replace('/\.(gif|jpg|jpeg|png)$/', '', $name);
+				$output = $path.$name.'.'.$type;
 				switch($type){
 					case 'jpg':
 					case 'jpeg':
@@ -193,7 +193,7 @@
 					$type = 'png';
 					break;
 				default:
-					throw new \TFD\Exception('Not a valid image type');
+					throw new \Exception('Not a valid image type');
 			}
 			
 			switch($options['x']){
