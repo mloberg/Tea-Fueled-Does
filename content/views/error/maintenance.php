@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset=utf-8>
-	<title>Maintenance</title>
+	<title><?php echo Config::get('site.title');?> Maintenance</title>
 	<!--[if lt IE 9]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->

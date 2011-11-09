@@ -54,7 +54,9 @@
 			$router = new Router($this->request()); // create a router object
 			$route = $router->get(); // get the matching route
 			
-			if(is_array($route)){
+			if(Config::get('site.maintenance') === true){ // maintance mode is on
+				return Response::make(Render::error('maintenance'));
+			}elseif(is_array($route)){ // route render options
 				if(($route['auth'] || $route['admin']) && !Admin::loggedin()){
 					// need to login
 					setcookie('redirect', $this->request(), time() + 3600);
@@ -65,11 +67,11 @@
 					return Admin::dashboard($route);
 				}
 				$render_info = $route;
-			}elseif(!is_null($route)){
+			}elseif(!is_null($route)){ // route is string
 				return $route;
-			}elseif(($do = self::$request->run()) !== false){
+			}elseif(($do = self::$request->run()) !== false){ // other requests (ajax, etc)
 				return $do;
-			}else{
+			}else{ // normal request
 				$render_info = array('view' => $this->request());
 			}
 			
