@@ -91,8 +91,8 @@
 		
 		private function __render_page(){
 			Hooks::render();
-			if(self::$status === 404){
-				return Render::error(404)->render();
+			if(!empty(self::$status) && self::$status !== 200 && empty(self::__content())){ // if the status is not 200 and content is empty, send error page
+				return Render::error(self::$status)->render();
 			}else{
 				$master = self::$options['master'];
 				if(!file_exists($master)) $master = Config::get('render.default_master');

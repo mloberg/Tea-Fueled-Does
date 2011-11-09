@@ -8,6 +8,6 @@
 	<![endif]-->
 </head>
 <body>
-	<p>ran into an error.</p>
+	<p>We ran into an error.</p>
 </body>
 </html>

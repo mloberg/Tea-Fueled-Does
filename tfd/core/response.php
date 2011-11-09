@@ -107,7 +107,7 @@
 		}
 		
 		public static function error($code, $data = array()){
-			return new self(Render::error($code)->render(), $code);
+			return new self(Render::error($code, $data)->render(), $code);
 		}
 				
 		public static function redirect($location){
