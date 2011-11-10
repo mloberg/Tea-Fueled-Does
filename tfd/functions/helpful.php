@@ -1,17 +1,5 @@
 <?php
-	
-	function stylesheet_link_tag($style,$ext='css'){
-		$css;
-		if(is_array($style)){
-			foreach($style as $s){
-				$css .= "<link rel=\"stylesheet\" href=\"css/{$s}.{$ext}\" />\n";
-			}
-		}else{
-			$css = "<link rel=\"stylesheet\" href=\"css/{$style}.{$ext}\" />\n";
-		}
-		return $css;
-	}
-	
+
 	function redirect($location, $message = null, $type = 'message', $options = array()){
 		// check if external link
 		if(preg_match('/^http/',$location)){
@@ -122,4 +110,4 @@
 		}
 		
 		return $data;
-	} 
+	}

@@ -83,7 +83,8 @@ Loader::create_aliases(array(
 	'HTML' => 'TFD\HTML',
 	'Form' => 'TFD\Form\HTML',
 	'S3' => 'TFD\S3',
-	'Cache' => 'TFD\Cache'
+	'Cache' => 'TFD\Cache',
+	'Paginator' => 'TFD\Paginator',
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
 if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
