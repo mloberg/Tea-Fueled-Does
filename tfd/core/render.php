@@ -91,7 +91,7 @@
 		
 		private function __render_page(){
 			Hooks::render();
-			if(!empty(self::$status) && self::$status !== 200 && empty(self::__content())){ // if the status is not 200 and content is empty, send error page
+			if(self::$status != 200 && empty(self::$content)){ // if the status is not 200 and content is empty, send error page
 				return Render::error(self::$status)->render();
 			}else{
 				$master = self::$options['master'];
