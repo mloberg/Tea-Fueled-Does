@@ -102,7 +102,7 @@
 		 * Static methods
 		 */
 		
-		public function make($content = null, $status = 200){
+		public static function make($content = null, $status = 200){
 			return new self($content, $status);
 		}
 		

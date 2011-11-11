@@ -61,40 +61,11 @@
 			foreach($styles as $element => $style){
 				$sheet .= $element.'{';
 				foreach($style as $key => $value){
-					if(preg_match('/^(border-radius|drop-shadow)$/', $key)){
-						$key = str_replace('-', '_', $key);
-						$sheet .= Styles::$key($value);
-					}else{
-						$sheet .= $key.':'.$value.';';
-					}
+					$sheet .= $key.':'.$value.';';
 				}
 				$sheet .= '}';
 			}
 			self::$styles .= $sheet;
-		}
-		
-		public static function add_font($name, $src){
-			$style = self::$styles;
-			$font = '@font-face{font-family:"'.$name.'";src:url("'.$src.'");}';
-			self::$styles = $font.$style;
-		}
-	
-	}
-	
-	abstract class Styles{
-	
-		public static function border_radius($size){
-			return '-moz-border-radius:'.$size.';-webkit-border-radius:'.$size.';border-radius:'.$size.';';
-		}
-		
-		public static function drop_shadow($opts){
-			$defaults = array(
-				'spread' => '2px',
-				'blur' => '5px',
-				'color' => '#000'
-			);
-			$opts = $opts + $defaults;
-			return 'box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'].';-moz-box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'].';-webkit-box-shadow:'.$opts['spread'].' '.$opts['spread'].' '.$opts['blur'].' '.$opts['color'];
 		}
 	
 	}
