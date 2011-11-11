@@ -1,4 +1,4 @@
-<?php namespace TFD\Form;
+<?php namespace TFD;
 
 /*
  * This is a PHP library that handles calling reCAPTCHA.
@@ -34,8 +34,6 @@
  * THE SOFTWARE.
  */
 
-	use TFD\Config;
-	
 	class ReCAPTCHA{
 	
 		/**

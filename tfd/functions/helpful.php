@@ -1,24 +1,14 @@
 <?php
 
-	function redirect($location, $message = null, $type = 'message', $options = array()){
+	function redirect($location){
 		// check if external link
 		if(preg_match('/^http/',$location)){
-			header("Location: $location");
+			header('Location: ' . $location);
 			exit();
 		}else{
-			if(!is_null($message)){
-				global $app;
-				$app->flash->redirect($message, $type, $options);
-			}
-			header("Location: ".Config::get('site.url').$location);
+			header('Location: '.Config::get('site.url').$location);
 			exit();
 		}
-	}
-	
-	function image_tag($src,$alt){
-		$img = Config::get('site.url').$src;
-		list($w,$h,$type,$attr) = getimagesize($img);
-		return '<img src="'.$img.'" alt="'.$alt.'" '.$attr.' />'."\n";
 	}
 	
 	function post($name){
@@ -33,17 +23,6 @@
 		echo '<pre>';
 		print_r($print);
 		echo '</pre>';
-	}
-	
-	function href($a, $text, $admin=false){
-		if(preg_match('/^http/', $a)){
-			return '<a href="'.$a.'">'.$text.'</a>';
-		}else{
-			$href = Config::get('site.url');
-			if($admin) $href .= Config::get('admin.path').'/';
-			$href .= $a;
-			return '<a href="'.$href.'">'.$text.'</a>';
-		}
 	}
 	
 	function matheval($equation){

@@ -70,10 +70,10 @@ Loader::create_aliases(array(
 	'JavaScript' => 'TFD\JavaScript',
 	'Flash' => 'TFD\Flash',
 	'MySQL' => 'TFD\DB\MySQL',
-	'ReCAPTCHA' => 'TFD\Form\ReCAPTCHA',
+	'ReCAPTCHA' => 'TFD\ReCAPTCHA',
 	'Postmark' => 'TFD\Postmark',
 	'Image' => 'TFD\Image',
-	'Validate' => 'TFD\Form\Validate',
+	'Validate' => 'TFD\Validate',
 	'Template' => 'TFD\Template',
 	'Benchmark' => 'TFD\Benchmark',
 	'Render' => 'TFD\Core\Render',
@@ -81,10 +81,11 @@ Loader::create_aliases(array(
 	'Upload' => 'TFD\Upload\File',
 	'Config' => 'TFD\Config',
 	'HTML' => 'TFD\HTML',
-	'Form' => 'TFD\Form\HTML',
+	'Form' => 'TFD\Form',
 	'S3' => 'TFD\S3',
 	'Cache' => 'TFD\Cache',
 	'Paginator' => 'TFD\Paginator',
+	'Request' => 'TFD\Core\Request'
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'api/postmark'.EXT);
 if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));

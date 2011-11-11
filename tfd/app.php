@@ -54,7 +54,7 @@
 			$router = new Router($this->request()); // create a router object
 			$route = $router->get(); // get the matching route
 			
-			if(Config::get('site.maintenance') === true){ // maintance mode is on
+			if(Request::is_maintenance()){ // maintance mode is on
 				return Response::make(Render::error('maintenance'));
 			}elseif(is_array($route)){ // route render options
 				if(($route['auth'] || $route['admin']) && !Admin::loggedin()){

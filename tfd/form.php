@@ -1,10 +1,6 @@
-<?php namespace TFD\Form;
+<?php namespace TFD;
 
-	use TFD\App;
-	use TFD\Config;
-	use TFD\HTML as h;
-	
-	class HTML{
+	class Form{
 	
 		private static $labels = array();
 		
@@ -19,12 +15,12 @@
 			}elseif(filter_var($action, FILTER_VALIDATE_URL) === false){
 				$action = Config::get('site.url').$action;
 			}
-			$attributes['action'] = h::entities($action);
+			$attributes['action'] = HTML::entities($action);
 			
 			// PUT and DELETE methods are spoofed using a hidden field
 			$attributes['method'] = ($method == 'PUT' || $method == 'DELETE') ? 'POST' : $method;
 			
-			$html = '<form'.h::attributes($attributes).'>';
+			$html = '<form'.HTML::attributes($attributes).'>';
 			
 			if($method == 'PUT' || $method == 'DELETE'){
 				$html .= self::input('hidden', 'REQUEST_METHOD', $method);
@@ -45,7 +41,7 @@
 		public static function label($name, $value, $attributes = array()){
 			self::$labels[] = $name;
 			
-			return '<label for="'.$name.'"'.h::attributes($attributes).'>'.h::entities($value).'</label>';
+			return '<label for="'.$name.'"'.HTML::attributes($attributes).'>'.HTML::entities($value).'</label>';
 		}
 		
 		public static function input($type, $name, $value = null, $attributes = array()){
@@ -53,7 +49,7 @@
 			
 			$id = self::id($name, $attributes);
 			
-			return '<input'.h::attributes(array_merge($attributes, compact('type', 'name', 'value', 'id'))).' />';
+			return '<input'.HTML::attributes(array_merge($attributes, compact('type', 'name', 'value', 'id'))).' />';
 		}
 		
 		public static function text($name, $value = null, $attributes = array()){
@@ -77,7 +73,7 @@
 			if(!isset($attributes['rows'])) $attributes['rows'] = 10;
 			if(!isset($attributes['cols'])) $attributes['cols'] = 50;
 			
-			return '<textarea'.h::attributes($attributes).'>'.h::entities($value).'</textarea>';
+			return '<textarea'.HTML::attributes($attributes).'>'.HTML::entities($value).'</textarea>';
 		}
 		
 		public static function select($name, $options = array(), $selected = null, $attributes = array()){
@@ -86,11 +82,11 @@
 			$html = array();
 			
 			foreach($options as $value => $display){
-				$option_attributes = array('value' => h::entities($value), 'selected' => ($value == $selected) ? 'selected' : null);
-				$html[] = '<option'.h::attributes($option_attributes).'>'.h::entities($display).'</option>';
+				$option_attributes = array('value' => HTML::entities($value), 'selected' => ($value == $selected) ? 'selected' : null);
+				$html[] = '<option'.HTML::attributes($option_attributes).'>'.HTML::entities($display).'</option>';
 			}
 			
-			return '<select'.h::attributes($attributes).'>'.implode('', $html).'</select>';
+			return '<select'.HTML::attributes($attributes).'>'.implode('', $html).'</select>';
 		}
 		
 		public static function checkable($type, $name, $value = null, $checked = false, $attributes = array()){

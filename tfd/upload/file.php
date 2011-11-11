@@ -9,7 +9,6 @@
 				throw new \Exception("\$_FILES[{$file}] not set");
 			}else{
 				self::$info = $_FILES[$file];
-				print_p(self::$info);
 			}
 		}
 		
