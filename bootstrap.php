@@ -78,7 +78,6 @@ Loader::create_aliases(array(
 	'Benchmark' => 'TFD\Benchmark',
 	'Render' => 'TFD\Core\Render',
 	'Redis' => 'TFD\Redis',
-	'Upload' => 'TFD\Upload\File',
 	'Config' => 'TFD\Config',
 	'HTML' => 'TFD\HTML',
 	'Form' => 'TFD\Form',
