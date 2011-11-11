@@ -8,6 +8,22 @@
 		
 		public static function set_servers($servers){
 			Config::set('memcached.servers', $servers);
+			if(!is_null(self::$instance)){
+				self::$instance = self::connect(Config::get('memcached.servers'));
+			}
+		}
+		
+		public static function add_server($server){
+			$current = Config::get('memcached.servers');
+			$current[] = $server;
+			Config::set('memcached.servers', $current);
+			if(!is_null(self::$instance)){
+				if(Config::get('memcached.class') == 'memcached'){
+					self::$instance->addServer($server['host'], $server['port'], $server['weight']);
+				}else{
+					self::$instance->addServer($server['host'], $server['port'], true, $server['weight']);
+				}
+			}
 		}
 		
 		public static function instance(){

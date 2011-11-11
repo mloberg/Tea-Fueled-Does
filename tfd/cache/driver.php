@@ -25,5 +25,11 @@
 		 */
 		
 		public function delete($key);
+		
+		/**
+		 * Delete all keys
+		 */
+		
+		public function flush();
 	
 	}

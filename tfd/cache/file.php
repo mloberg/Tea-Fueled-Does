@@ -22,5 +22,12 @@
 		public function delete($key){
 			@unlink(Config::get('cache.dir').$key);
 		}
+		
+		public function flush(){
+			foreach(glob(Config::get('cache.dir').'*') as $file){
+				@unlink($file);
+			}
+			return true;
+		}
 	
 	}

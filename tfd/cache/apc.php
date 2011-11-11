@@ -19,5 +19,17 @@
 		public function delete($key){
 			return apc_delete(Config::get('cache.key').$key);
 		}
+		
+		public function flush(){
+			return apc_clear_cache('user'); // clear only user cache
+		}
+		
+		public function increase($key, $count = 1){
+			return apc_inc($key, $count);
+		}
+		
+		public function decrease($key, $count = 1){
+			return apc_dec($key, $count);
+		}
 	
 	}

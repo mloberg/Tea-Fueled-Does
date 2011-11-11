@@ -1,6 +1,8 @@
 <?php
 
-$results = Cache::remember('posts', MySQL::table('posts')->get(), 300);
+$results = Cache::remember('posts', function(){
+	return MySQL::table('posts')->get();
+}, 300);
 
 $paginate = \TFD\Paginator::make($results, $_GET['page']);
 

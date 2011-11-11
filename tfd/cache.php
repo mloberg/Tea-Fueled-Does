@@ -70,6 +70,14 @@
 		}
 		
 		/**
+		 * Clear all cache items
+		 */
+		
+		public static function clear_all($driver = null){
+			return self::driver($driver)->flush();
+		}
+		
+		/**
 		 * This helps us create a broader API without having to a lot of extra methods
 		 * So instead of doing Cache::driver()->foo(), you can do Cache::foo()
 		 */
