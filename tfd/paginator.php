@@ -57,9 +57,9 @@
 				$first = $this->page - $options['padding'];
 				$last = $this->page + $options['padding'];
 				
-				if($first > 3) $nav .= $this->beginning();
+				if($first > 2) $nav .= $this->beginning();
 				$nav .= $this->range($first, $last);
-				if($last < $this->last_page) $nav .= $this->ending();
+				if($last < $this->last_page - 1) $nav .= $this->ending();
 			}
 			
 			if($options['prev_next']){
