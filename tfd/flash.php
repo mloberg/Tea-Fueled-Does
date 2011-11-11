@@ -25,59 +25,16 @@
 			self::$flash['message'] = $message;
 			self::$flash['type'] = (array_search($type, self::$valid_types)) ? $type : 'message';
 			self::$flash['options'] = $options + self::$flash['options'];
-			self::css();
 		}
 		
 		public static function redirect($message, $type = 'message', $options = array()){
 			$_SESSION['flash'] = array('message' => $message, 'type' => $type, 'options' => $options);
 		}
 		
-		private static function css(){
-			$styles = array(
-				'body' => array(
-					'margin-top' => '40px'
-				),
-				'clear' => array(
-					'clear' => 'both'
-				),
-				'#message-flash p' => array(
-					'margin' => 0,
-					'padding' => 0
-				),
-				'#message-flash' => array(
-					'width' => '100%',
-					'position' => 'absolute',
-					'top' => 0,
-					'left' => 0,
-					'padding' => '5px 0',
-					'text-align' => 'center',
-					'margin-bottom' => '30px'
-				),
-				'.message-message' => array(
-					'background-color' => '#dcdcdc',
-					'color' => '#000'
-				),
-				'.message-success' => array(
-					'background-color' => '#008000',
-					'color' => '#fff'
-				),
-				'.message-error' => array(
-					'background-color' => '#b22222',
-					'color' => '#fff'
-				),
-				'.message-warning' => array(
-					'background-color' => '#ffd700',
-					'color' => '#000'
-				)
-			);
-			CSS::style($styles);
-		}
-		
 		private static function js(){
 			$time = self::$flash['options']['time'] * 1000;
 			$js = <<<SCRIPT
-	if(document.all){var marginTop = parseInt(document.body.currentStyle.marginTop) - 40 + "px";}else{var marginTop = parseInt(document.defaultView.getComputedStyle(document.body, '').getPropertyValue('margin-top')) - 40 + "px";}
-	setTimeout(function(){document.getElementById("message-flash").style.display = "none";document.body.style.marginTop = marginTop;},{$time});
+function animateFlashFade(){var a=document.getElementById("flash-message-wrapper"),b=a.Visibility-5;a.Visibility=b;a.style.opacity=b/100;a.style.filter="alpha(opacity = "+b+")";if(b<=0){document.body.removeChild(a)}else{setTimeout("animateFlashFade()",33)}}setTimeout(function(){var a=document.getElementById("flash-message-wrapper").Visibility=100;setTimeout("animateFlashFade()",33)},$time)
 SCRIPT;
 			JavaScript::script($js);
 		}
@@ -88,13 +45,10 @@ SCRIPT;
 			}
 			self::$flash['message'] = $_SESSION['flash']['message'];
 			self::$flash['type'] = (array_search($_SESSION['flash']['type'], self::$valid_types)) ? $_SESSION['flash']['type'] : 'message';
-			self::css();
 		}
 		
 		public static function render(){
-			if(empty(self::$flash['message'])){
-				return;
-			}
+			if(empty(self::$flash['message'])) return;
 			
 			if(self::$flash['options']['sticky'] !== true) self::js();
 			$type = self::$flash['type'];
@@ -104,8 +58,20 @@ SCRIPT;
 			self::$flash = array();
 			unset($_SESSION['flash']);
 			
+			$styles = array(
+				'message' => 'background-color:#dcdcdc;color:#000',
+				'success' => 'background-color:#008000;color:#fff',
+				'error' => 'background-color:#b22222;color:#fff',
+				'warning' => 'background-color:#ffd700;color:#000'
+			);
+			
+			$style = (isset($styles[$type])) ? $styles[$type] : $styles['message'];
+			
 			return <<<FLASH
-<div id="message-flash" class="message-$type"><p>$message</p></div><div class="clear"></div>
+<div id="flash-message-wrapper">
+	<div style="$style;font-size:18px;left:0;margin:0;opacity:1;padding:5px;position:absolute;text-align:center;top:0;width:100%">$message</div>
+	<div style="margin-bottom:29px"></div>
+</div>
 FLASH;
 		}
 		

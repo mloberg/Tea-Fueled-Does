@@ -30,9 +30,8 @@
 			return $return;
 		}
 		
-		public static function add_sheet($name, $src, $load = false, $order = null){
+		public static function add_sheet($name, $src){
 			self::$sheets[$name] = $src;
-			if($load) self::load($name, $order);
 		}
 		
 		public static function load($src, $order = null){
