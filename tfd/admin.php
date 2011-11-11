@@ -57,7 +57,7 @@
 				}else{
 					$redirect = Config::get('admin.path');
 				}
-				return Response::redirect($redirect);
+				redirect($redirect);
 			}elseif(isset($_POST['submit'])){
 				Flash::redirect('The username or password you entered is not valid.', 'error', array('time' => 5));
 				redirect(Config::get('admin.login'));

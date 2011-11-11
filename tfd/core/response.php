@@ -88,7 +88,7 @@
 			return (string)self::$content;
 		}
 		
-		public function send_headers(){
+		private function send_headers(){
 			$protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
 			
 			header($protocol.' '.self::$status.' '.self::$statuses[self::$status]);
@@ -108,12 +108,6 @@
 		
 		public static function error($code, $data = array()){
 			return new self(Render::error($code, $data)->render(), $code);
-		}
-				
-		public static function redirect($location){
-			$redirect = (!preg_match('/^http(s?):\/\//', $location)) ? Config::get('site.url').$location : $location;
-			header("Location: {$redirect}");
-			exit;
 		}
 	
 	}
