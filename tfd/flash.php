@@ -13,18 +13,38 @@
 		);
 		static private $valid_types = array('message', 'error', 'warning', 'success');
 		
-		function __toString(){
+		public function __toString(){
 			return self::render();
+		}
+		
+		private static function __message($message, $type, $options){
+			self::$flash['message'] = $message;
+			self::$flash['type'] = (array_search($type, self::$valid_types)) ? $type : 'message';
+			self::$flash['options'] = $options + self::$flash['options'];
 		}
 		
 		public static function bootstrap(){
 			if(!empty($_SESSION['flash']['message'])) self::_redirect();
 		}
 		
-		public function message($message, $type = 'message', $options = array()){
-			self::$flash['message'] = $message;
-			self::$flash['type'] = (array_search($type, self::$valid_types)) ? $type : 'message';
-			self::$flash['options'] = $options + self::$flash['options'];
+		public static function success($message, $options = array()){
+			self::__message($message, 'success', $options);
+		}
+		
+		public static function error($message, $options = array()){
+			self::__message($message, 'error', $options);
+		}
+		
+		public static function warning($message, $options = array()){
+			self::__message($message, 'warning', $options);
+		}
+		
+		public static function message($message, $type = 'message', $options = array()){
+			if(is_array($type)){
+				self::__message($message, 'message', $options);
+			}else{
+				self::__message($message, $type, $options);
+			}
 		}
 		
 		public static function redirect($message, $type = 'message', $options = array()){
@@ -32,11 +52,12 @@
 		}
 		
 		private static function js(){
+			if(self::$flash['options']['sticky'] === true) return;
 			$time = self::$flash['options']['time'] * 1000;
 			$js = <<<SCRIPT
-function animateFlashFade(){var a=document.getElementById("flash-message-wrapper"),b=a.Visibility-5;a.Visibility=b;a.style.opacity=b/100;a.style.filter="alpha(opacity = "+b+")";if(b<=0){document.body.removeChild(a)}else{setTimeout("animateFlashFade()",33)}}setTimeout(function(){var a=document.getElementById("flash-message-wrapper").Visibility=100;setTimeout("animateFlashFade()",33)},$time)
+<script>function animateFlashFade(){var a=document.getElementById("flash-message-wrapper"),b=a.Visibility-5;a.Visibility=b;a.style.opacity=b/100;a.style.filter="alpha(opacity = "+b+")";if(b<=0){document.body.removeChild(a)}else{setTimeout("animateFlashFade()",33)}}setTimeout(function(){var a=document.getElementById("flash-message-wrapper").Visibility=100;setTimeout("animateFlashFade()",33)}, $time)</script>
 SCRIPT;
-			JavaScript::script($js);
+			return $js;
 		}
 		
 		private static function _redirect(){
@@ -49,30 +70,27 @@ SCRIPT;
 		
 		public static function render(){
 			if(empty(self::$flash['message'])) return;
-			
-			if(self::$flash['options']['sticky'] !== true) self::js();
 			$type = self::$flash['type'];
 			$message = self::$flash['message'];
-			
-			// cleanup
-			self::$flash = array();
-			unset($_SESSION['flash']);
-			
 			$styles = array(
 				'message' => 'background-color:#dcdcdc;color:#000',
 				'success' => 'background-color:#008000;color:#fff',
 				'error' => 'background-color:#b22222;color:#fff',
 				'warning' => 'background-color:#ffd700;color:#000'
 			);
-			
 			$style = (isset($styles[$type])) ? $styles[$type] : $styles['message'];
-			
-			return <<<FLASH
+			$html = <<<FLASH
 <div id="flash-message-wrapper">
 	<div style="$style;font-size:18px;left:0;margin:0;opacity:1;padding:5px;position:absolute;text-align:center;top:0;width:100%">$message</div>
 	<div style="margin-bottom:29px"></div>
 </div>
 FLASH;
+			$js = self::js();
+			// cleanup
+			self::$flash = array();
+			unset($_SESSION['flash']);
+			// flash html
+			return $html . $js;
 		}
 		
 	}
