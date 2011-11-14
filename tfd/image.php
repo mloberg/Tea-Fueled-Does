@@ -139,9 +139,9 @@
 					$scale = '.'.$options['percent'];
 					$options['width'] = round($this->info['width'] * $scale);
 					$options['height'] = round($this->info['height'] * $scale);
-				}elseif((!isset($options['height']) && isset($options['width'])) || ($this->info['width'] > $this->info['height'])){
+				}elseif((!isset($options['height'])) || ($this->info['width'] > $this->info['height']) && isset($options['width'])){
 					$options['height'] = round($this->info['height'] / ($this->info['width'] / $options['width']));
-				}elseif((!isset($options['width']) && isset($options['height'])) || ($this->info['height'] > $this->info['width'])){
+				}elseif((!isset($options['width'])) || ($this->info['height'] > $this->info['width']) && isset($options['height'])){
 					$options['width'] = round($this->info['width'] / ($this->info['height'] / $options['height']));
 				}else{
 					throw new \LogicException('Width, height, or percent not set');
