@@ -1,28 +1,25 @@
 <?php namespace Content;
 
+	use TFD\Core\Response;
+	
 	class Ajax{
 	
 		private static $method;
 		
-		function __construct($method){
+		public function __construct($method){
 			self::$method = $method;
 		}
 		
 		public function __toString(){
-			if(method_exists(__CLASS__, self::$method)){
+			if(method_exists(__CLASS__, self::$method) && (($method = new \ReflectionMethod(__CLASS__, self::$method)) && $method->isPublic())){
 				$method = self::$method;
 				return self::$method();
 			}else{
-				return self::error();
+				return Response::make('', 404)->send();
 			}
 		}
 		
-		private static function error(){
-			// send 404
-			return '404';
-		}
-		
-		private static function test(){
+		public static function test(){
 			return 'foobar';
 		}
 	
