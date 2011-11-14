@@ -46,7 +46,7 @@
 		}
 		
 		public static function is_ajax(){
-			if(Config::is_set('ajax.path') && preg_match('/^'.preg_quote(Config::get('ajax.path')).'\/?(.*)?$/', self::$request, $match) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'){
+			if(Config::is_set('ajax.path') && preg_match('/'.preg_quote(Config::get('ajax.path')).'\/?(.*)?$/', self::$request, $match) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'){
 				if(empty($match[1]) && Config::is_set('ajax.parameter') && isset($_REQUEST[Config::get('ajax.parameter')])) return $_REQUEST[Config::get('ajax.parameter')];
 				return $match[1];
 			}
