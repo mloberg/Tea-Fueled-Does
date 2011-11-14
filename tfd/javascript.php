@@ -14,6 +14,7 @@
 			'mootools-more' => 'js/mootools-more-1.4.0.1-min.js',
 			'jquery' => 'js/jquery-1.6.4.min.js',
 			'jquery-ui' => 'js/jquery-ui-1.8.14.min.js',
+			'dojo' => 'http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js'
 			'tfd' => 'js/tfd.js'
 		);
 		
