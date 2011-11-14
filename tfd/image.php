@@ -15,6 +15,10 @@
 			if(is_resource($this->image)) imagedestroy($this->image);
 		}
 		
+		public static function make($image){
+			return new self($image);
+		}
+		
 		private function __open($file){
 			if(!file_exists($file)) throw new \Exception("No such file {$file}.");
 			list($this->info['width'], $this->info['height'], $this->info['type'], $this->info['attr']) = getimagesize($file);

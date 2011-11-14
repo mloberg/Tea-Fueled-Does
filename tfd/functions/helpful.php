@@ -30,17 +30,15 @@
 		$equation = preg_replace('/([+-])([0-9]{1})(%)/', '*(1\$1.0\$2)', $equation);
 		$equation = preg_replace('/([+-])([0-9]+)(%)/', '*(1\$1.\$2)', $equation);
 		$equation = preg_replace('/([0-9]+)(%)/', '.\$1', $equation);
-		if($equation == ''){
-			$return = 0;
-		}else{
-			eval("\$return=" . $equation . ";" );
-		}
+		if(empty($equation)) return 0;
+		eval("\$return=" . $equation . ";" );
 		return $return;
 	}
 	
 	/**
 	 * Original script by donatj (https://github.com/donatj/)
 	 */
+	
 	function parse_user_agent($u_agent = null){ 
 		if(is_null($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'];
 		
@@ -50,7 +48,7 @@
 		if(preg_match('/^.+?(?P<platform>Android|iPhone|iPad|Windows|Macintosh|Windows Phone OS)(?: NT)*(?: [0-9.]+)*(;|\))/im', $u_agent, $regs)){
 			$data['platform'] = $regs['platform'];
 		}else{
-			$result = "";
+			$result = '';
 		}
 		
 		# (?<browser>Camino|Kindle|Firefox|Safari|MSIE|AppleWebKit|Chrome|IEMobile|Opera)(?:[/ ])(?<version>[0-9.]+)
