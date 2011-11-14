@@ -13,13 +13,13 @@
 		public function __toString(){
 			if(method_exists(__CLASS__, self::$method) && (($method = new \ReflectionMethod(__CLASS__, self::$method)) && $method->isPublic())){
 				$method = self::$method;
-				return self::$method();
+				return $this->$method();
 			}else{
 				return Response::make('', 404)->send();
 			}
 		}
 		
-		public static function test(){
+		public function page(){
 			return 'foobar';
 		}
 	

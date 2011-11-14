@@ -1,3 +1,4 @@
+<div id="response">loading</div>
 <?php
 
 $script = <<<SCRIPT
@@ -5,7 +6,7 @@ $.ajax({
 	type: 'get',
 	url: 'ajax/page',
 	success: function(msg){
-		console.log(msg);
+		$("#response").html("Got " + msg + " from /ajax/page");
 	}
 });
 SCRIPT;
