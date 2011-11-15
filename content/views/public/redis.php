@@ -1,7 +1,5 @@
 <?php
-
-	$redis = new Redis();
 	
-	$redis->set('myval', 'Hello World');
+	Redis::set('myval', 'Hello World');
 	
-	echo $redis->get('myval');
+	echo Redis::get('myval');

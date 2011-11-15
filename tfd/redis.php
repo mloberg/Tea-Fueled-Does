@@ -51,22 +51,34 @@
 		const MULTIBULK = '*';
 		const INTEGER = ':';
 	
-		protected $connection = false;
+		private $connection = false;
+		private static $class = null;
 	
 		/**
 		 * Open the connection to the Redis server.
 		 */
 		public function  __construct($config = array()){
-			$default = array('hostname' => Config::get('redis.host'), 'port' => Config::get('redis.port'));
+			$default = array('hostname' => Config::get('redis.host'), 'port' => Config::get('redis.port'), 'pass' => Config::get('redis.pass'));
 			$config = $config + $default;
 			$this->connection = @fsockopen($config['hostname'], $config['port'], $errno, $errstr);
 	
 			if(!$this->connection){
 				throw new RedisException($errstr, $errno);
-			}elseif(REDIS_PASS !== ''){
+			}elseif(!empty($config['pass'])){
 				// if Redis has a password, send the auth command
-				$this->auth(REDIS_PASS);
+				$this->auth($config['pass']);
 			}
+		}
+		
+		public static function make($config = array()){
+			return new self($config);
+		}
+		
+		public static function __callStatic($name, $args){
+			if(is_null(self::$class)) self::$class = new self();
+			$cmd = self::$class->buildCommand($name, $args);
+			self::$class->sendCommand($cmd);
+			return self::$class->readReply();
 		}
 	
 		/**
@@ -79,11 +91,10 @@
 		public function __call($name, $args){
 			$cmd = $this->buildCommand($name, $args);
 			$this->sendCommand($cmd);
-			
 			return $this->readReply();
 		}
 		
-		public function buildCommand($cmd, $args){
+		private function buildCommand($cmd, $args){
 			// Start building the command
 			$command = '*'.(count($args) + 1).CRLF;
 			$command .= '$'.strlen($cmd).CRLF;
@@ -98,7 +109,7 @@
 			return $command;
 		}
 		
-		public function sendCommand($command){
+		private function sendCommand($command){
 			if(!$this->connection){
 				throw new RedisException('You must be connected to a Redis server to send a command.');
 			}
@@ -106,7 +117,7 @@
 			fwrite($this->connection, $command);
 		}
 		
-		public function readReply(){
+		private function readReply(){
 			if(!$this->connection){
 				throw new RedisException('You must be connected to a Redis server to send a command.');
 			}
@@ -149,7 +160,7 @@
 			return $response;
 		}
 		
-		protected function readBulkReply($reply){
+		private function readBulkReply($reply){
 			if(!$this->connection){
 				throw new RedisException('You must be connected to a Redis server to send a command.');
 			}
