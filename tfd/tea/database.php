@@ -161,7 +161,7 @@ MAN;
 		
 		public static function create_table($table, $columns = array()){
 			if(empty($columns)){
-				echo "Columns is empty. Exiting...\n";
+				echo "Columns are empty. Exiting...\n";
 				exit(0);
 			}
 			$query = "CREATE TABLE `{$table}` (";
