@@ -19,6 +19,7 @@
 			'add-columns' => 'add_column_prompt',
 			'add-column' => 'add_column_prompt',
 			'drop-columns' => 'drop_column_prompt',
+			'drop-column' => 'drop_column_prompt',
 			'add-key' => 'add_key_prompt',
 			'drop-key' => 'drop_key_prompt'
 		);
@@ -88,6 +89,11 @@ Arguments:
 	-h, --help            This page
 	-i, --init            Setup the database
 	-c, --create-table    Create a new table
+	-d, --drop-table      Drop a table
+	-a, --add-column      Add a column(s)
+	--drop-columns        Drop a column(s)
+	--add-key             Add a key to a column
+	--drop-key            Drop a key from a column
 
 TFD Homepage: http://teafueleddoes.com/
 Tea Homepage: http://teafueleddoes.com/v2/tea

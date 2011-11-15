@@ -7,7 +7,8 @@
 		private static $commands = array(
 			'h' => 'help',
 			'a' => 'auth_key',
-			'm' => 'maintenance'
+			'm' => 'maintenance',
+			'u' => 'user_table',
 		);
 		private static $config_file;
 		
@@ -60,6 +61,7 @@ Arguments:
 	-h, help            This page
 	-a, --auth_key      Generate a new global auth key
 	-m, --maintenance   Turn maintence mode on/off
+	-u, --user_table    Set the user table
 
 TFD Homepage: http://teafueleddoes.com/
 Tea Homepage: http://teafueleddoes.com/v2/tea
