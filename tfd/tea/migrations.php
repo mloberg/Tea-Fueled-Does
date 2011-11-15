@@ -127,7 +127,6 @@ FILE;
 		
 		public static function init(){
 			if(!Config::is_set('migrations.table')){
-				echo "This is the migrations class provided by Tea.\nMigrations is an easy way to \"version control\" your database schema.\nFirst we need to setup the table that Tea will use to track active migrations.\n";
 				echo "Migrations table name [migrations]: ";
 				do{
 					$table = Tea::response('migrations');
