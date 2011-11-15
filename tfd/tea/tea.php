@@ -30,16 +30,8 @@ Tea Homepage: http://teafueleddoes.com/v2/tea
 MAN;
 		}
 		
-		static function db(){
-			include_once(TEA_DIR.'db'.EXT);
-			return new DB();
-		}
-		
 		/**
 		 * Get the user's response
-		 * 
-		 * params:
-		 *  default - (string) if response is empty, return this
 		 */
 		
 		public static function response($default = null){
@@ -49,10 +41,6 @@ MAN;
 			}
 			return $response;
 		}
-		
-		/**
-		 * This is the same method as above, but returns the string's lowercase
-		 */
 		
 		public static function response_to_lower($default = null){
 			return strtolower(self::response($default));
@@ -72,6 +60,17 @@ MAN;
 					return false;
 				}
 			}while(!$exit);
+		}
+		
+		public static function multiple($choice, $text = "Please select an above option: "){
+			foreach($choice as $key => $value){
+				echo "  {$key}: {$value}\n";
+			}
+			do{
+				echo $text.' ';
+				$resp = $choice[self::response()];
+			}while(empty($resp));
+			return $resp;
 		}
 	
 	}
