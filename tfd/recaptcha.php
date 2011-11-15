@@ -113,17 +113,13 @@
 		public static function get_html($pubkey = null, $error = null, $use_ssl = false){
 			if(is_null($pubkey)) $pubkey = Config::get('recaptcha.public_key');
 			if(empty($pubkey)){
-				die("To use reCAPTCHA you must get an API key from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a>.");
+				throw new \Exception('To use reCAPTCHA you must get an API key from <a href="https://www.google.com/recaptcha/admin/create">https://www.google.com/recaptcha/admin/create</a>');
 			}
-			
 			
 			$server = ($use_ssl) ? self::API_SECURE_SERVER : self::API_SERVER;
 			
 			$errorpart = '';
-			
-			if($error){
-				$errorpart = "&amp;error=".$error;
-			}
+			if($error) $errorpart = "&amp;error=".$error;
 			
 			return <<<RECAPTCHA
 <script type="text/javascript" src="$server/challenge?k=$pubkey$errorpart"></script>
@@ -145,16 +141,15 @@ RECAPTCHA;
 		  * @return ReCaptchaResponse
 		  */
 		
-		public static function check_answer($remoteip = '', $challenge = '', $response = '', $privkey = null, $extra_params = array()){
+		public static function check_answer($remoteip = null, $challenge = null, $response = null, $privkey = null, $extra_params = array()){
 			if(is_null($privkey)) $privkey = Config::get('recaptcha.private_key');
 			if(empty($privkey)){
-				die("To use reCAPTCHA you must get an API key from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a>.");
+				throw new \Exception('To use reCAPTCHA you must get an API key from <a href="https://www.google.com/recaptcha/admin/create">https://www.google.com/recaptcha/admin/create</a>.');
 			}
 			
-			if(empty($remoteip)) $remoteip = $_SERVER['REMOTE_ADDR'];
-			
-			if(empty($challenge)) $challenge = $_REQUEST['recaptcha_challenge_field'];
-			if(empty($response)) $response = $_REQUEST['recaptcha_response_field'];
+			if(is_null($remoteip)) $remoteip = $_SERVER['REMOTE_ADDR'];
+			if(is_null($challenge)) $challenge = $_REQUEST['recaptcha_challenge_field'];
+			if(is_null($response)) $response = $_REQUEST['recaptcha_response_field'];
 			
 			if(strlen($challenge) == 0 || strlen($response) == 0){
 				$response = new ReCaptchaResponse();
