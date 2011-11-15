@@ -1,12 +1,17 @@
 <?php namespace TFD\Tea;
 
 	use TFD\Admin;
+	use TFD\Crypter;
+	use TFD\DB\MySQL;
+	use TFD\Config as C;
 	
 	class User{
 	
 		private static $commands = array(
 			'h' => 'help',
-			'a' => 'add'
+			'a' => 'add',
+			'p' => 'password',
+			'r' => 'remove',
 		);
 		
 		public static function action($arg){
@@ -57,15 +62,43 @@ MAN;
 			do{
 				echo "Password: ";
 				system('stty -echo');
-				$password = trim(fgets(STDIN));
+				$password = Tea::response();
 				system('stty echo');
 			}while(empty($password));
-			
+			// add user
 			if(Admin::add_user($username, $password)){
 				echo "\n{$username} added!\n";
 			}else{
 				echo "\nCould not add user!\n";
 			}
+		}
+		
+		public static function password(){
+			echo 'Username: ';
+			$username = Tea::response();
+			if(empty($username)) exit(0);
+			$user = MySQL::table(C::get('admin.table'))->where('username', '=', $username)->limit(1)->get();
+			if(empty($user)) exit(0);
+			do{
+				echo 'Password: ';
+				system('stty -echo');
+				$password = Tea::response();
+				system('stty echo');
+			}while(empty($password));
+			// update password
+			if(MySQL::table(C::get('admin.table'))->where('username', '=', $username)->set('hash', Crypter::hash($password))){
+				echo "\nPassword updated.\n";
+			}else{
+				echo "\nCould not update password.\n";
+			}
+		}
+		
+		public static function remove(){
+			echo 'Username: ';
+			$username = Tea::response();
+			if(empty($username)) exit(0);
+			$user = MySQL::table(C::get('admin.table'))->where('username', '=', $username)->delete();
+			echo "User {$username} removed.\n";
 		}
 	
 	}
