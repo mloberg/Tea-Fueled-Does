@@ -1,6 +1,7 @@
 <?php namespace TFD\Cache;
 
 	use TFD\Config;
+	use TFD\File as F;
 	
 	class File implements Driver{
 	
@@ -10,13 +11,13 @@
 		
 		public function get($key){
 			if(!file_exists(Config::get('cache.dir').$key)) return null;
-			$cache = file_get_contents(Config::get('cache.dir').$key);
+			$cache = F::get(Config::get('cache.dir').$key);
 			if(time() >= substr($cache, 0, 10)) return self::delete($key);
 			return unserialize(substr($cache, 10));
 		}
 		
 		public function set($key, $value, $time){
-			file_put_contents(Config::get('cache.dir').$key, (time() + $time).serialize($value), LOCK_EX);
+			F::put(Config::get('cache.dir').$key, (time() + $time).serialize($value));
 		}
 		
 		public function delete($key){

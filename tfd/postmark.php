@@ -13,10 +13,14 @@
 		const BATCH_ENDPOINT = 'http://api.postmarkapp.com/email/batch';
 		const BOUNCES_ENDPOINT = 'http://api.postmarkapp.com/bounces';
 		
-		function __construct($api = null, $from = null, $reply = null){
+		public function __construct($api = null, $from = null, $reply = null){
 			$this->api_key = (!is_null($api)) $api : Config::get('postmark.api_key');
 			$this->from = (!is_null($from)) $from : Config::get('postmark.from');
 			$this->reply = (!is_null($reply)) $reply : Config::get('postmark.reply_to');
+		}
+		
+		public static function make($api = null, $from = null, $reply = null){
+			return new self($api, $from, $reply);
 		}
 		
 		protected function __send($data, $endpoint = null){
@@ -109,8 +113,12 @@
 		private $batch = array();
 		private $info = array();
 		
-		function __construct($api = null, $from = null, $reply = null){
+		public function __construct($api = null, $from = null, $reply = null){
 			parent::__construct($api, $from, $reply);
+		}
+		
+		public static function make($api = null, $from = null, $reply = null){
+			return new self($api, $from, $reply);
 		}
 		
 		public function send(){
