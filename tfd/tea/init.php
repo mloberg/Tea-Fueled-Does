@@ -10,6 +10,12 @@
 	class Init{
 	
 		public static function action($args){
+			// remove git related files
+			self::recursive_rm(BASE_DIR.'.git_test');
+			@unlink(BASE_DIR.'.gitignore');
+			@unlink(BASE_DIR.'cache/.gitignore');
+			
+			// include our config file
 			include_once(CONTENT_DIR.'config'.EXT);
 			// environment
 			echo 'Current environment is '.C::get('application.environment')."\n";
@@ -68,9 +74,6 @@
 			// write new config file
 			File::put(CONTENT_DIR.'config'.EXT, $conf[0].'function '.C::get('application.environment').'(){'.$conf[1]);
 			
-			// reload config file
-			new \Content\Environment(C::get('application.environment'));
-			
 			Database::init();
 			
 			if(Tea::yes_no('Setup Migrations?')){
@@ -82,6 +85,18 @@
 			if(Tea::yes_no("Add a user?")){
 				User::add();
 			}
+		}
+		
+		private static function recursive_rm($dir){
+			if(!is_dir($dir) || is_link($dir)) return unlink($dir);
+			foreach(scandir($dir) as $file){
+				if($file == '.' || $file == '..') continue;
+				if(!self::recursive_rm($dir.'/'.$file)){
+					chmod($dir.'/'.$file, 0777);
+					if(!self::recursive_rm($dir.'/'.$file)) return false;
+				}
+			}
+			return rmdir($dir);
 		}
 	
 	}
