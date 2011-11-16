@@ -1,7 +1,12 @@
 <?php
 
-	$postmark = new Postmark();
+	$resp = Postmark::make()->to('mail@example.com')->send(array('Subject' => 'Test', 'TextBody' => 'foobar'));
 	
-	$bounces = $postmark->get_bounces();
+	if(!$resp->sent()){
+		echo $resp->error();
+	}
 	
-	print_p($bounces->response());
+	print_p($resp->response());
+	
+	// bounces
+	print_p(PostmarkBounces::make()->get()->response());
