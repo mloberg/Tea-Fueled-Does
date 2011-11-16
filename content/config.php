@@ -5,8 +5,6 @@
  * Each environment can have a different set of options like MySQL host, error reporting, or anything you want or need.
  * Then to define the environment you are using, you must change line 2 of public/.htaccess from DEVELOPMENT to whatever environment you need
  *
- * You have the ability to add a custom environment, simply by adding another method to the class below with the name of the environment.
- *
  * You can read more about this file at http://teafueleddoes.com/v2/config
  */
 

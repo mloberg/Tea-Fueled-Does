@@ -10,8 +10,14 @@
 	class Init{
 	
 		public static function action($args){
+			// get current commit
+			if(!file_exists(BASE_DIR.'.tfdrevision')){
+				$commits = json_decode(file_get_contents('https://api.github.com/repos/mloberg/Tea-Fueled-Does/commits'), true);
+				File::put(BASE_DIR.'.tfdrevision', $commits[0]['sha']);
+			}
+			
 			// remove git related files
-			self::recursive_rm(BASE_DIR.'.git_test');
+			self::recursive_rm(BASE_DIR.'.git');
 			@unlink(BASE_DIR.'.gitignore');
 			@unlink(BASE_DIR.'cache/.gitignore');
 			
