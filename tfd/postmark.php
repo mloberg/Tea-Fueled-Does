@@ -14,9 +14,9 @@
 		const BOUNCES_ENDPOINT = 'http://api.postmarkapp.com/bounces';
 		
 		public function __construct($api = null, $from = null, $reply = null){
-			$this->api_key = (!is_null($api)) $api : Config::get('postmark.api_key');
-			$this->from = (!is_null($from)) $from : Config::get('postmark.from');
-			$this->reply = (!is_null($reply)) $reply : Config::get('postmark.reply_to');
+			$this->api_key = (!is_null($api)) ? $api : Config::get('postmark.api_key');
+			$this->from = (!is_null($from)) ? $from : Config::get('postmark.from');
+			$this->reply = (!is_null($reply)) ? $reply : Config::get('postmark.reply_to');
 		}
 		
 		public static function make($api = null, $from = null, $reply = null){
