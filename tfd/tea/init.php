@@ -20,6 +20,7 @@
 			self::recursive_rm(BASE_DIR.'.git');
 			@unlink(BASE_DIR.'.gitignore');
 			@unlink(BASE_DIR.'cache/.gitignore');
+			@unlink(CONTENT_DIR.'/views/public/.gitignore');
 			
 			// include our config file
 			include_once(CONTENT_DIR.'config'.EXT);
