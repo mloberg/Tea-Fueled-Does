@@ -4,7 +4,7 @@
 	
 	class Model{
 	
-		public static function foo(){
+		public function foo(){
 			return 'foobar';
 		}
 	

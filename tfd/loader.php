@@ -28,8 +28,6 @@
 				}else{
 					throw new \Exception("Could not load class {$name}. No file found at {$file}");
 				}
-			}elseif(preg_match('/^models/', strtolower($name))){
-				self::load_model($name);
 			}else{
 				throw new \Exception("Could not load class {$name}. No file found at {$file}");
 			}
@@ -41,16 +39,6 @@
 		
 		public static function content_dir($dir){
 			self::$content = $dir;
-		}
-		
-		private static function load_model($model){
-			$file = CONTENT_DIR.strtolower(str_replace('\\', '/', $model)).EXT;
-			if(file_exists($file)){
-				include_once($file);
-				class_alias('\Content\\'.$model, $model);
-			}else{
-				throw new \Exception("Could not load model {$model}. No file found at {$file}");
-			}
 		}
 		
 		public static function add_alias($name, $class, $file = null){
