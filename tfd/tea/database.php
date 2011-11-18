@@ -437,7 +437,7 @@ MAN;
 							'null' => false,
 							'default' => false,
 							'extra' => 'auto_increment',
-							'key' => 'primary'
+							'key' => 'primary key'
 						),
 						'username' => array(
 							'type' => 'varchar',
