@@ -28,6 +28,9 @@
 						echo "\n";
 					}
 					echo $update['message'];
+					if(Tea::yes_no('Have you updated these files?')){
+						File::put(BASE_DIR.'.tfdrevision', $update['sha']);
+					}
 				}elseif(Tea::yes_no('Would you like to update TFD?')){
 					if(!empty($update['delete'])){
 						foreach($update['delete'] as $delete){
