@@ -5,22 +5,13 @@
 		private static $connection;
 		private static $info = array();
 		
-		private static $table;
-		private static $params = array();
-		private static $query = array();
+		private $table;
+		private $params = array();
+		private $query = array();
 		
-		function __construct(){
+		function __construct($table = null){
+			$this->table = $table;
 			if(!is_object(self::$connection)){
-				self::create_connection();
-			}
-		}
-		
-		function __destruct(){
-			self::$connection = null;
-		}
-		
-		public static function __callStatic($name, $arguments){
-			if(!is_object(self::$connection) && $name !== 'table'){
 				self::create_connection();
 			}
 		}
@@ -29,11 +20,22 @@
 			if(!is_object(self::$connection)){
 				$con = new Connection();
 				try{
-					self::$connection = $con->mysql();
+					self::$connection =& $con->mysql();
 				}catch(\Exception $e){
 					throw new \Exception($e);
 				}
 			}
+		}
+		
+		private function __params($param, $value){
+			$i = 1;
+			$original = $param;
+			while(isset($this->params[$param])){
+				$param = $original.$i;
+				$i++;
+			}
+			$this->params[$param] = $value;
+			return $param;
 		}
 		
 		/**
@@ -60,12 +62,8 @@
 		 */
 		
 		public static function table($table){
-			// clear placeholders
-			self::$params = array();
-			// set table
-			self::$table = $table;
 			// return new MySQL object
-			return new self();
+			return new self($table);
 		}
 		
 		/**
@@ -91,7 +89,7 @@
 					$data = array();
 					while($row = $stmt->fetch()){
 						// if limit one, just return the single row
-						if(preg_match('/LIMIT 1/', self::last_query())){
+						if(preg_match('/LIMIT 1( |\z)/', self::last_query())){
 							return $row;
 						}
 						$data[] = $row;
@@ -119,20 +117,20 @@
 		 */
 		
 		private function __where($fields, $bitwise_operator, $value, $type = 'AND'){
-			if(!is_array($fields)) $fields = array($fields => $value);
+			// in case they didn't set a bitwise operator
+			if(is_null($value) && !is_array($fields)){
+				$fields = array($fields => $bitwise_operator);
+				$bitwise_operator = '=';
+			}elseif(!is_array($fields)){
+				$fields = array($fields => $value);
+			}
 			foreach($fields as $col => $value){
-				// make sure we don't have two placeholders with the same name
-				$i = 1;$orig = $col;
-				while(isset(self::$params[$col])){
-					$col = $orig.$i;
-					$i++;
-				}
-				if(empty(self::$query['where'])){
-					self::$query['where'] = sprintf("`%s` %s :%s", $orig, $bitwise_operator, $col);
+				$param = $this->__params($col, $value);
+				if(empty($this->query['where'])){
+					$this->query['where'] = sprintf("`%s` %s :%s", $col, $bitwise_operator, $param);
 				}else{
-					self::$query['where'] .= sprintf(" %s `%s` %s :%s", $type, $orig, $bitwise_operator, $col);
+					$this->query['where'] .= sprintf(" %s `%s` %s :%s", $type, $col, $bitwise_operator, $param);
 				}
-				self::$params[$col] = $value;
 			}
 		}
 		
@@ -156,13 +154,13 @@
 				$type = gettype($limit);
 				throw new \LogicException("MySQL::limit() expects an integer, {$type} given");
 			}else{
-				self::$query['limit'] = $limit;
+				$this->query['limit'] = $limit;
 			}
 			return $this;
 		}
 		
 		public function order_by($field, $type = 'DESC'){
-			$order = self::$query['order'];
+			$order = $this->query['order'];
 			if(!is_array($field)) $field = array($field => $type);
 			foreach($field as $by => $t){
 				if(is_int($by) && !preg_match('/desc|asc/', strtolower($t))){
@@ -171,7 +169,7 @@
 				}
 				$order .= sprintf("`%s` %s, ", $by, $t);
 			}
-			self::$query['order'] = $order;
+			$this->query['order'] = $order;
 			return $this;
 		}
 		
@@ -179,36 +177,41 @@
 		 * Our query builder helper method. Returns a PDO statement object
 		 */
 		
-		private function query_builder($query){
+		private function run_query($query){
 			// append query helpers to the query
-			if(!empty(self::$query['where'])){
-				$query .= ' WHERE '.self::$query['where'];
+			if(!empty($this->query['where'])){
+				$query .= ' WHERE '.$this->query['where'];
 			}
-			if(!empty(self::$query['order'])){
-				$query .= ' ORDER BY '.substr(self::$query['order'], 0, -2);
+			if(!empty($this->query['order'])){
+				$query .= ' ORDER BY '.substr($this->query['order'], 0, -2);
 			}
-			if(!empty(self::$query['limit'])){
-				$query .= ' LIMIT '.self::$query['limit'];
+			if(!empty($this->query['limit'])){
+				$query .= ' LIMIT '.$this->query['limit'];
 			}
 			
 			// clear query helper info
-			self::$query = array();
+			$this->query = array();
 			
 			// create a PDO statement object
 			$stmt = self::$connection->prepare($query);
 			
+			// run query
+			$stmt->execute($this->params);
+			
 			// set the last query
-			foreach(self::$params as $param => $value){
+			foreach($this->params as $param => $value){
 				$query = str_replace(':'.$param, '\''.$value.'\'', $query);
-				$stmt->bindParam(':'.$param, $value);
 			}
 			self::last_query($query);
+			
+			// clear params
+			$this->params = array();
 			
 			return $stmt;
 		}
 		
 		/**
-		 * Main SQL method
+		 * Main SQL methods
 		 */
 		
 		public function get($fields = '*'){
@@ -218,22 +221,15 @@
 				}
 				$fields = substr($tmp, 0, -1);
 			}
-			$qry = sprintf("SELECT %s FROM %s", $fields, self::$table);
-			$stmt = self::query_builder($qry);
-			try{
-				$stmt->execute(self::$params);
-			}catch(\PDOException $e){
-				throw new \Exception($e);
-			}
+			$qry = sprintf("SELECT %s FROM %s", $fields, $this->table);
+			$stmt = $this->run_query($qry);
 			self::num_rows($stmt->rowCount());
 			$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 			$data = array();
 			while($row = $stmt->fetch()){
 				// if limit 1, return the single row
-				if(preg_match('/LIMIT 1/', self::last_query())){
-					return $row;
-				}
-				$data[] = $row;
+				if(preg_match('/LIMIT 1( |\z)/', self::last_query())) return $row;
+				array_push($data, $row);
 			}
 			return $data;
 		}
@@ -242,60 +238,53 @@
 			if(!is_array($data)){
 				$type = gettype($data);
 				throw new \LogicException("MySQL::insert() expects an array, {$type} given");
+			}elseif(is_multi($data)){
+				// data[0] is the field list
+				$fields = array_shift($data);
+				foreach($fields as $f){
+					$field .= "`{$f}`, ";
+				}
+				$qry = sprintf("INSERT INTO %s (%s) VALUES ", $this->table, substr($field, 0, -2));
+				$values = '';
+				foreach($data as $insert){
+					$tmp_values = '';
+					foreach($insert as $index => $value){
+						$param = $this->__params($fields[$index], $value);
+						$tmp_values .= ":{$param}, ";
+					}
+					$values .= '('.substr($tmp_values, 0, -2).'),';
+				}
+				$qry .= substr($values, 0, -1);
 			}else{
 				foreach($data as $field => $value){
-					$i = 0;$orig = $field;
-					while(isset(self::$params[$field])){
-						$field = $orig.$i;
-						$i++;
-					}
-					$fields .= sprintf("`%s`, ", $orig);
-					$values .= sprintf(":%s, ", $field);
-					self::$params[$field] = $value;
+					$param = $this->__params($field, $value);
+					$fields .= "`{$field}`, ";
+					$values .= ":{$param}, ";
 				}
-				$qry = sprintf("INSERT INTO %s (%s) VALUES (%s)", self::$table, substr($fields, 0, -2), substr($values, 0, -2));
-				$stmt = self::query_builder($qry);
-				try{
-					$stmt->execute(self::$params);
-					self::insert_id(self::$connection->lastInsertId());
-					self::num_rows($stmt->rowCount());
-					return true;
-				}catch(\PDOException $e){
-					throw new \Exception($e);
-					return false;
-				}
+				$qry = sprintf("INSERT INTO %s (%s) VALUES (%s)", $this->table, substr($fields, 0, -2), substr($values, 0, -2));
 			}
+			$stmt = $this->run_query($qry);
+			self::insert_id(self::$connection->lastInsertId());
+			self::num_rows($stmt->rowCount());
+			return true;
 		}
 		
 		public function update($data, $where = null){
-			if(is_array($where)) self::where($where);
+			if(is_array($where)) $this->where($where);
 			if(!is_array($data)){
 				$type = gettype($data);
 				throw new \LogicException("MySQL::update expects an array, {$type} given");
-				return false;
-			}elseif(empty(self::$query['where']) && $where !== true){
+			}elseif(empty($this->query['where']) && $where !== true){
 				throw new \Exception('WHERE is not set in your query, this will update all rows. Skipping query');
-				return false;
 			}else{
 				foreach($data as $field => $value){
-					$i = 0;$orig = $field;
-					while(isset(self::$params[$field])){
-						$field = $orig.$i;
-						$i++;
-					}
-					$update .= sprintf("`%s` = :%s, ", $orig, $field);
-					self::$params[$field] = $value;
+					$param = $this->__params($field, $value);
+					$update .= sprintf("`%s` = :%s, ", $field, $param);
 				}
-				$qry = sprintf("UPDATE %s SET %s", self::$table, substr($update, 0, -2));
-				$stmt = self::query_builder($qry);
-				try{
-					$stmt->execute(self::$params);
-					self::num_rows($stmt->rowCount());
-					return true;
-				}catch(\PDOException $e){
-					throw new \Exception($e);
-					return false;
-				}
+				$qry = sprintf("UPDATE %s SET %s", $this->table, substr($update, 0, -2));
+				$stmt = $this->run_query($qry);
+				self::num_rows($stmt->rowCount());
+				return true;
 			}
 		}
 		
@@ -303,31 +292,22 @@
 			if(is_array($where)) self::where($where);
 			if(is_array($key) || is_array($value)){
 				throw new \LogicException("MySQL::set is used for setting a single column. If you wish to set multiple columns, use MySQL::update");
-				return false;
-			}elseif(empty(self::$query['where']) && $where !== true){
+			}elseif(empty($this->query['where']) && $where !== true){
 				throw new \Exception('WHERE is not set in your query, this will update all rows. Skipping query');
-				return false;
 			}else{
-				return $this->update(array($key => $value));
+				return $this->update(array($key => $value), $where);
 			}
 		}
 		
 		public function delete($where = null){
 			if(is_array($where)) $this->where($where);
-			if(empty(self::$query['where']) && $where !== true){
+			if(empty($this->query['where']) && $where !== true){
 				throw new \Exception('WHERE is not set in your query, this will delete all rows. Skipping query');
-				return false;
 			}else{
-				$qry = sprintf("DELETE FROM %s", self::$table);
-				$stmt = self::query_builder($qry);
-				try{
-					$stmt->execute(self::$params);
-					self::num_rows($stmt->rowCount());
-					return true;
-				}catch(\PDOException $e){
-					throw new \Exception($e);
-					return false;
-				}
+				$qry = sprintf("DELETE FROM %s", $this->table);
+				$stmt = $this->run_query($qry);
+				self::num_rows($stmt->rowCount());
+				return true;
 			}
 		}
 	

@@ -1,8 +1,12 @@
 <?php
 
+	/**
+	 * Redirect to another internal or external website
+	 */
+	
 	function redirect($location){
 		// check if external link
-		if(preg_match('/^http/',$location)){
+		if(preg_match('/^https?:\/\//',$location)){
 			header('Location: ' . $location);
 			exit();
 		}else{
@@ -11,19 +15,35 @@
 		}
 	}
 	
+	/**
+	 * Get a POST request variable
+	 */
+	
 	function post($name){
 		return $_POST[$name];
 	}
 	
+	/**
+	 * Get a GET request variable
+	 */
+	
 	function get($name){
 		return $_GET[$name];
 	}
+	
+	/**
+	 * Print pretty (print_r wrapped with <pre> tags
+	 */
 	
 	function print_p($print){
 		echo '<pre>';
 		print_r($print);
 		echo '</pre>';
 	}
+	
+	/**
+	 * Evaluate a math function stored as a string
+	 */
 	
 	function matheval($equation){
 		$equation = preg_replace('/[^0-9+\-.*\/()%]/', '', $equation);
@@ -36,6 +56,7 @@
 	}
 	
 	/**
+	 * Parse a User Agent string into it's different parts
 	 * Original script by donatj (https://github.com/donatj/)
 	 */
 	
@@ -87,4 +108,15 @@
 		}
 		
 		return $data;
+	}
+	
+	/**
+	 * Check for a multidimensional array
+	 */
+	
+	function is_multi($array){
+		if(!is_array($array)) throw new LogicException('is_multi expects an array.');
+		$rv = array_filter($array, 'is_array');
+		if(count($rv) > 0) return true;
+		return false;
 	}
