@@ -10,25 +10,43 @@
 			if($latest == $current){
 				echo "You are up to date!\n";
 				exit(0);
-			}elseif(Tea::yes_no('Would you like to update TFD?')){
+			}else{
 				$update = json_decode(self::post_request('changes', array('from' => $current)), true);
-				if(is_array($update['delete'])){
-					foreach($update['delete'] as $delete){
-						@unlink($delete);
-						if(file_exists($delete)) echo "\nCould not delete {$delete}!";
+				if($arg == 'list'){
+					if(!empty($update['delete'])){
+						echo "These files have been deleted:\n";
+						foreach($update['delete'] as $file => $content){
+							echo "    * {$file}\n";
+						}
+						echo "\n";
 					}
-				}
-				if(is_array($update['update'])){
-					foreach($update['update'] as $file => $content){
-						$checksum = md5_file($file);
-						@unlink($file);
-						File::put($file, base64_decode($content));
-						if(md5_file($file) == $checksum) echo "\nCould not update {$file}!";
+					if(!empty($update['update'])){
+						echo "These files have been changed:\n";
+						foreach($update['update'] as $file => $content){
+							echo "    * {$file}\n";
+						}
+						echo "\n";
 					}
+					echo $update['message'];
+				}elseif(Tea::yes_no('Would you like to update TFD?')){
+					if(!empty($update['delete'])){
+						foreach($update['delete'] as $delete){
+							@unlink($delete);
+							if(file_exists($delete)) echo "\nCould not delete {$delete}!";
+						}
+					}
+					if(!empty($update['update'])){
+						foreach($update['update'] as $file => $content){
+							$checksum = md5_file($file);
+							@unlink($file);
+							File::put($file, base64_decode($content));
+							if(md5_file($file) == $checksum) echo "\nCould not update {$file}!";
+						}
+					}
+					File::put(BASE_DIR.'.tfdrevision', $update['sha']);
+					echo $update['message'];
+					echo "TFD updated!\n";
 				}
-				File::put(BASE_DIR.'.tfdrevision', $update['sha']);
-				echo $update['message'];
-				echo "TFD updated!\n";
 			}
 		}
 		
