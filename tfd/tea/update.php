@@ -41,7 +41,6 @@
 					if(!empty($update['update'])){
 						foreach($update['update'] as $file => $content){
 							$checksum = md5_file($file);
-							@unlink($file);
 							File::put($file, base64_decode($content));
 							if(md5_file($file) == $checksum) echo "\nCould not update {$file}!";
 						}
