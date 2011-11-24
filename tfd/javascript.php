@@ -26,9 +26,6 @@
 		}
 		
 		public static function render(){
-			if(empty(self::$config['library']) && !empty(self::$ready)){
-				self::library('tfd');
-			}
 			$return = '';
 			if(!empty(self::$scripts)){
 				ksort(self::$scripts);
@@ -52,9 +49,10 @@
 					case 'jquery':
 						$return .= '$(document).ready(function(){';
 						break;
-					case 'tfd':
+					case 'dojo':
+						$return .= 'dojo.ready(function(){';
+					default:
 						$return .= 'window.onDomReady(function(){';
-						break;
 				}
 				foreach(self::$ready as $s){
 					$return .= $s;
@@ -88,10 +86,18 @@
 				}
 				self::$scripts[$order] = self::__prepare(self::$libraries[$lib]);;
 			}
-			if($lib == 'mootools'){
-				self::$config['library'] = 'mootools';
-			}elseif($lib == 'jquery'){
-				self::$config['library'] = 'jquery';
+			switch($lib){
+				case 'mootools':
+					self::$config['library'] = 'mootools';
+					break;
+				case 'jquery':
+					self::$config['library'] = 'jquery';
+					break;
+				case 'dojo':
+					self::$config['library'] = 'dojo';
+					break;
+				default:
+					self::$config['library'] = 'tfd';
 			}
 			return true;
 		}
