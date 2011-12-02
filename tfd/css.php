@@ -8,7 +8,7 @@
 		private static $styles = null;
 		private static $preloaded = array(
 			'reset' => 'css/reset.css',
-			'jquery-ui' => 'css/ui-lightness/jquery-ui-1.8.14.css'
+			'jquery-ui' => 'css/ui-lightness/jquery-ui.css'
 		);
 		
 		private static function __prepare($src){

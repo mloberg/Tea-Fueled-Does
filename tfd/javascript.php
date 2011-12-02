@@ -10,10 +10,10 @@
 		private static $config = array();
 		
 		private static $libraries = array(
-			'mootools' => 'js/mootools-core-1.4.1-min.js',
-			'mootools-more' => 'js/mootools-more-1.4.0.1-min.js',
-			'jquery' => 'js/jquery-1.7.min.js',
-			'jquery-ui' => 'js/jquery-ui-1.8.14.min.js',
+			'mootools' => 'js/mootools-core.min.js',
+			'mootools-more' => 'js/mootools-more.min.js',
+			'jquery' => 'js/jquery.min.js',
+			'jquery-ui' => 'js/jquery-ui.min.js',
 			'dojo' => 'http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js',
 			'tfd' => 'js/tfd.js',
 		);
