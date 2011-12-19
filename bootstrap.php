@@ -87,6 +87,7 @@ Loader::create_aliases(array(
 	'Request' => 'TFD\Core\Request',
 	'File' => 'TFD\File',
 	'Model' => 'TFD\Model',
+	'RSS' => 'TFD\RSS',
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
 Loader::add_alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);

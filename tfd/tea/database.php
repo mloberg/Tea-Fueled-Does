@@ -30,7 +30,7 @@
 			'tinytext', 'mediumtext', 'longtext', 'bit', 'char',
 			'date', 'datetime', 'time', 'year'
 		);
-		private static $default_types = array(
+		private static $default_values = array(
 			'varchar' => 128,
 			'int' => 11,
 			'text' => false,
@@ -357,21 +357,23 @@ MAN;
 					do{
 						echo "Field type. Enter a number above: ";
 						$type = Tea::response();
-						$type = (isset($default_types[$type])) ? $default_types[$type] : null;
+						$type = (isset(self::$field_types[$type])) ? self::$field_types[$type] : null;
 					}while(is_null($type));
 					
 					if(self::$default_values[$type] !== false && isset(self::$default_values[$type])){
 						// get the default false
 						$default_length = self::$default_values[$type];
 						echo "Length: [{$default_length}] ";
-						$length = Tea::response($default_values[$type]);
+						$length = Tea::response($default_length);
 					}
 					
 					$null = Tea::yes_no('Allow NULL?');
 					
 					echo "Default value (NULL for none): ";
 					$default = Tea::response();
-					if($default == 'NULL'){
+					if($null == false && (empty($default) || $default == 'NULL')){
+						$default = false;
+					}elseif($default == 'NULL'){
 						$null = true;
 						$default = false;
 					}

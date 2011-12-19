@@ -95,6 +95,17 @@
 			return self::link('&#109;&#097;&#105;&#108;&#116;&#111;&#058;'.$email, $title, $attributes);
 		}
 		
+		public static function rss_link($feed, $title = 'RSS Feed', $attributes = array()){
+			if(filter_var($feed, FILTER_VALIDATE_URL) === false){
+				$feed = Config::get('site.url').$feed;
+			}
+			$attributes['rel'] = 'alternate';
+			$attributes['type'] = 'application/rss+xml';
+			$attributes['title'] = $title;
+			$attributes['href'] = $feed;
+			return '<link '.self::attributes($attributes).' />';
+		}
+		
 		public static function image($url, $alt = '', $attributes = array()){
 			if(filter_var($url, FILTER_VALIDATE_URL) === false){
 				$remote = false;
@@ -106,7 +117,7 @@
 			}
 			$attributes['src'] = $url;
 			$attributes['alt'] = $alt;
-			return '<img'.self::attributes($attributes).' />';
+			return '<img '.self::attributes($attributes).' />';
 		}
 		
 		public static function ul($list, $attributes = array(), $entities = true){
