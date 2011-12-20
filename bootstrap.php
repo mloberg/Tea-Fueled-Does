@@ -33,7 +33,7 @@ include_once(FUNCTIONS_DIR.'helpful'.EXT);
 include_once(APP_DIR.'config'.EXT);
 // load some default config options
 TFD\Config::load(array(
-	'application.version' => '2.0',
+	'application.version' => '2.0.5',
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
 	'render.default_master' => MASTERS_DIR.'master'.EXT,
 	
@@ -87,6 +87,7 @@ Loader::create_aliases(array(
 	'Request' => 'TFD\Core\Request',
 	'File' => 'TFD\File',
 	'Model' => 'TFD\Model',
+	'RSS' => 'TFD\RSS',
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
 Loader::add_alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);

@@ -28,6 +28,11 @@ set_exception_handler(function($e){
 	exit(1);
 });
 
+if(preg_match('/-v|--version/', trim($_SERVER['argv'][1]))){
+	echo 'TFD ' .TFD\Config::get('application.version') . PHP_EOL;
+	exit(0);
+}
+
 // define STDIN if not already
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 
