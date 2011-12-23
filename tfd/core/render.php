@@ -94,15 +94,20 @@
 			if(self::$status != 200 && empty(self::$content)){ // if the status is not 200 and content is empty, send error page
 				return Render::error(self::$status)->render();
 			}else{
-				$master = self::$options['master'];
-				if(!file_exists($master)) $master = Config::get('render.default_master');
-				
+				if(!isset(self::$options['master'])){
+					$master = Config::get('render.default_master');
+				}else{
+					$master = self::$options['master'];
+				}
 				unset(self::$options['master']);
+				
 				self::$options['content'] = self::__content();
 				
-				$page = parent::__render($master, self::$options);
+				if($master === false){
+					return self::$options['content'];
+				}
 				
-				return $page;
+				return parent::__render($master, self::$options);
 			}
 		}
 		
@@ -116,7 +121,13 @@
 		}
 		
 		public function __set($name, $value){
-			self::$options[$name] = $value;
+			if($name == 'master'){
+				$this->master($value);
+			}elseif($name == 'status'){
+				$this->set_status($value);
+			}else{
+				self::$options[$name] = $value;
+			}
 		}
 		
 		public function set_status($code){
@@ -125,12 +136,14 @@
 		}
 		
 		public function master($master){
-			$master = MASTERS_DIR.$master.EXT;
-			if(!file_exists($master)){
-				throw new \Exception("Master {$master} not found.");
-			}else{
-				self::$options['master'] = $master;
+			if($master === null) $master = false;
+			if($master !== false){
+				$master = MASTERS_DIR.$master.EXT;
+				if(!file_exists($master)){
+					throw new \Exception("Master {$master} not found.");
+				}
 			}
+			self::$options['master'] = $master;
 			return $this;
 		}
 		
@@ -154,7 +167,9 @@
 		private function bootstrap($options){
 			$this->__render_view($options);
 			unset($options['view'], $options['dir']);
-			if(isset($options['master'])) $options['master'] = MASTERS_DIR.$options['master'].EXT;
+			if(isset($options['master']) && ($options['master'] !== null || $options['master'] !== false)){
+				$options['master'] = MASTERS_DIR.$options['master'].EXT;
+			}
 			$this->set_options($options);
 		}
 		
