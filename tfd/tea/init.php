@@ -44,7 +44,7 @@
 			$conf = explode('function '.C::get('application.environment').'(){', $conf_file);
 			
 			// site url
-			echo 'Site URL (with trailing slash) ['.C::get('site.url').']: ';
+			echo 'Site URL (without trailing slash) ['.C::get('site.url').']: ';
 			$url = Tea::response(C::get('site.url'));
 			$conf[1] = preg_replace("/('site\.url' => ')".preg_quote(C::get('site.url'), '/')."(')/", '${1}'.$url.'$2', $conf[1], 1);
 			C::set('site.url', $url);

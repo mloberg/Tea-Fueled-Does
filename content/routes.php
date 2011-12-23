@@ -9,7 +9,7 @@
 return array(
 
 	/** Sample Routes
-	'GET form' => function(){
+	'GET /form' => function(){
 		return array(
 			'dir' => 'protected',
 			'view' => 'upload',
@@ -18,7 +18,7 @@ return array(
 		);
 	},
 	
-	'POST form/post' => function(){
+	'POST /form/post' => function(){
 		// do something with the upload
 		
 		redirect('form');

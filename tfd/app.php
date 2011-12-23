@@ -46,6 +46,8 @@
 		 */
 		
 		private static function bootstrap($request){
+			Config::set('site.url', preg_replace('/\/$/', '', Config::get('site.url')));
+			if(!preg_match('/^\//', $request)) $request = '/' . $request;
 			self::$request = new Request($request);
 			Flash::bootstrap();
 		}

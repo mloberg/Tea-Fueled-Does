@@ -20,7 +20,7 @@
 		private static function parse_request($req){
 			if(empty($req)){
 				return 'index';
-			}elseif(preg_match('/\/$/', $req)){
+			}elseif(preg_match('/\/$/', $req)){ // if request ends with / added index
 				return $req.'index';
 			}else{
 				return $req;
@@ -28,7 +28,7 @@
 		}
 		
 		public static function run(){
-			if(($call = self::is_ajax()) !== false){
+			if(($call = self::is_ajax()) !== false && method_exists('Ajax', $call)){
 				return (string) new Ajax($call);
 			}elseif(self::is_logout()){
 				return Admin::logout();
@@ -46,7 +46,7 @@
 		}
 		
 		public static function is_ajax(){
-			if(Config::is_set('ajax.path') && preg_match('/^'.preg_quote(Config::get('ajax.path')).'\/?(.*)?$/', self::$request, $match) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'){
+			if(Config::is_set('ajax.path') && preg_match('/^'.preg_quote(Config::get('ajax.path'), '/').'\/?(.*)?$/', self::$request, $match) && ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' || Config::get('ajax.debug'))){
 				if(empty($match[1]) && Config::is_set('ajax.parameter') && isset($_REQUEST[Config::get('ajax.parameter')])) return $_REQUEST[Config::get('ajax.parameter')];
 				return $match[1];
 			}
@@ -54,15 +54,15 @@
 		}
 		
 		private static function is_logout(){
-			return (Config::is_set('admin.logout') && preg_match('/^(admin\/)?'.preg_quote(Config::get('admin.logout')).'$/', self::$request)) ? true : false;
+			return (Config::is_set('admin.logout') && preg_match('/^(\/admin)?'.preg_quote(Config::get('admin.logout'), '/').'$/', self::$request)) ? true : false;
 		}
 		
 		private static function is_login(){
-			return (Config::is_set('admin.login') && preg_match('/^'.preg_quote(Config::get('admin.login')).'\/?$/', self::$request)) ? true : false;
+			return (Config::is_set('admin.login') && preg_match('/^'.preg_quote(Config::get('admin.login'), '/').'\/?$/', self::$request)) ? true : false;
 		}
 		
 		public static function is_admin(){
-			return (Config::is_set('admin.path') && preg_match('/^'.preg_quote(Config::get('admin.path')).'\/?(.*)?$/', self::$request)) ? true : false;
+			return (Config::is_set('admin.path') && preg_match('/^'.preg_quote(Config::get('admin.path'), '/').'\/?(.*)?$/', self::$request)) ? true : false;
 		}
 		
 		public static function uri(){
