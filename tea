@@ -90,6 +90,8 @@ try{
 // if command is empty, show command help
 if(empty($command)){
 	call_user_func('TFD\Tea\\'.$class.'::help');
+}elseif($command == 'update'){
+	\TFD\Tea\Update::do_update($args[0]);
 }else{
 	$command = preg_replace('/^--?/', '', $command);
 	if(method_exists('TFD\Tea\\'.$class, '__flags')){

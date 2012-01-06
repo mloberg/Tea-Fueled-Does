@@ -81,10 +81,10 @@
 				'error.detailed' => true,
 				
 				'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
-				'mysql.port' => 8889, // MySQL default is 3306
+				'mysql.port' => 3306, // MySQL default is 3306
 				'mysql.user' => 'root',
 				'mysql.pass' => 'root',
-				'mysql.db' => 'tea',
+				'mysql.db' => 'tfd',
 				
 				'redis.host' => '',
 				'redis.port' => 6379,

@@ -6,31 +6,13 @@
 	
 	class Database{
 	
-		private static $commands = array(
-			'h' => 'help',
-			'i' => 'init',
-			'c' => 'create_table_prompt',
-			'd' => 'drop_table_prompt',
-			'a' => 'add_column_prompt'
-		);
-		private static $aliases = array(
-			'create-table' => 'create_table_prompt',
-			'drop-table' => 'drop_table_prompt',
-			'add-columns' => 'add_column_prompt',
-			'add-column' => 'add_column_prompt',
-			'drop-columns' => 'drop_column_prompt',
-			'drop-column' => 'drop_column_prompt',
-			'add-key' => 'add_key_prompt',
-			'drop-key' => 'drop_key_prompt'
-		);
-		
-		private static $field_types = array(
+		protected static $field_types = array(
 			'varchar', 'int', 'text', 'timestamp', 'enum',
 			'float', 'double', 'tinyint', 'smallint', 'mediumint', 'bigint', 'decimal',
 			'tinytext', 'mediumtext', 'longtext', 'bit', 'char',
 			'date', 'datetime', 'time', 'year'
 		);
-		private static $default_values = array(
+		protected static $default_values = array(
 			'varchar' => 128,
 			'int' => 11,
 			'text' => false,
@@ -53,6 +35,22 @@
 			'time' => false,
 			'year' => 4
 		);
+		
+		public static function __flags(){
+			return array(
+				'h' => 'help',
+				'i' => 'init',
+				'c' => 'create_table_prompt',
+				'd' => 'drop_table_prompt',
+				'a' => 'add_column_prompt',
+			);
+		}
+		
+		public static function __callStatic($method, $args){
+			if(method_exists('\TFD\Tea\Worker', $method)){
+				return call_user_func_array('\TFD\Tea\Worker::'.$method, $args);
+			}
+		}
 		
 		public static function action($arg){
 			if(empty($arg)) self::help();
@@ -102,14 +100,80 @@ MAN;
 			exit(0);
 		}
 		
+		public static function init(){
+			if(!Config::is_set('mysql.host')){
+				throw new \Exception('Database config is empty');
+			}
+			
+			// check for a user table
+			if(!Worker::table_exists(Config::get('admin.table'))){
+				if(Tea::yes_no('Setup user table?')){
+					echo 'Table name ['.Config::get('admin.table').']: ';
+					$table = Tea::response(Config::get('admin.table'));
+					if($table !== Config::get('admin.table')){
+						General::user_table(array($table));
+					}
+					// default columns
+					$columns = array(
+						'id' => array(
+							'type' => 'int',
+							'length' => 11,
+							'null' => false,
+							'default' => false,
+							'extra' => 'auto_increment',
+							'key' => 'primary key'
+						),
+						'username' => array(
+							'type' => 'varchar',
+							'length' => 128,
+							'null' => false,
+							'default' => false,
+							'extra' => '',
+							'key' => 'unique'
+						),
+						'hash' => array(
+							'type' => 'varchar',
+							'length' => 1024,
+							'null' => false,
+							'default' => false,
+							'extra' => '',
+							'key' => ''
+						),
+						'secret' => array(
+							'type' => 'varchar',
+							'length' => 1024,
+							'null' => false,
+							'default' => '',
+							'extra' => '',
+							'key' => ''
+						)
+					);
+					if(Tea::yes_no('Add custom fields to the table?')){
+						$columns = Prompt::columns($columns);
+					}
+					
+					// create table
+					if(!Worker::create_table($table, $columns)){
+						throw new \Exception("Could not create admin table");
+					}
+				}
+			}
+			
+			// create other tables
+			do{
+				if(Tea::yes_no("Add a table?")){
+					Prompt::create_table();
+				}else{
+					$exit = true;
+				}
+			}while($exit !== true);
+
+			echo "Database setup\n";
+		}
+		
 		/**
 		 * Database Methods
 		 */
-		
-		public static function table_exists($table){
-			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => (string)$table), true);
-			return (empty($tables)) ? false : true;
-		}
 		
 		public static function list_tables(){
 			$t = MySQL::query("SHOW TABLES", array(), true);
@@ -416,7 +480,7 @@ MAN;
 		 * Class Methods
 		 */
 		
-		public static function init(){
+		public static function old_init(){
 			// if no database information was loaded, exit
 			if(!Config::is_set('mysql.host')){
 				echo "Empty database config. Exiting...\n";
@@ -815,6 +879,216 @@ MAN;
 					}
 				}
 			}
+		}
+	
+	}
+	
+	class Worker{
+	
+		public static function table_exists($table){
+			$tables = MySQL::query("SHOW TABLES LIKE :table", array('table' => (string)$table), true);
+			return (empty($tables)) ? false : true;
+		}
+
+		public static function list_tables(){
+			$t = MySQL::query("SHOW TABLES", array(), true);
+			$tables = array();
+			foreach($t as $table){
+				$v = array_values($table);
+				$tables[] = $v[0];
+			}
+			return $tables;
+		}
+
+		public static function list_columns($table){
+			$fields = MySQL::query("SHOW FIELDS FROM `{$table}`", array(), true);
+			$keys = array(
+				'PRI' => 'primary key',
+				'UNI' => 'unique key',
+				'MUL' => 'key'
+			);
+			$columns = array();
+			foreach($fields as $field){
+				preg_match('/(\w+)(\((.+)\))?/', $field['Type'], $match);
+				$type = $match[1];
+				$length = (isset($match[3])) ? $match[3] : false;
+				$columns[$field['Field']] = array(
+					'type' => $type,
+					'length' => $length,
+					'null' => ($field['Null'] == 'YES') ? true : false,
+					'default' => ($field['Default'] === null) ? false : $field['Default'],
+					'extra' => $field['Extra'],
+					'key' => $keys[$field['Key']]
+				);
+			}
+			return $columns;
+		}
+
+		public static function scan(){
+			$tables = self::list_tables();
+			$db = array();
+			foreach($tables as $table){
+				$db[$table] = self::list_columns($table);
+			}
+			return $db;
+		}
+		
+		public static function create_table($table, $columns = array()){
+			if(empty($columns) || !is_array($columns)){
+				throw new \Exception('Columns are empty');
+			}
+			$query = '';
+			$keys = array();
+			foreach($columns as $name => $info){
+				if($info['length'] === false || empty($info['length'])){
+					$type = $info['type'];
+				}else{
+					$type = sprintf("%s(%s)", $info['type'], $info['length']);
+				}
+				
+				if($info['null'] === true && $info['default'] === false){
+					$default = 'DEFAULT NULL';
+				}elseif($info['null'] === true && $info['type'] == 'timestamp'){
+					$default = 'DEFAULT CURRENT_TIMESTAMP';
+				}elseif($info['null'] === true){
+					$default = sprintf("DEFAULT '%s'", $info['default']);
+				}elseif($info['null'] === false && $info['default'] === false){
+					$default = 'NOT NULL';
+				}elseif($info['null'] === false && $info['type'] == 'timestamp'){
+					$default = 'NOT NULL DEFAULT CURRENT_TIMESTAMP';
+				}elseif($info['null'] === false){
+					$default = sprintf("NOT NULL DEFAULT '%s'", $info['default']);
+				}
+				
+				$query .= sprintf("`%s` %s %s %s,", $name, $type, $default, strtoupper($info['extra']));
+				
+				if(!empty($info['key'])){
+					$keys[$name] = $info['key'];
+				}
+			}
+			
+			foreach($keys as $field => $type){
+				$key = ($type !== 'primary key') ? $key = sprintf("`%s`", $field) : '';
+				$query .= sprintf("%s %s (`%s`),", strtoupper($type), $key, $field);
+			}
+			$query = sprintf("CREATE TABLE `%s` (%s)", $table, substr($query, 0, -1));
+			
+			try{
+				return MySQL::query($query);
+			}catch(\Exception $e){
+				return false;
+			}
+		}
+	
+	}
+	
+	class Prompt extends Database{
+	
+		private static function migration(){
+			
+		}
+
+		public static function columns($columns = array()){
+			if(empty($columns['id'])){
+				if(Tea::yes_no('Create an id column?')){
+					$columns['id'] = array(
+						'type' => 'int',
+						'value' => 11,
+						'null' => false,
+						'default' => false,
+						'extra' => 'auto_increment',
+						'key' => 'primary key'
+					);
+				}
+			}
+			do{
+				$exit = false;
+				echo 'Field name ("q" when done): ';
+				$field = Tea::response();
+				if($field == 'q'){
+					$exit = true;
+				}elseif(array_key_exists($field, $columns)){
+					echo "\033[0;31mError:\033[0m Field exists!\n";
+				}elseif(!empty($field)){
+					echo "Field types:\n";
+					foreach(parent::$field_types as $index => $type){
+						echo "\t{$index}:  {$type}\n";
+					}
+					do{
+						echo "Field type. Enter a number above: ";
+						$type = Tea::response();
+						$type = (isset(parent::$field_types[$type])) ? parent::$field_types[$type] : null;
+					}while(is_null($type));
+
+					if(parent::$default_values[$type] !== false && isset(parent::$default_values[$type])){
+						$default_length = parent::$default_values[$type];
+						echo "Length [{$default_length}]: ";
+						$length = Tea::response($default_length);
+					}
+
+					$null = Tea::yes_no('Allow NULL?');
+
+					echo 'Default value (NULL for none): ';
+					$default = Tea::response();
+					if($null === false && $default == 'NULL'){
+						$default = false;
+					}elseif($default == 'NULL'){
+						$null = true;
+						$default = false;
+					}
+
+					$key_types = array('primary key', 'unique key', 'key');
+					foreach($key_types as $index => $key){
+						echo "\t{$index}:  {$key}\n";
+					}
+					do{
+						echo 'Key (blank for none): ';
+						$response = Tea::response();
+						if(empty($response)){
+							$key = '';
+							$done = true;
+						}elseif(isset($key_types[$response])){
+							$key = $key_types[$response];
+							$done = true;
+						}
+					}while($done !== true);
+
+					echo 'Extra: ';
+					$extra = Tea::response_to_upper();
+
+					$columns[$field] = array(
+						'type' => $type,
+						'length' => $length,
+						'null' => $null,
+						'default' => $default,
+						'extra' => $extra,
+						'key' => $key
+					);
+				}
+			}while(!$exit);
+
+			return $columns;
+		}
+		
+		public static function create_table($table = null, $columns = array()){
+			if(empty($table)){
+				do{
+					echo 'Table name: ';
+					$table = Tea::response();
+					if(Worker::table_exists($table)){
+						$table = '';
+						echo "\033[1;31mError:\033[0m Table exists!";
+					}
+				}while(empty($table));
+			}elseif(Worker::table_exists($table)){
+				throw new \Exception('Table exists');
+			}
+
+			// columns
+			$columns = self::columns($columns);
+
+			// generate migration?
+
 		}
 	
 	}
