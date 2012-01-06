@@ -26,6 +26,10 @@ set_exception_handler(function($e){
 	echo $e->getMessage() . PHP_EOL;
 	exit(1);
 });
+set_error_handler(function($number, $error, $file, $line){
+	echo $error;
+	exit(1);
+}, E_ALL ^ E_NOTICE);
 
 // if looking for version, display version and exit
 if(preg_match('/-v|--version/', trim($_SERVER['argv'][1]))){
@@ -92,7 +96,7 @@ if(empty($command)){
 		$a = call_user_func('TFD\Tea\\'.$class.'::__flags');
 		if(array_key_exists($command, $a)) $command = $a[$command];
 	}
-	if(!method_exists('TFD\Tea\\'.$class, $command)){
+	if(!method_exists('TFD\Tea\\'.$class, $command) || (($method = new \ReflectionMethod('TFD\Tea\\'.$class, $command)) && !$method->isPublic())){
 		throw new \Exception("'tea {$class} {$command}' is not a valid command");
 	}
 	call_user_func('TFD\Tea\\'.$class.'::'.$command, $args);

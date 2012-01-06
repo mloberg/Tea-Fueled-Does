@@ -35,7 +35,7 @@
 				'admin.logout' => 'logout',
 				'admin.path' => 'admin',
 				'admin.table' => 'users',
-				'admin.auth_key' => '4ea06e01d8e73',
+				'admin.auth_key' => '4f0712cd96a93',
 				'admin.login_time' => 3600,
 				'admin.cost' => 12, // rounds for hashing passwords
 				
