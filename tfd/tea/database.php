@@ -802,5 +802,19 @@ MAN;
 			
 			self::drop_key($table, $col);
 		}
+		
+		public static function seed(){
+			$seeds = include(CONTENT_DIR.'db/seed'.EXT);
+			if(!empty($seed)){
+				foreach($seeds as $table => $seed){
+					if(isset($seed['clear_data']) && $seed['clear_data'] === true){
+						// clear all data in db
+					}
+					foreach($seed as $row){
+						// insert row
+					}
+				}
+			}
+		}
 	
 	}

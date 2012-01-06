@@ -12,10 +12,10 @@ $environment = $match[1];
 
 // include the files to get this going
 require_once 'bootstrap.php';
-use TFD\Config;
 
 // set some tea config options
-Config::set('migrations.dir', CONTENT_DIR.'migrations/');
+use TFD\Config;
+Config::set('migrations.dir', CONTENT_DIR.'db/migrations/');
 include_once(CONTENT_DIR.'tea-config'.EXT);
 
 // run verbosely
@@ -23,35 +23,79 @@ error_reporting(E_ERROR|E_WARNING|E_PARSE);
 
 // deal with exceptions differently
 set_exception_handler(function($e){
-	$e = new \TFD\Exception\Examiner($e);
-	echo $e->message();
+	echo $e->getMessage() . PHP_EOL;
 	exit(1);
 });
 
+// if looking for version, display version and exit
 if(preg_match('/-v|--version/', trim($_SERVER['argv'][1]))){
-	echo 'TFD ' .TFD\Config::get('application.version') . PHP_EOL;
+	echo 'v'.TFD\Config::get('application.version').PHP_EOL;
 	exit(0);
 }
 
 // define STDIN if not already
 if(!defined('STDIN')) define('STDIN', fopen("php://stdin", 'r'));
 
+// parse the command
+preg_match('/tea ([\w|\-|:]+) ?([\w|\-|:]+)? ?(.+)?/', implode(' ', $_SERVER['argv']), $parts);
+$class = $parts[1];
+$command = $parts[2];
+$args = explode(' ', $parts[3]);
+unset($parts);
+
 // welcome message
 echo "== Tea-Fueled Does v".TFD\Config::get('application.version')." ==\n";
 
-// now let's get on with the show
-Config::set('tea.command', $_SERVER['argv'][1]);
-preg_match('/tea ([\w|\-|:]+) (.+)/', implode(' ', $_SERVER['argv']), $match);
-Config::set('tea.args', $match[2]);
-unset($match);
+// help?
+if(empty($class) || preg_match('/(--)?help|-h/', $class)){
+	echo <<<MAN
+A CLI to interface with Tea-Fueled Does.
 
-// show some help if they need it
-if(Config::get('tea.command') == '' || Config::get('tea.command') == 'help' || Config::get('tea.command') == '-h'){
-	// send Tea help
-	TFD\Tea\Tea::help();
-// should add some sort of validation to make sure it's a valid command
+	Usage: tea <command> <args>
+
+Tea Commands:
+
+	init:        Quickly setup TFD.
+	user:        Manage users.
+	config:      Change a config option.
+	database:    Make changes to the database.
+	migrations:  Manage database migrations.
+
+
+Args:
+
+Each command has it's own set of commands,
+to see args for a specific comamnd run:
+
+	tea <command> -h
+
+TFD Homepage: http://teafueleddoes.com/
+Tea Homepage: http://teafueleddoes.com/v2/tea
+
+MAN;
+	exit(0);
+}
+
+// see if class exists
+try{
+	class_exists('TFD\Tea\\'.$class);
+}catch(Exception $e){
+	throw new \Exception("command does not exist");
+}
+
+// if command is empty, show command help
+if(empty($command)){
+	call_user_func('TFD\Tea\\'.$class.'::help');
 }else{
-	call_user_func('TFD\Tea\\'.Config::get('tea.command').'::action', Config::get('tea.args'));
+	$command = preg_replace('/^--?/', '', $command);
+	if(method_exists('TFD\Tea\\'.$class, '__flags')){
+		$a = call_user_func('TFD\Tea\\'.$class.'::__flags');
+		if(array_key_exists($command, $a)) $command = $a[$command];
+	}
+	if(!method_exists('TFD\Tea\\'.$class, $command)){
+		throw new \Exception("'tea {$class} {$command}' is not a valid command");
+	}
+	call_user_func('TFD\Tea\\'.$class.'::'.$command, $args);
 }
 
 // exit the script properly

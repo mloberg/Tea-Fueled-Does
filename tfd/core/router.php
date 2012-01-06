@@ -25,7 +25,7 @@
 		
 		private static function load_routes(){
 			if(file_exists(CONTENT_DIR.'routes'.EXT)){
-				self::$routes = include_once(CONTENT_DIR.'routes'.EXT);
+				self::$routes = include(CONTENT_DIR.'routes'.EXT);
 			}
 		}
 		
