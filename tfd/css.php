@@ -7,12 +7,15 @@
 		private static $sheets = array();
 		private static $styles = null;
 		private static $preloaded = array(
-			'reset' => 'css/reset.css',
-			'jquery-ui' => 'css/ui-lightness/jquery-ui-1.8.14.css'
+			'reset' => '/css/reset.css',
+			'jquery-ui' => '/css/ui-lightness/jquery-ui-1.8.14.css'
 		);
 		
 		private static function __prepare($src){
-			if(!preg_match('/^http(s*)\:\/\//', $src)) $src = Config::get('site.url').$src;
+			if(!preg_match('/^http(s*)\:\/\//', $src)){
+				if(!preg_match('/^\//', $src)) $src = '/' . $src;
+				$src = Config::get('site.url').$src;
+			}
 			return '<link rel="stylesheet" href="'.$src.'" />';
 		}
 				

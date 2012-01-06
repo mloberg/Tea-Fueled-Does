@@ -31,9 +31,9 @@
 				'site.maintenance' => false,
 				'site.title' => 'Tea-Fueled Does',
 				
-				'admin.login' => 'login',
-				'admin.logout' => 'logout',
-				'admin.path' => 'admin',
+				'admin.login' => '/login',
+				'admin.logout' => '/logout',
+				'admin.path' => '/admin',
 				'admin.table' => 'users',
 				'admin.auth_key' => '4f0712cd96a93',
 				'admin.login_time' => 3600,
@@ -41,8 +41,9 @@
 				
 				'crypter.rounds' => 10, // default rounds for the crypter class
 				
-				'ajax.path' => 'ajax',
+				'ajax.path' => '/ajax',
 				'ajax.parameter' => 'method',
+				'ajax.debug' => false,
 				
 				'cache.key' => ''
 			));
@@ -75,7 +76,7 @@
 			// php error reporting
 			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 			Config::load(array(
-				'site.url' => 'http://localhost/', // with trailing slash
+				'site.url' => 'http://localhost', // without trailing slash
 				
 				'error.log' => false,
 				'error.detailed' => true,
@@ -108,7 +109,7 @@
 			// php error reporting
 			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 			Config::load(array(
-				'site.url' => '', // with trailing slash
+				'site.url' => '', // without trailing slash
 				
 				'error.log' => BASE_DIR.'error.log',
 				'error.detailed' => true,
@@ -141,7 +142,7 @@
 			// php error reporting
 			error_reporting(0); // no reporting
 			Config::load(array(
-				'site.url' => '', // with trailing slash
+				'site.url' => '', // without trailing slash
 				
 				'error.log' => BASE_DIR.'error.log',
 				'error.detailed' => false,

@@ -10,6 +10,7 @@
 			header('Location: ' . $location);
 			exit();
 		}else{
+			if(!preg_match('/^\//', $location)) $location = '/' . $location;
 			header('Location: '.Config::get('site.url').$location);
 			exit();
 		}

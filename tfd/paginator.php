@@ -115,7 +115,9 @@
 		
 		private function link($page, $text, $class = null){
 			if($this->url !== false){
-				$link = Config::get('site.url').$this->url.$page;
+				$url = $this->url;
+				if(!preg_match('/^\//', $url)) $url = '/' . $url;
+				$link = Config::get('site.url').$url.$page;
 			}else{
 				$link = App::request().'?page='.$page;
 				if(!empty($this->append)){
