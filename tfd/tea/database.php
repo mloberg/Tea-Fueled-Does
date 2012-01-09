@@ -223,62 +223,6 @@ MAN;
 			return $db;
 		}
 		
-		public static function create_table($table, $columns = array()){
-			if(empty($columns)){
-				echo "Columns are empty. Exiting...\n";
-				exit(0);
-			}
-			$query = "CREATE TABLE `{$table}` (";
-			$keys = array();
-			foreach($columns as $name => $info){
-				$query .= "`{$name}` ";
-				// get type
-				if($info['length'] === false || empty($info['length'])){
-					$query .= $info['type'].' ';
-				}else{
-					$query .= "{$info['type']}({$info['length']}) ";
-				}
-				
-				if($info['null'] === true && $info['default'] === false){
-					$query .= "DEFAULT NULL ";
-				}elseif($info['null'] === true && $info['type'] == 'timestamp'){
-					$query .= "DEFAULT CURRENT_TIMESTAMP ";
-				}elseif($info['null'] === true){
-					$query .= "DEFAULT '{$info['default']}' ";
-				}elseif($info['null'] === false && $info['default'] === false){
-					$query .= "NOT NULL ";
-				}elseif($info['null'] === false && $info['type'] == 'timestamp'){
-					$query .= "NOT NULL DEFAULT CURRENT_TIMESTAMP ";
-				}elseif($info['null'] == false){
-					$query .= "NOT NULL DEFAULT '{$info['default']}' ";
-				}
-				
-				$query .= strtoupper($info['extra']).',';
-				
-				// if there is a key, save it to the key array for later
-				if(!empty($info['key'])){
-					$keys[$name] = $info['key'];
-				}
-			}
-			// add the keys to the query
-			foreach($keys as $name => $type){
-				$query .= strtoupper($type);
-				if($type !== 'primary key'){
-					$query .= " `{$name}`";
-				}
-				$query .= " (`{$name}`),";
-			}
-			$query = substr($query, 0, -1).')';
-			try{
-				if(MySQL::query($query)){
-					return true;
-				}
-				return false;
-			}catch(\Exception $e){
-				return false;
-			}
-		}
-		
 		public static function drop_table($table){
 			if(!self::table_exists($table)){
 				echo "{$table} does not exist! Exiting...";
