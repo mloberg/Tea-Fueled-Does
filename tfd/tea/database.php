@@ -51,6 +51,7 @@
 				'drop-column' => 'remove_column',
 				'add-key' => 'add_key',
 				'drop-key' => 'remove_key',
+				's' => 'seed',
 			);
 		}
 		
@@ -249,7 +250,7 @@ MAN;
 				}
 				do{
 					echo 'Which table would you like to drop columns from? ';
-					$table = tables[Tea::response()])){
+					$table = $tables[Tea::response()];
 				}while(empty($table));
 			}
 
@@ -383,6 +384,24 @@ MAN;
 			Migrations::create($table.'DropKey', sprintf("Database::drop_key('%s', '%s');", $table, $col), sprintf("Database::create_key('%s', '%s', '%s');", $table, $col, $columns[$col]['key']));
 
 			Worker::drop_key($table, $col);
+		}
+
+		public static function seed(){
+			$seed = include(CONTENT_DIR.'db/seed'.EXT);
+			if(!empty($seed)){
+				foreach($seed as $table => $fields){
+					echo "Seeding {$table}...\n";
+					if($fields['clear_data'] === true){
+						MySQL::table($table)->delete(true);
+						MySQL::query(sprintf("ALTER TABLE `%s` AUTO_INCREMENT = 1", $table));
+						unset($fields['clear_data']);
+					}
+					foreach($fields as $field){
+						MySQL::table($table)->insert($field);
+					}
+				}
+				echo "Database seeded.\n";
+			}
 		}
 	
 	}
