@@ -194,7 +194,6 @@ MAN;
 				// sort so we run in the right order
 				ksort($migrations);
 				foreach($migrations as $number => $name){
-					echo "running {$number}\n";
 					// get the class name
 					$class = '\Content\DB\Migrations\\'.$name.'_'.$number;
 					// and run the up method
@@ -242,7 +241,6 @@ MAN;
 				// sort so we run in the right order
 				krsort($migrations);
 				foreach($migrations as $number => $name){
-					echo "running {$number}\n";
 					// get class name
 					$class = '\Content\DB\Migrations\\'.$name.'_'.$number;
 					if(!class_exists($class)){
