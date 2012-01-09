@@ -35,8 +35,6 @@ Set TFD config options.
 	Usage: tea config <args>
 
 Arguments:
-
-	-h, help            This page
 	-a, --auth-key      Generate a new global auth key
 	-m, --maintenance   Turn maintence mode on/off
 	-u, --user-table    Set the user table

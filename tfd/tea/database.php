@@ -170,6 +170,178 @@ MAN;
 
 			echo "Database setup\n";
 		}
+
+		public static function add_table($arg){ // --create-table > Worker::create_table()
+			$table = $arg[0];
+			if(empty($table)){
+				echo "Table name: ";
+				$table = Tea::response();
+			}
+			if(Worker::table_exists($table)){
+				throw new \Exception('Table exists');
+			}
+
+			$columns = Prompt::columns();
+
+			Migrations::create($table, sprintf("Database::create_table('%s', %s);", $table, var_export($columns, true)), sprintf("Database::drop_table('%s');", $table));
+
+			Worker::create_table($table, $columns);
+			echo "Table created.\n";
+		}
+
+		public static function remove_table($arg){ // --drop-table > Worker::drop_table()
+			$table = $arg[0];
+			if(empty($table)){
+				$tables = Worker::list_tables();
+				if(empty($tables)){
+					throw new \Exception('No tables');
+				}
+				echo "Tables:\n";
+				foreach($tables as $key => $value){
+					echo "\t{$key}: {$value}\n";
+				}
+				do{
+					echo 'Which table would you like to drop? ';
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}
+				}while(empty($table));
+			}
+			if(!Worker::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+
+			Migrations::create('Drop'.$table, sprintf("Database::drop_table('%s');", $table), sprintf("Database::create_table('%s', %s);", $table, var_export(Worker::list_columns($table), true));
+
+			Worker::drop_table($table);
+			echo "Table dropped.\n";
+		}
+
+		public static function add_column($arg){ // --add-columns > Worker::create_columns()
+			$table = $arg[0];
+			if(empty($table)){
+				$tables = Worker::list_tables();
+				if(empty($tables)){
+					throw new \Exception('No tables');
+				}
+				echo "Tables:\n";
+				foreach($tables as $key => $value){
+					echo "\t{$key}: {$value}\n";
+				}
+				do{
+					echo 'Which table would you like to add a column to? ';
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}
+				}while(empty($table));
+			}
+
+			if(!Worker::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+
+			$cols = Worker::list_columns($table);
+			echo "Columns:\n";
+			foreach($cols as $name => $info){
+				echo "\t- {$name}\n";
+			}
+			$columns = Prompt::columns($cols);
+			foreach($cols as $key => $value){
+				unset($columns[$key]);
+			}
+
+			Migrations::create($table.'cols', sprintf("Database::create_columns('%s', %s);", $table, var_export($columns, true)), sprintf("Database::drop_columns('%s', %s);", $table, var_export(array_keys($columns), true)));
+
+			Worker::create_columns($table, $columns);
+			echo "Columns added.\n";
+		}
+
+		public static function remove_column($arg){ // --drop-columns > Worker::drop_columns
+			$table = $arg[0];
+			if(empty($table)){
+				$tables = Worker::list_tables();
+				if(empty($tables)){
+					throw new \Exception('No tables');
+				}
+				echo "Tables:\n";
+				foreach($tables as $key => $value){
+					echo "\t{$key}: {$value}\n";
+				}
+				do{
+					echo 'Which table would you like to drop columns from? ';
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}
+				}while(empty($table));
+			}
+
+			if(!Worker::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+
+			$cols = self::list_columns($table);
+			$columns = array_keys($cols);
+			$drop = array();
+
+			echo "Columns:\n";
+			foreach($columns as $key => $value){
+				echo "\t{$key}: {$value}\n";
+			}
+			do{
+				echo 'Which column would you like to drop? ("q" when done): ';
+				$resp = Tea::response();
+				if($resp == 'q'){
+					$exit = true;
+				}elseif(!isset($columns[$resp])){
+					echo "Not a valid selection.\n";
+				}else{
+					$drop[] = $columns[$resp];
+					unset($columns[$resp]);
+				}
+				if(empty($columns)) $exit = true;
+			}while($exit !== true);
+
+			$down = array();
+			foreach($drop as $col){
+				$down[$col] = $cols[$col];
+			}
+			Migrations::create($table.'DropCols', sprintf("Database::drop_columns('%s', %s);", $table, var_export($drop, true)), sprintf("Database::add_columns('%s', %s);", $table, var_export($down, true)));
+
+			Worker::drop_columns($table, $drop);
+			echo "Columns dropped.\n";
+		}
+
+		public static function add_key($arg){ // --add-key > Worker::create_key
+			$table = $arg[0];
+			if(empty($table)){
+				$tables = Worker::list_tables();
+				if(empty($tables)){
+					throw new \Exception('No tables');
+				}
+				echo "Tables:\n";
+				foreach($tables as $key => $value){
+					echo "\t{$key}: {$value}\n";
+				}
+				do{
+					echo 'Which table would you like to add a key to? ';
+					$resp = Tea::response();
+					if(isset($tables[$resp])){
+						$table = $tables[$resp];
+					}
+				}while(empty($table));
+			}
+
+			if(!Worker::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+		}
+
+		public static function remove_key($arg){ // --drop-key > Worker::drop_key
+			$table = $arg[0];
+		}
 		
 		/**
 		 * Database Methods
@@ -877,7 +1049,7 @@ MAN;
 			return $db;
 		}
 		
-		public static function create_table($table, $columns = array()){
+		public static function create_table($table, $columns){
 			if(empty($columns) || !is_array($columns)){
 				throw new \Exception('Columns are empty');
 			}
@@ -923,15 +1095,84 @@ MAN;
 				return false;
 			}
 		}
+
+		public static function drop_table($table){
+			if(!self::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+			try{
+				return MySQL::query(sprintf("DROP TABLE `%s`", $table));
+			}catch(\Exception $e){
+				return false;
+			}
+		}
+
+		public static function create_columns($table, $columns){
+			if(!self::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+			$keys = array();
+			$query = sprintf("ALTER TABLE `%s` ", $table);
+			foreach($columns as $name => $info){
+				if($info['length'] === false || empty($info['length'])){
+					$type = $info['type'];
+				}else{
+					$type = sprintf("%s(%s)", $info['type'], $info['length']);
+				}
+
+				if($info['null'] === true && $info['default'] === false){
+					$default = 'DEFAULT NULL';
+				}elseif($info['null'] === true && $info['type'] == 'timestamp'){
+					$default = 'DEFAULT CURRENT_TIMESTAMP';
+				}elseif($info['null'] === true){
+					$default = sprintf("DEFAULT '%s'", $info['default']);
+				}elseif($info['null'] === false && $info['default'] === false){
+					$default = 'NOT NULL';
+				}elseif($info['null'] === false && $info['type'] == 'timestamp'){
+					$default = 'NOT NULL DEFAULT CURRENT_TIMESTAMP';
+				}elseif($info['null'] === false){
+					$default = sprintf("NOT NULL DEFAULT '%s'", $info['default']);
+				}
+
+				$query .= sprintf("ADD COLUMN `%s` %s %s %s,", $name, $type, $default, strtoupper($info['extra']));
+
+				if(!empty($info['key'])){
+					$keys[$name] = $info['key'];
+				}
+			}
+
+			if(!empty($keys)){
+				foreach($keys as $name => $type){
+					$query .= sprintf("ADD %s (`%s`),", strtoupper($type), $name);
+				}
+			}
+
+			try{
+				return MySQL::query(substr($query, 0, -1));
+			}catch(\Exception $e){
+				return false;
+			}
+		}
+
+		public static function drop_columns($table, $cols){
+			if(!self::table_exists($table)){
+				throw new \Exception('Table does not exist');
+			}
+			$query = sprintf("ALTER TABLE `%s` ", $table);
+			foreach($cols as $col){
+				$query .= sprintf("DROP `%s`,");
+			}
+			try{
+				return MySQL::query(substr($query, 0, -1));
+			}catch(\Exception $e){
+				return false;
+			}
+		}
 	
 	}
 	
 	class Prompt extends Database{
 	
-		private static function migration(){
-			
-		}
-
 		public static function columns($columns = array()){
 			if(empty($columns['id'])){
 				if(Tea::yes_no('Create an id column?')){
@@ -1012,27 +1253,6 @@ MAN;
 			}while(!$exit);
 
 			return $columns;
-		}
-		
-		public static function create_table($table = null, $columns = array()){
-			if(empty($table)){
-				do{
-					echo 'Table name: ';
-					$table = Tea::response();
-					if(Worker::table_exists($table)){
-						$table = '';
-						echo "\033[1;31mError:\033[0m Table exists!";
-					}
-				}while(empty($table));
-			}elseif(Worker::table_exists($table)){
-				throw new \Exception('Table exists');
-			}
-
-			// columns
-			$columns = self::columns($columns);
-
-			// generate migration?
-
 		}
 	
 	}

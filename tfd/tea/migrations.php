@@ -257,6 +257,14 @@ MAN;
 			$info = self::info();
 			self::up($info['max']);
 		}
+
+		public static function create($name, $up, $down, $add = true){
+			if((Config::is_set('migrations.table')) && Tea::yes_no('Create migration?')){
+				echo "Migration name [{$name}]: ";
+				$name = Generate::name($name);
+				return Generate::migration($name, $up, $down, $add);
+			}
+		}
 	
 	}
 
