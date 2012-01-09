@@ -477,22 +477,14 @@ MAN;
 			}
 			$query = sprintf("CREATE TABLE `%s` (%s)", $table, substr($query, 0, -1));
 			
-			try{
-				return MySQL::query($query);
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query($query);
 		}
 
 		public static function drop_table($table){
 			if(!self::table_exists($table)){
 				throw new \Exception('Table does not exist');
 			}
-			try{
-				return MySQL::query(sprintf("DROP TABLE `%s`", $table));
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query(sprintf("DROP TABLE `%s`", $table));
 		}
 
 		public static function create_columns($table, $columns){
@@ -535,11 +527,7 @@ MAN;
 				}
 			}
 
-			try{
-				return MySQL::query(substr($query, 0, -1));
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query(substr($query, 0, -1));
 		}
 
 		public static function drop_columns($table, $cols){
@@ -550,33 +538,21 @@ MAN;
 			foreach($cols as $col){
 				$query .= sprintf("DROP `%s`,");
 			}
-			try{
-				return MySQL::query(substr($query, 0, -1));
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query(substr($query, 0, -1));
 		}
 
 		public static function create_key($table, $col, $key){
 			if(!self::table_exists($table)){
 				throw new \Exception('Table does not exist');
 			}
-			try{
-				return MySQL::query(sprintf("ALTER TABLE `%s` ADD %s (`%s`)", $table, strtoupper($key), $col));
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query(sprintf("ALTER TABLE `%s` ADD %s (`%s`)", $table, strtoupper($key), $col));
 		}
 
 		public static function drop_key($table, $col){
 			if(!self::table_exists($table)){
 				throw new \Exception('Table does not exist');
 			}
-			try{
-				return MySQL::query(sprintf("ALTER TABLE `%s` DROP KEY `%s`", $table, $col));
-			}catch(\Exception $e){
-				return false;
-			}
+			return MySQL::query(sprintf("ALTER TABLE `%s` DROP KEY `%s`", $table, $col));
 		}
 	
 	}

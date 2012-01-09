@@ -195,7 +195,11 @@ MAN;
 					// get the class name
 					$class = '\Content\DB\Migrations\\'.$name.'_'.$number;
 					// and run the up method
-					$class::up();
+					try{
+						$class::up();
+					}catch(\Exception $e){
+						throw new \Exception("Ran into issue with migration {$number}.\nError: {$e->getMessage();}");
+					}
 					// change db in case of error
 					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
@@ -241,7 +245,11 @@ MAN;
 						$class = '\Content\Migrations\\'.$name.'_'.$number;
 					}
 					// run the down method
-					$class::down();
+					try{
+						$class::down();
+					}catch(\Exception $e){
+						throw new \Exception("Ran into issue with migration {$number}. Error: {$e->getMessage()}");
+					}
 					// update db in case of error
 					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
