@@ -131,6 +131,8 @@ MAN;
 			}elseif(Tea::yes_no('Run migrations?')){
 				self::latest();
 			}
+
+			echo "Migrations setup.\n";
 		}
 		
 		public static function status(){
@@ -192,13 +194,14 @@ MAN;
 				// sort so we run in the right order
 				ksort($migrations);
 				foreach($migrations as $number => $name){
+					echo "running {$number}\n";
 					// get the class name
 					$class = '\Content\DB\Migrations\\'.$name.'_'.$number;
 					// and run the up method
 					try{
 						$class::up();
 					}catch(\Exception $e){
-						throw new \Exception("Ran into issue with migration {$number}.\nError: {$e->getMessage();}");
+						throw new \Exception("Ran into issue with migration {$number}.\nError: {$e->getMessage()}");
 					}
 					// change db in case of error
 					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
@@ -213,7 +216,7 @@ MAN;
 			extract(self::info());
 			if(!empty($arg[0]) && $arg[0] > $active){
 				throw new \Exception('Must use migration less than current');
-			}elseif(!empty($arg[0]) && isset($migrations[$arg[0]])){
+			}elseif(!empty($arg[0]) && isset($migrations[$arg[0]]) || $arg[0] == "0"){
 				$migration = $arg[0];
 			}elseif(self::list_m(true)){
 				do{
@@ -225,7 +228,7 @@ MAN;
 					}elseif($migration > $active){
 						return self::up($migration);
 					}
-				}while(empty($migration));
+				}while(empty($migration) && $migration != "0");
 			}
 			
 			// run the migrations
@@ -239,6 +242,7 @@ MAN;
 				// sort so we run in the right order
 				krsort($migrations);
 				foreach($migrations as $number => $name){
+					echo "running {$number}\n";
 					// get class name
 					$class = '\Content\DB\Migrations\\'.$name.'_'.$number;
 					if(!class_exists($class)){
@@ -255,6 +259,9 @@ MAN;
 					MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $number));
 					Config::set('migrations.active', $number);
 				}
+				MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
+				MySQL::query(sprintf("REPLACE INTO `%s` SET `number` = :number, `active` = 1", Config::get('migrations.table')), array('number' => $migration));
+				Config::set('migrations.active', $migration);
 				if($migration == 0){
 					MySQL::table(Config::get('migrations.table'))->where('active', '=', 1)->set('active', 0);
 				}
@@ -263,7 +270,7 @@ MAN;
 		
 		public static function latest(){
 			$info = self::info();
-			self::up($info['max']);
+			self::up(array($info['max']));
 		}
 
 		public static function create($name, $up, $down, $add = true){

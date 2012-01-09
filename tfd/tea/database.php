@@ -147,7 +147,7 @@ MAN;
 			// create other tables
 			do{
 				if(Tea::yes_no("Add a table?")){
-					Prompt::create_table();
+					Prompt::add_table(array());
 				}else{
 					$exit = true;
 				}
@@ -156,7 +156,7 @@ MAN;
 			echo "Database setup\n";
 		}
 
-		public static function add_table($arg){ // --create-table > Worker::create_table()
+		public static function add_table($arg){ // --create-table > Worker::create_table
 			$table = $arg[0];
 			if(empty($table)){
 				echo "Table name: ";
@@ -174,7 +174,7 @@ MAN;
 			echo "Table created.\n";
 		}
 
-		public static function remove_table($arg){ // --drop-table > Worker::drop_table()
+		public static function remove_table($arg){ // --drop-table > Worker::drop_table
 			$table = $arg[0];
 			if(empty($table)){
 				$tables = Worker::list_tables();
@@ -200,7 +200,7 @@ MAN;
 			echo "Table dropped.\n";
 		}
 
-		public static function add_column($arg){ // --add-columns > Worker::create_columns()
+		public static function add_column($arg){ // --add-columns > Worker::create_columns
 			$table = $arg[0];
 			if(empty($table)){
 				$tables = Worker::list_tables();
@@ -222,7 +222,7 @@ MAN;
 			}
 
 			$cols = Worker::list_columns($table);
-			echo "Columns:\n";
+			echo "Current columns:\n";
 			foreach($cols as $name => $info){
 				echo "\t- {$name}\n";
 			}
@@ -555,7 +555,7 @@ MAN;
 			}
 			$query = sprintf("ALTER TABLE `%s` ", $table);
 			foreach($cols as $col){
-				$query .= sprintf("DROP `%s`,");
+				$query .= sprintf("DROP `%s`,", $col);
 			}
 			return MySQL::query(substr($query, 0, -1));
 		}
@@ -593,6 +593,7 @@ MAN;
 			}
 			do{
 				$exit = false;
+				$type = $length = $null = $default = $extra = $key = null;
 				echo 'Field name ("q" when done): ';
 				$field = Tea::response();
 				if($field == 'q'){
