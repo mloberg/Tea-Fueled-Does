@@ -63,23 +63,44 @@
 		
 		public static function help(){
 			echo <<<MAN
-Interact with a database.
+NAME
+	Tea\Database
 
-	Usage: tea database <args>
+DESCRIPTION
+	Manage a MySQL database.
 
-Arguments:
+USAGE
+	tea database [command] [args]
 
-	-h, --help            This page
-	-i, --init            Setup the database
-	-c, --create-table    Create a new table
-	-d, --drop-table      Drop a table
-	-a, --add-column      Add a column(s)
-	--drop-columns        Drop a column(s)
-	--add-key             Add a key to a column
-	--drop-key            Drop a key from a column
+COMMANDS
+	-i init
+		Add admin database and additional databases.
+		No arguments.
+	-c create-table
+		Create a new table.
+		Optional argument of table.
+	-d drop-table
+		Drop a table.
+		Optional argument of table.
+	-a add-column
+		Add column(s) to a table.
+		Optional argument of table.
+	drop-columns
+		Drop column(s) from a table.
+		Optional argument of table.
+	add-key
+		Add a key to a column.
+		Optional argument of table.
+	drop-key
+		Drop a key from a column.
+		Optional arguments of table and column.
+	-s seed
+		Add dummy data to your database.
 
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
+	Tea\Database: http://teafueleddoes.com/docs/tea/database.html
 
 MAN;
 			exit(0);

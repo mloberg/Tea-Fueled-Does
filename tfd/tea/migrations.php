@@ -20,20 +20,38 @@
 		
 		public static function help(){
 			echo <<<MAN
-Create and run database migrations.
+NAME
+	Tea\Migrations
 
-	Usage: tea migrations <args>
+DESCRIPTION
+	Version control your database.
 
-Arguments:
-	init, i      Set up migrations
-	status, s    Get current migration
-	list, l      List migrations
-	up, u        Update to a migration
-	down, d      Roll-back to a migration
-	latest       Update to latest migration
+USAGE
+	tea migrations [command] [args]
 
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+COMMANDS
+	-i init
+		Set up migrations. Must run this first.
+		No arguments.
+	-s status
+		Get current migration.
+		No arguments.
+	-l list
+		List migrations.
+		No arguments.
+	-u up
+		Update to a migration.
+		Optional argument of migration number.
+	-d down
+		Roll-back to a migration.
+		Optional argument of migration number.
+	latest
+		Update to latest migration
+
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
+	Tea\Migrations: http://teafueleddoes.com/docs/tea/migrations.html
 
 MAN;
 			exit(0);

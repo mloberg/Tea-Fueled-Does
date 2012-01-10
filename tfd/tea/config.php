@@ -30,17 +30,30 @@
 		
 		public static function help(){
 			echo <<<MAN
-Set TFD config options.
+NAME
+	Tea\Config
 
-	Usage: tea config <args>
+DESCRIPTION
+	Set TFD config options.
 
-Arguments:
-	-a, --auth-key      Generate a new global auth key
-	-m, --maintenance   Turn maintence mode on/off
-	-u, --user-table    Set the user table
+USAGE
+	tea config [command] [arg]
 
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+COMMANDS
+	-a auth-key
+		Generate a new global auth key.
+		No arguments.
+	-m maintenance
+		Turn maintence mode on/off.
+		Takes single argument, on/off.
+	-u user-table
+		Set the user table
+		Optional argument of table.
+
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
+	Tea\Config: http://teafueleddoes.com/docs/tea/config.html
 
 MAN;
 		}

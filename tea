@@ -53,28 +53,36 @@ echo "== Tea-Fueled Does v".TFD\Config::get('application.version')." ==\n";
 // help?
 if(empty($class) || preg_match('/(--)?help|-h/', $class)){
 	echo <<<MAN
-A CLI to interface with Tea-Fueled Does.
+NAME
+	Tea
 
-	Usage: tea <command> <args>
+DESCRIPTION
+	A CLI included with Tea-Fueled Does to
+	manage users, database, and config options.
 
-Tea Commands:
+USAGE
+	tea [class] [command] [args]
 
-	init:        Quickly setup TFD.
-	user:        Manage users.
-	config:      Change a config option.
-	database:    Make changes to the database.
-	migrations:  Manage database migrations.
+CLASSES
+	init
+		One command to rule them all.
+		Get TFD up and running in one command.
+	user
+		Manage your users. Add, edit, and delete
+		users.
+	config
+		Update config options with ease.
+	database
+		Manage a MySQL database without SQL.
+	migrations
+		Version control your database.
 
+COMMANDS
+	See each class's commands with the -h flag.
 
-Args:
-
-Each command has it's own set of commands,
-to see args for a specific comamnd run:
-
-	tea <command> -h
-
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
 
 MAN;
 	exit(0);

@@ -18,17 +18,30 @@
 		
 		public static function help(){
 			echo <<<MAN
-Add, update, and remove users.
+NAME
+	Tea\User
 
-	Usage: tea user <args>
+DESCRIPTION
+	Add, update, and remove users.
 
-Arguments:
+USAGE
+	tea user [command] [args]
 
-	-h, --help     This page
-	-a, --add      Add a user
+COMMANDS
+	-a add
+		Add a user.
+		Optional arguments of username and password.
+	-p password
+		Change a user's password.
+		Optional arguments of username and password.
+	-r remove
+		Delete a user.
+		Optional argument of username.
 
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
+	Tea\User: http://teafueleddoes.com/docs/tea/user.html
 
 MAN;
 			exit(0);
