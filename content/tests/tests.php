@@ -10,6 +10,8 @@
 
 	class Tests extends Test{
 		
+		const name = 'TFD\Test';
+
 		public function test_true(){
 			$this->assertTrue(true);
 			$this->assertTrue(false, 'Expected');

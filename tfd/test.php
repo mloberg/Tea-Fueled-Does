@@ -7,18 +7,19 @@
 			if(!class_exists($class)){
 				throw new \Exception('Test does not exist');
 			}
-			$class = new $class;
-			foreach(get_class_methods($class) as $method){
+			$test_class = new $class;
+			foreach(get_class_methods($test_class) as $method){
 				if(preg_match('/^test/i', $method)){
 					try{
-						call_user_func(array($class, $method));
+						call_user_func(array($test_class, $method));
 					}catch(\Exception $e){
 						Results::exception($method, $e);
 					}
 				}
 			}
 			$results = Results::get();
-			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('name' => $test, 'results' => $results, 'show_passed' => $show_passed));
+			$name = (defined($class.'::name')) ? $class::name : $test;
+			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('name' => $name, 'results' => $results, 'show_passed' => $show_passed));
 		}
 
 		/**

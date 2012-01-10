@@ -1,11 +1,23 @@
 <?php
-	$passes = $fails = $exceptions = 0;
+	$passes = $fails = $exceptions = $completed = 0;
 	$total = count($results);
 ?>
 <h1><?php echo ucwords($name);?> Tests</h1>
 
-<?php foreach($results as $test_name => $result):?>
-<h3><?php echo $test_name;?></h3>
+<?php foreach($results as $test_name => $result):
+	$passed = array_filter($result, function($test){
+		return($test['result'] == 'passed');
+	});
+	$failed = array_filter($result, function($test){
+		return($test['result'] == 'failed');
+	});
+	$exception = array_filter($result, function($test){
+		return($test['result'] == 'exception');
+	});
+	$class = (!empty($failed) || !empty($exception)) ? 'failed' : 'passed';
+	if(empty($exception)) $completed++;
+?>
+<h3 class="<?php echo $class;?>"><?php echo $test_name;?></h3>
 <ul>
 	<?php foreach($result as $test):
 		if($test['result'] == 'passed') $passes++;
@@ -21,7 +33,7 @@
 	</li>
 	<?php elseif($test['result'] == 'exception'):?>
 	<li>
-		<span class="failed">Exception</span>: (<?php echo $test['message'];?>)
+		<span class="exception">Exception</span>: (<?php echo $test['message'];?>)
 		[at <?php echo $test['file'];?> line <?php echo $test['line'];?>]
 	</li>
 	<?php
@@ -30,7 +42,7 @@
 </ul>
 <?php endforeach;?>
 <?php
-$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails, %s exceptions.", $total, $total, $passes, $fails, $exceptions);
+$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails, %s exceptions.", $completed, $total, $passes, $fails, $exceptions);
 if($fails !== 0 || $exceptions !== 0){
 	Flash::error($flash_message, array('sticky' => true));
 }else{
@@ -51,7 +63,7 @@ CSS::style(array(
 	'ul' => array(
 		'margin-left' => '10px'
 	),
-	'.passed, .failed' => array(
+	'.passed, .failed, .exception' => array(
 		'color' => 'red',
 		'font-weight' => 'bold'
 	),
