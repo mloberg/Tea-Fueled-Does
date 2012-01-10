@@ -1,16 +1,23 @@
-# Mac files
-.DS_Store?
-Icon?
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+#
+# This ignore file includes Linux, Mac and TextMate ignores as well as some specific TFD ignores
 
-# Thumbnails
+# Linux
+.*
+!.gitignore
+*~
+.directory
+
+# Mac
+.DS_Store
 ._*
-
-# Files that might appear on external disk
 .Spotlight-V100
 .Trashes
 
-# Apache log folder
-logs/*
+# TextMate
+*.tmproj
+*.tmproject
+tmtags
 
-# TFD specific files
+# TFD
 .tfdrevision

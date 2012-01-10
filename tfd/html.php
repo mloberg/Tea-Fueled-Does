@@ -84,7 +84,10 @@
 		}
 		
 		public static function link($url, $title, $attributes = array()){
-			if(filter_var($url, FILTER_VALIDATE_URL) === false) $url = Config::get('site.url').$url;
+			if(filter_var($url, FILTER_VALIDATE_URL) === false){
+				if(!preg_match('/^\//', $url)) $url = '/' . $url;
+				$url = Config::get('site.url').$url;
+			}
 			$attributes['href'] = $url;
 			return self::__build_tag('a', $title, $attributes);
 		}
@@ -97,6 +100,7 @@
 		
 		public static function rss_link($feed, $title = 'RSS Feed', $attributes = array()){
 			if(filter_var($feed, FILTER_VALIDATE_URL) === false){
+				if(!preg_match('/^\//', $feed)) $feed = '/' . $feed;
 				$feed = Config::get('site.url').$feed;
 			}
 			$attributes['rel'] = 'alternate';
@@ -110,6 +114,7 @@
 			if(filter_var($url, FILTER_VALIDATE_URL) === false){
 				$remote = false;
 				$image = PUBLIC_DIR.$url;
+				if(!preg_match('/^\//', $url)) $url = '/' . $url;
 				$url = Config::get('site.url').$url;
 			}
 			if((!isset($attributes['width']) || !isset($attributes['height'])) && $remote === false){

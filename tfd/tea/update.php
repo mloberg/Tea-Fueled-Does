@@ -4,7 +4,7 @@
 	
 	class Update{
 	
-		public static function action($arg){
+		public static function do_update($arg){
 			$latest = file_get_contents('http://get.teafueleddoes.com/update.php?latest');
 			$current = File::get(BASE_DIR.'.tfdrevision');
 			if($latest == $current){

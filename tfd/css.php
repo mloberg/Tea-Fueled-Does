@@ -12,7 +12,10 @@
 		);
 		
 		private static function __prepare($src){
-			if(!preg_match('/^http(s*)\:\/\//', $src)) $src = Config::get('site.url').$src;
+			if(!preg_match('/^http(s*)\:\/\//', $src)){
+				if(!preg_match('/^\//', $src)) $src = '/' . $src;
+				$src = Config::get('site.url').$src;
+			}
 			return '<link rel="stylesheet" href="'.$src.'" />';
 		}
 				

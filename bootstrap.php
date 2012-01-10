@@ -33,7 +33,7 @@ include_once(FUNCTIONS_DIR.'helpful'.EXT);
 include_once(APP_DIR.'config'.EXT);
 // load some default config options
 TFD\Config::load(array(
-	'application.version' => '2.0.5',
+	'application.version' => '2.1',
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
 	'render.default_master' => MASTERS_DIR.'master'.EXT,
 	

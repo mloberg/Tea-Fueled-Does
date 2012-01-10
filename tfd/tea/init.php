@@ -15,14 +15,6 @@
 				File::put(BASE_DIR.'.tfdrevision', file_get_contents('http://get.teafueleddoes.com/update.php?latest'));
 			}
 			
-			// remove git related files
-			if(is_dir(BASE_DIR.'.git')){
-				self::recursive_rm(BASE_DIR.'.git');
-				@unlink(BASE_DIR.'.gitignore');
-				@unlink(BASE_DIR.'cache/.gitignore');
-				@unlink(CONTENT_DIR.'/views/public/.gitignore');
-			}
-			
 			// include our config file
 			include_once(CONTENT_DIR.'config'.EXT);
 			// environment
@@ -44,7 +36,7 @@
 			$conf = explode('function '.C::get('application.environment').'(){', $conf_file);
 			
 			// site url
-			echo 'Site URL (with trailing slash) ['.C::get('site.url').']: ';
+			echo 'Site URL (without trailing slash) ['.C::get('site.url').']: ';
 			$url = Tea::response(C::get('site.url'));
 			$conf[1] = preg_replace("/('site\.url' => ')".preg_quote(C::get('site.url'), '/')."(')/", '${1}'.$url.'$2', $conf[1], 1);
 			C::set('site.url', $url);

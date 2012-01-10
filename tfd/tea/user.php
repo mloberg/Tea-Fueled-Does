@@ -7,96 +7,100 @@
 	
 	class User{
 	
-		private static $commands = array(
-			'h' => 'help',
-			'a' => 'add',
-			'p' => 'password',
-			'r' => 'remove',
-		);
-		
-		public static function action($arg){
-			if(empty($arg)) self::help();
-			
-			if(preg_match('/^\-\-([\w|\-]+)(.+)?/', $arg, $match)){
-				$run = $match[1];
-				$args = trim($match[2]);
-			}elseif(preg_match('/^\-(\w)(.+)?/', $arg, $match)){
-				$run = self::$commands[$match[1]];
-				$args = trim($match[2]);
-			}elseif(preg_match('/([\w|\-]+)(.+)?/', $arg, $match)){
-				$run = $match[1];
-				$args = trim($match[2]);
-			}
-			
-			if(!method_exists(__CLASS__, $run) || (($method = new \ReflectionMethod(__CLASS__, $run)) && $method->isPrivate())){
-				echo "\033[0;31mError:\033[0m '{$arg}' is not a valid argument!\n";
-				exit(0);
-			}else{
-				self::$run($args);
-			}
+		public static function __flags(){
+			return array(
+				'h' => 'help',
+				'a' => 'add',
+				'p' => 'password',
+				'r' => 'remove',
+			);
 		}
 		
 		public static function help(){
 			echo <<<MAN
-Add, update, and remove users.
+NAME
+	Tea\User
 
-	Usage: tea user <args>
+DESCRIPTION
+	Add, update, and remove users.
 
-Arguments:
+USAGE
+	tea user [command] [args]
 
-	-h, --help     This page
-	-a, --add      Add a user
+COMMANDS
+	-a add
+		Add a user.
+		Optional arguments of username and password.
+	-p password
+		Change a user's password.
+		Optional arguments of username and password.
+	-r remove
+		Delete a user.
+		Optional argument of username.
 
-TFD Homepage: http://teafueleddoes.com/
-Tea Homepage: http://teafueleddoes.com/v2/tea
+SEE ALSO
+	TFD: http://teafueleddoes.com/
+	Tea: http://teafueleddoes.com/docs/tea/index.html
+	Tea\User: http://teafueleddoes.com/docs/tea/user.html
 
 MAN;
 			exit(0);
 		}
 		
-		public static function add(){
-			do{
+		public static function add($args){
+			$username = $args[0];
+			while(empty($username)){
 				echo "Username: ";
 				$username = Tea::response();
-			}while(empty($username));
-			do{
+			}
+			$password = $args[1];
+			while(empty($password)){
 				echo "Password: ";
 				system('stty -echo');
 				$password = Tea::response();
 				system('stty echo');
-			}while(empty($password));
+				echo "\n";
+			}
 			// add user
 			if(Admin::add_user($username, $password)){
-				echo "\n{$username} added!\n";
+				echo "{$username} added!\n";
 			}else{
-				echo "\nCould not add user!\n";
+				echo "Could not add user!\n";
 			}
 		}
 		
-		public static function password(){
-			echo 'Username: ';
-			$username = Tea::response();
-			if(empty($username)) exit(0);
+		public static function password($args){
+			$username = $args[0];
+			while(empty($username)){
+				echo 'Username: ';
+				$username = Tea::response();
+			}
 			$user = MySQL::table(C::get('admin.table'))->where('username', '=', $username)->limit(1)->get();
-			if(empty($user)) exit(0);
-			do{
+			if(empty($user)){
+				throw new \Exception("User {$username} is not a valid username.");
+			}
+			$password = $args[1];
+			while(empty($password)){
 				echo 'Password: ';
 				system('stty -echo');
 				$password = Tea::response();
 				system('stty echo');
-			}while(empty($password));
+				echo "\n";
+			}
 			// update password
 			if(MySQL::table(C::get('admin.table'))->where('username', '=', $username)->set('hash', Crypter::hash($password))){
-				echo "\nPassword updated.\n";
+				echo "Password updated.\n";
 			}else{
-				echo "\nCould not update password.\n";
+				echo "Could not update password.\n";
 			}
 		}
 		
-		public static function remove(){
-			echo 'Username: ';
-			$username = Tea::response();
-			if(empty($username)) exit(0);
+		public static function remove($args){
+			$username = $args[0];
+			while(empty($username)){
+				echo 'Username: ';
+				$username = Tea::response();
+			}
 			$user = MySQL::table(C::get('admin.table'))->where('username', '=', $username)->delete();
 			echo "User {$username} removed.\n";
 		}

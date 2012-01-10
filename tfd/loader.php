@@ -7,6 +7,7 @@
 		private static $content = false;
 		
 		public static function load($name){
+			// if content and tfd have been moved
 			if(self::$app !== false && preg_match('/^TFD\\\/', $name)){
 				$name = preg_replace('/^TFD/', self::$app, $name);
 			}elseif(self::$content !== false && preg_match('/^content\\\/', strtolower($name))){
@@ -17,10 +18,10 @@
 				include_once($file);
 			}elseif(array_key_exists($name, self::$alias)){
 				$file = (!is_null(self::$alias[$name]['file'])) ? self::$alias[$name]['file'] : BASE_DIR.strtolower(str_replace('\\', '/', self::$alias[$name]['class'])).EXT;
-				if(self::$app !== false && preg_match('/^'.str_replace('/', '\/', BASE_DIR).'tfd\//', $file)){
-					$file = preg_replace('/^('.str_replace('/', '\/', BASE_DIR).')tfd\//', '${1}'.self::$app.'/', $file);
-				}elseif(self::$content !== false && preg_match('/^'.str_replace('/', '\/', BASE_DIR).'content\//', $file)){
-					$file = preg_replace('/^('.str_replace('/', '\/', BASE_DIR).')content\//', '${1}'.self::$content.'/', $file);
+				if(self::$app !== false && preg_match('/^'.preg_quote(BASE_DIR, '/').'tfd\//', $file)){
+					$file = preg_replace('/^('.preg_quote(BASE_DIR, '/').')tfd\//', '${1}'.self::$app.'/', $file);
+				}elseif(self::$content !== false && preg_match('/^'.preg_quote(BASE_DIR, '/').'content\//', $file)){
+					$file = preg_replace('/^('.preg_quote(BASE_DIR, '/').')content\//', '${1}'.self::$content.'/', $file);
 				}
 				if(file_exists($file)){
 					include_once($file);

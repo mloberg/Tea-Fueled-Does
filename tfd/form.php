@@ -13,6 +13,7 @@
 			if(is_null($action)){
 				$action = Config::get('site.url').App::request();
 			}elseif(filter_var($action, FILTER_VALIDATE_URL) === false){
+				if(!preg_match('/^\//', $action)) $action = '/' . $action;
 				$action = Config::get('site.url').$action;
 			}
 			$attributes['action'] = HTML::entities($action);

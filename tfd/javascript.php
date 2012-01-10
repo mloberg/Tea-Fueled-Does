@@ -15,11 +15,12 @@
 			'jquery' => 'js/jquery.min.js',
 			'jquery-ui' => 'js/jquery-ui.min.js',
 			'dojo' => 'http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js',
-			'tfd' => 'js/tfd.js',
+			'tfd' => '/js/tfd.js',
 		);
 		
 		private static function __prepare($src){
 			if(!preg_match('/^http(s*)\:\/\//', $src)){
+				if(!preg_match('/^\//', $src)) $src = '/' . $src;
 				$src = Config::get('site.url').$src;
 			}
 			return '<script src="'.$src.'"></script>';
