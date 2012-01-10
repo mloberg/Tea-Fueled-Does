@@ -46,7 +46,8 @@ COMMANDS
 		Roll-back to a migration.
 		Optional argument of migration number.
 	latest
-		Update to latest migration
+		Update to latest migration.
+		No arguments.
 
 SEE ALSO
 	TFD: http://teafueleddoes.com/
