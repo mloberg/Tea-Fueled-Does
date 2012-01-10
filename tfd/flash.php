@@ -81,7 +81,7 @@ SCRIPT;
 			$style = (isset($styles[$type])) ? $styles[$type] : $styles['message'];
 			$html = <<<FLASH
 <div id="flash-message-wrapper">
-	<div style="$style;font-size:18px;left:0;margin:0;opacity:1;padding:5px;position:absolute;text-align:center;top:0;width:100%">$message</div>
+	<div style="$style;font-size:18px;left:0;margin:0;opacity:1;position:absolute;text-align:center;top:0;width:100%"><div style="padding:5px;">$message</div></div>
 	<div style="margin-bottom:29px"></div>
 </div>
 FLASH;
