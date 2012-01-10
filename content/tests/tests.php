@@ -138,4 +138,8 @@
 			}, 'Expected');
 		}
 
+		public function test_handle_exception(){
+			throw new \Exception('ran into error');
+		}
+
 	}

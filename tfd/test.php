@@ -10,8 +10,11 @@
 			$class = new $class;
 			foreach(get_class_methods($class) as $method){
 				if(preg_match('/^test/i', $method)){
-					// need to be able to catch exceptions thrown by tests
-					call_user_func(array($class, $method));
+					try{
+						call_user_func(array($class, $method));
+					}catch(\Exception $e){
+						Results::exception($method, $e);
+					}
 				}
 			}
 			$results = Results::get();
@@ -204,7 +207,17 @@
 			);
 		}
 
+		public static function exception($method, $e){
+			self::$results[$method][] = array(
+				'file' => $e->getFile(),
+				'line' => $e->getLine(),
+				'result' => 'exception',
+				'message' => $e->getMessage(),
+			);
+		}
+
 		public static function get(){
 			return self::$results;
 		}
+
 	}

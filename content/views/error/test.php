@@ -1,5 +1,5 @@
 <?php
-	$passes = $fails = 0;
+	$passes = $fails = $exceptions = 0;
 	$total = count($results);
 ?>
 <h1><?php echo ucwords($name);?> Tests</h1>
@@ -10,6 +10,7 @@
 	<?php foreach($result as $test):
 		if($test['result'] == 'passed') $passes++;
 		if($test['result'] == 'failed') $fails++;
+		if($test['result'] == 'exception') $exceptions++;
 		if(($show_passed && $test['result'] == 'passed') || $test['result'] == 'failed'):
 	?>
 	<li>
@@ -18,14 +19,19 @@
 		<?php if($test['result'] == 'failed' && !is_null($test['message'])) echo '('.$test['message'].')';?>
 		[at <?php echo $test['file'];?> line <?php echo $test['line'];?>]
 	</li>
+	<?php elseif($test['result'] == 'exception'):?>
+	<li>
+		<span class="failed">Exception</span>: (<?php echo $test['message'];?>)
+		[at <?php echo $test['file'];?> line <?php echo $test['line'];?>]
+	</li>
 	<?php
 		endif;
 	endforeach;?>
 </ul>
 <?php endforeach;?>
 <?php
-$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails.", $total, $total, $passes, $fails);
-if($fails !== 0){
+$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails, %s exceptions.", $total, $total, $passes, $fails, $exceptions);
+if($fails !== 0 || $exceptions !== 0){
 	Flash::error($flash_message, array('sticky' => true));
 }else{
 	Flash::success($flash_message, array('sticky' => true));
