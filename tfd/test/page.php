@@ -4,11 +4,13 @@
 
 	class Page{
 		
+		private $page = null;
 		private $headers = array();
 		private $content = null;
 		private $info = array();
 
 		public function __construct($page){
+			$this->page = $page;
 			$this->load_page($page);
 		}
 
@@ -45,43 +47,69 @@
 			$this->info = $info;
 		}
 
-		public function statusIs($expected, $message = null){
+		public function assertStatusIs($expected, $message = null){
+			if(is_null($message)) $message = sprintf("Expected [%s] to have HTTP Status code of [%s]", $this->page, $expected);
 			Results::add(((integer)$expected === (integer)$this->info['http_code']), $message);
 		}
 
-		public function statusIsNot($expected, $message = null){
+		public function assertStatusNot($expected, $message = null){
+			if(is_null($message)) $message = sprintf("Expected [%s] to not have HTTP Status code of [%s]", $this->page, $expected);
 			Results::add(!((integer)$expected === (integer)$this->info['http_code']), $message);
 		}
 
-		public function contentNotEmpty(){
+		public function assertContent($message = null){
+			if(is_null($message)) $message = sprintf("Page [%s] content is empty", $this->page);
+			Results::add(!empty($this->content), $message);
+		}
+
+		public function assertContentEmpty($message = null){
+			if(is_null($message)) $message = sprintf("Page [%s] content is not empty", $this->page);
+			Results::add(empty($this->content), $message);
+		}
+
+		public function assertInContent($search, $message = null){
+			if(is_null($message)) $message = sprintf("Expected [%s] in page content", $search);
+			Results::add((strpos($this->content, $search) !== false), $message);
+		}
+
+		public function assertNotInContent($search, $message = null){
+			if(is_null($message)) $message = sprintf("Did not expect [%s] in page content", $search);
+			Results::add((strpos($this->content, $search) === false), $message);
+		}
+
+		public function assertHeaderExists($header, $message = null){
+			if(is_null($message)) $message = sprintf("Expected header [%s]", $header);
+			Results::add(array_key_exists($header, $this->headers), $message);
+		}
+
+		public function assertHeaderNotExists($header, $message = null){
+			if(is_null($message)) $message = sprintf("Did not expect header [%s]", $header);
+			Results::add(!array_key_exists($header, $this->headers), $message);
+		}
+
+		public function assertHeaderIs($header, $expected, $message = null){
+			if(is_null($message)) $message = sprintf("Header [%s] should be [%s]", $header, $expected);
+			Results::add(($this->headers[$header] == $expected), $message);
+		}
+
+		public function assertHeaderNot($header, $expected, $message = null){
+			if(is_null($message)) $message = sprintf("Header [%s] should not be [%s]", $header, $expected);
+			Results::add(($this->headers[$header] != $expected), $message);
+		}
+
+		public function assertContentTypeIs($expected, $message = null){
 			
 		}
 
-		public function contentEmpty(){
+		public function assertContentTypeNot($expected, $message = null){
 			
 		}
 
-		public function headerExists($header){
+		public function assertIsRedirect($message = null){
 			
 		}
 
-		public function headerNotExists($header){
-			
-		}
-
-		public function contentTypeIs(){
-			
-		}
-
-		public function contentTypeNot(){
-			
-		}
-
-		public function isRedirect(){
-			
-		}
-
-		public function notRedirect(){
+		public function assertNotRedirect($message = null){
 			
 		}
 
