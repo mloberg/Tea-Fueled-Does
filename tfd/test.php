@@ -1,25 +1,41 @@
 <?php namespace TFD;
 
+	use TFD\Test\Results;
+
 	class Test{
 
-		public static function run($test, $show_passed = false){
+		private static function run_test($test, $show_passed = false){
 			$class = 'Content\Tests\\'.$test;
 			if(!class_exists($class)){
 				throw new \Exception('Test does not exist');
 			}
-			$test_class = new $class;
-			foreach(get_class_methods($test_class) as $method){
+			$class = new $class;
+			foreach(get_class_methods($class) as $method){
 				if(preg_match('/^test/i', $method)){
 					try{
-						call_user_func(array($test_class, $method));
+						call_user_func(array($class, $method));
 					}catch(\Exception $e){
 						Results::exception($method, $e);
 					}
 				}
 			}
-			$results = Results::get();
+			return Results::get();
+		}
+
+		public static function run($test, $show_passed = false){
+			$results = self::run_test($test, $show_passed);
+			$class = 'Content\Tests\\'.$test;
 			$name = (defined($class.'::name')) ? $class::name : $test;
 			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('name' => $name, 'results' => $results, 'show_passed' => $show_passed));
+		}
+
+		public static function cli($test, $show_passed = false){
+			$results = self::run_test($test, $show_passed);
+			return $results;
+		}
+
+		public function page($page){
+			return new Test\Page($page);
 		}
 
 		/**
@@ -189,36 +205,6 @@
 			if($a !== $b) return false;
 			if(self::is_reference($a, $b)) return false;
 			return true;
-		}
-
-	}
-
-	class Results{
-		
-		private static $results = array();
-
-		public static function add($passed, $message){
-			$trace = debug_backtrace();
-			self::$results[$trace[2]['function']][] = array(
-				'test' => $trace[1]['function'],
-				'file' => $trace[1]['file'],
-				'line' => $trace[1]['line'],
-				'result' => ($passed === true) ? 'passed' : 'failed',
-				'message' => $message,
-			);
-		}
-
-		public static function exception($method, $e){
-			self::$results[$method][] = array(
-				'file' => $e->getFile(),
-				'line' => $e->getLine(),
-				'result' => 'exception',
-				'message' => $e->getMessage(),
-			);
-		}
-
-		public static function get(){
-			return self::$results;
 		}
 
 	}
