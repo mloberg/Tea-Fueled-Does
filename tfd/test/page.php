@@ -9,31 +9,73 @@
 		private $content = null;
 		private $info = array();
 
-		public function __construct($page){
+		public function __construct($page, $options = array()){
 			$this->page = $page;
-			$this->load_page($page);
+			$this->load_page($page, $options);
 		}
 
-		// need to support POST requests
-		// need to support admin views (add a way to view even if no db connection)
-		private function load_page($page){
+		// TODO: support admin views
+		// TODO: multipart posts
+		private function load_page($page, $options){
+			$options = $options + array(
+				'method' => 'get',
+				'post_data' => false,
+				'referer' => '',
+				'headers' => array(),
+			);
 			if(filter_var($page, FILTER_VALIDATE_URL) !== false){
 				throw new \Exception('You can only test local urls');
 			}
+			// make a valid url
 			if(!preg_match('/^\//', $page)) $page = '/' . $page;
-			$page = Config::get('site.url').$page;
+			$url = Config::get('site.url').$page;
+			$url_parts = parse_url($url);
+
+			// post data
+			if(!empty($options['post_data'])){
+				// method has to be post
+				$options['method'] = 'post';
+				// if an array, turn it into a query string
+				if(is_array($options['post_data'])){
+					$options['post_data'] = http_build_query($options['post_data']);
+				}
+				$url_parts['query'] .= $options['post_data'];
+			}
 
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $page);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_USERAGENT, 'TFD-Test/'.Config::get('application.version'));
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_HEADER, 1);
+			curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+			curl_setopt($ch, CURLOPT_USERAGENT, (isset($options['headers']['User-Agent']) ? $options['User-Agent'] : 'TFD-Test/'.Config::get('application.version')));
+
+			if($options['method'] == 'post'){
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $url_parts['query']);
+			}
+
+			// organize our custom headers
+			$custom_headers = array();
+			foreach($options['headers'] as $name => $value){
+				if(is_array($value)){
+					foreach($value as $item){
+						$custom_headers[] = "{$name}: {$item}";
+					}
+				}else{
+					$custom_headers[] = "{$name}: {$value}";
+				}
+			}
+			if(isset($url_parts['user']) && isset($url_parts['pass'])){
+				$custom_headers[] = 'Authorization: Basic '.base64_encode($url_parts['user'].':'.$url_parts['pass']);
+			}
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $custom_headers);
 
 			$content = curl_exec($ch);
 			$info = curl_getinfo($ch);
 			curl_close($ch);
 			
+			// parse the returned headers
 			foreach(explode("\n", substr($content, 0, $info['header_size'])) as $header){
 				$parts = explode(': ', $header);
 				if(count($parts) >= 2){
@@ -48,22 +90,22 @@
 		}
 
 		public function assertStatusIs($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected [%s] to have HTTP Status code of [%s]", $this->page, $expected);
+			if(is_null($message)) $message = sprintf("Expected to have HTTP Status code of [%s]", $expected);
 			Results::add(((integer)$expected === (integer)$this->info['http_code']), $message);
 		}
 
 		public function assertStatusNot($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected [%s] to not have HTTP Status code of [%s]", $this->page, $expected);
+			if(is_null($message)) $message = sprintf("Expected to not have HTTP Status code of [%s]", $expected);
 			Results::add(!((integer)$expected === (integer)$this->info['http_code']), $message);
 		}
 
 		public function assertContent($message = null){
-			if(is_null($message)) $message = sprintf("Page [%s] content is empty", $this->page);
+			if(is_null($message)) $message = sprintf("Page content is empty");
 			Results::add(!empty($this->content), $message);
 		}
 
 		public function assertContentEmpty($message = null){
-			if(is_null($message)) $message = sprintf("Page [%s] content is not empty", $this->page);
+			if(is_null($message)) $message = sprintf("Page content is not empty");
 			Results::add(empty($this->content), $message);
 		}
 
@@ -97,66 +139,33 @@
 			Results::add(($this->headers[$header] != $expected), $message);
 		}
 
-		public function assertContentTypeIs($expected, $message = null){
-			
+		public function assertContentType($expected, $message = null){
+			if(is_null($message)) $message = sprintf("Expected content type to be [%s]", $expected);
+			Results::add((strpos(strtolower($this->info['content_type']), strtolower($expected)) !== false), $message);
 		}
 
 		public function assertContentTypeNot($expected, $message = null){
-			
+			if(is_null($message)) $message = sprintf("Expected content type to not be [%s]", $expected);
+			Results::add((strpos(strtolower($this->info['content_type']), strtolower($expected)) === false), $message);	
 		}
 
-		public function assertIsRedirect($message = null){
-			
+		public function assertRedirect($message = null){
+			if(is_null($message)) $message = sprintf("Expected a redirect", $expected);
+			Results::add(isset($this->headers['Location']), $message);
 		}
 
 		public function assertNotRedirect($message = null){
-			
+			if(is_null($message)) $message = sprintf("Did not expected a redirect", $expected);
+			Results::add(!isset($this->headers['Location']), $message);
+		}
+
+		public function assertRedirectsTo($location, $message = null){
+			if(filter_var($location, FILTER_VALIDATE_URL) !== false){
+				if(!preg_match('/^\//', $location)) $location = '/' . $location;
+				$location = Config::get('site.url') . $location;
+			}
+			if(is_null($message)) $message = sprintf("Expected a redirect to [%s]", $location);
+			Results::add(($this->headers['Location'] === $location), $message);
 		}
 
 	}
-
-	// class GetPage{
-		
-	// 	private static $options = array(
-	// 		'method' => 'get',
-	// 		'post_data' => false,
-	// 		'return_info' => false,
-	// 		'return_body' => true,
-	// 		'referer' => '',
-	// 		'headers' => array(),
-	// 		'session' => false,
-	// 		'session_close'
-	// 	);
-
-	// 	public function __construct($url, $options = array){
-	// 		self::$options = $options + self::$options;
-	// 		$url_parts = parse_url($url);
-	// 		$ch = false;
-	// 		$info = array(
-	// 			'http_code' => 200
-	// 		);
-	// 		$response = '';
-	// 		$send_header = array(
-	// 			'Accept' => 'text/*',
-	// 			'User-Agent' => 'TFD-Test/'.Config::get('application.version')
-	// 		) + self::$options['headers'];
-	// 		if(isset(self::$options['post_data'])){
-	// 			self::$options['method'] = 'post';
-	// 			if(is_array(self::$options['post_data'])){
-	// 				$post_data = array();
-	// 				foreach(self::$options['post_data'] as $key => $value){
-	// 					$post_data[] = "{$key}=".urlencode($value);
-	// 				}
-	// 				$url_parts['query'] = implode('&', $post_data);
-	// 			}else{
-	// 				$url_parts['query'] = self::$options['post_data'];
-	// 			}
-	// 		}elseif(isset(self::$options['multipart_data'])){
-	// 			self::$options['method'] = 'post';
-	// 			$url_parts['query'] = $options['multipart_data'];
-	// 		}
-
-			
-	// 	}
-
-	// }

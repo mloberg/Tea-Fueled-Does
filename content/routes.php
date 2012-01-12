@@ -25,4 +25,23 @@ return array(
 	}
 	**/
 
+	/**
+	 * For Tests
+	 */
+	
+	'GET /tests' => function(){
+		return TFD\Core\Render::page(array(
+			'master' => 'master',
+			'content' => TFD\Test::run('page', true)
+		));
+	},
+
+	'GET /redirect' => function(){
+		redirect('/index');
+	},
+
+	'POST /post' => function(){
+		return $_POST['foo'];
+	}
+
 );

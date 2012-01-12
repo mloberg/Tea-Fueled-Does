@@ -12,9 +12,19 @@
 		const name = 'TFD\Test\Page';
 
 		private static $index;
+		private static $redirect;
+		private static $post;
 
 		public function __construct(){
 			self::$index = $this->page('/index');
+			self::$redirect = $this->page('/redirect');
+			$post = array(
+				'method' => 'post',
+				'post_data' => array(
+					'foo' => 'bar'
+				)
+			);
+			self::$post = $this->page('/post', $post);
 		}
 
 		public function test_is_status(){
@@ -42,6 +52,22 @@
 			self::$index->assertHeaderNotExists('Content-Length'); // expected
 			self::$index->assertHeaderIs('Content-Type', 'text/html; charset=utf-8');
 			self::$index->assertHeaderNot('Content-Type', 'text/html; charset=utf-8'); // expected
+		}
+
+		public function test_content_type(){
+			self::$index->assertContentType('text/html');
+			self::$index->assertContentTypeNot('text/html'); // expected
+		}
+
+		public function test_redirects(){
+			self::$redirect->assertRedirect();
+			self::$index->assertRedirect(); // expected
+			self::$index->assertNotRedirect();
+			self::$redirect->assertNotRedirect(); // expected
+		}
+
+		public function test_post(){
+			self::$post->assertInContent('bar');
 		}
 
 	}

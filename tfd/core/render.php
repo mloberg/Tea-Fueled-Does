@@ -165,8 +165,13 @@
 		 */
 		
 		private function bootstrap($options){
-			$this->__render_view($options);
-			unset($options['view'], $options['dir']);
+			if(isset($options['content'])){
+				self::$content = $options['content'];
+				unset($options['content']);
+			}else{
+				$this->__render_view($options);
+				unset($options['view'], $options['dir']);
+			}
 			if(isset($options['master']) && ($options['master'] !== null || $options['master'] !== false)){
 				$options['master'] = MASTERS_DIR.$options['master'].EXT;
 			}
