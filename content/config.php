@@ -76,7 +76,7 @@
 			// php error reporting
 			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 			Config::load(array(
-				'site.url' => 'http://tdd.local', // without trailing slash
+				'site.url' => 'http://tdd.dev', // without trailing slash
 				
 				'error.log' => false,
 				'error.detailed' => true,

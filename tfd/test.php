@@ -34,8 +34,8 @@
 			return $results;
 		}
 
-		public function page($page){
-			return new Test\Page($page);
+		public function page($page, $options = array()){
+			return new Test\Page($page, $options);
 		}
 
 		/**

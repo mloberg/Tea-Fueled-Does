@@ -1,6 +1,7 @@
 <?php namespace TFD\Test;
 
 	use TFD\Config;
+	use TFD\Admin;
 
 	class Page{
 		
@@ -22,6 +23,7 @@
 				'post_data' => false,
 				'referer' => '',
 				'headers' => array(),
+				'admin' => false,
 			);
 			if(filter_var($page, FILTER_VALIDATE_URL) !== false){
 				throw new \Exception('You can only test local urls');
@@ -48,7 +50,19 @@
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-			curl_setopt($ch, CURLOPT_USERAGENT, (isset($options['headers']['User-Agent']) ? $options['User-Agent'] : 'TFD-Test/'.Config::get('application.version')));
+
+			// if the current user is logged in, they will be able to test admin protected pages
+			if($options['admin'] === true && Admin::loggedin()){
+				$cookie = session_name() . '=' . session_id() . '; path=' . session_save_path();
+				session_write_close();
+				curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+				curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+			}elseif($options['admin'] && isset($options['username'])){
+				// TDOD: allow to pass a username and create a valid session
+			}else{
+				curl_setopt($ch, CURLOPT_USERAGENT, (isset($options['headers']['User-Agent']) ? $options['User-Agent'] : 'TFD-Test/'.Config::get('application.version')));
+			}
+			unset($options['headers']['User-Agent']);
 
 			if($options['method'] == 'post'){
 				curl_setopt($ch, CURLOPT_POST, true);
@@ -74,6 +88,7 @@
 			$content = curl_exec($ch);
 			$info = curl_getinfo($ch);
 			curl_close($ch);
+			print_p("{$page}: {$content}");
 			
 			// parse the returned headers
 			foreach(explode("\n", substr($content, 0, $info['header_size'])) as $header){
@@ -89,9 +104,14 @@
 			$this->info = $info;
 		}
 
+		public function assertExists($message = null){
+			if(is_null($message)) $message = sprintf("Page does not exist");
+			Results::add(!($this->info['http_code'] === 404), $message);
+		}
+
 		public function assertStatusIs($expected, $message = null){
 			if(is_null($message)) $message = sprintf("Expected to have HTTP Status code of [%s]", $expected);
-			Results::add(((integer)$expected === (integer)$this->info['http_code']), $message);
+			Results::add(((integer)$expected === $this->info['http_code']), $message);
 		}
 
 		public function assertStatusNot($expected, $message = null){
@@ -101,22 +121,22 @@
 
 		public function assertContent($message = null){
 			if(is_null($message)) $message = sprintf("Page content is empty");
-			Results::add(!empty($this->content), $message);
+			Results::add((!empty($this->content) && !($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertContentEmpty($message = null){
 			if(is_null($message)) $message = sprintf("Page content is not empty");
-			Results::add(empty($this->content), $message);
+			Results::add((empty($this->content) || ($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertInContent($search, $message = null){
 			if(is_null($message)) $message = sprintf("Expected [%s] in page content", $search);
-			Results::add((strpos($this->content, $search) !== false), $message);
+			Results::add(((strpos($this->content, $search) !== false)  && !($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertNotInContent($search, $message = null){
 			if(is_null($message)) $message = sprintf("Did not expect [%s] in page content", $search);
-			Results::add((strpos($this->content, $search) === false), $message);
+			Results::add(((strpos($this->content, $search) === false) || ($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertHeaderExists($header, $message = null){

@@ -30,10 +30,10 @@ return array(
 	 */
 	
 	'GET /tests' => function(){
-		return TFD\Core\Render::page(array(
+		return array(
 			'master' => 'master',
 			'content' => TFD\Test::run('page', true)
-		));
+		);
 	},
 
 	'GET /redirect' => function(){

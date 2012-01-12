@@ -154,8 +154,8 @@
 			if(self::loggedin()){
 				Hooks::admin();
 				if(is_null($render)){
-					$request = preg_replace('/^'.Config::get('admin.path').'$/', 'index', App::request());
-					$request = preg_replace('/^'.Config::get('admin.path').'\//', '', $request);
+					$request = preg_replace('/^'.preg_quote(Config::get('admin.path'), '/').'$/', 'index', App::request());
+					$request = preg_replace('/^'.preg_quote(Config::get('admin.path'), '/').'\//', '', $request);
 					if(empty($request)) $request = 'index';
 					$render = array(
 						'dir' => Config::get('views.admin'),
