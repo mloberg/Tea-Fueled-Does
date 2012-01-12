@@ -2,6 +2,8 @@
 
 	use TFD\Config;
 	use TFD\Admin;
+	use TFD\Crypter;
+	use TFD\DB\MySQL;
 
 	class Page{
 		
@@ -15,7 +17,6 @@
 			$this->load_page($page, $options);
 		}
 
-		// TODO: support admin views
 		// TODO: multipart posts
 		private function load_page($page, $options){
 			$options = $options + array(
@@ -51,18 +52,36 @@
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
-			// if the current user is logged in, they will be able to test admin protected pages
-			if($options['admin'] === true && Admin::loggedin()){
+			$user_agent = (isset($options['headers']['User-Agent']) ? $options['headers']['User-Agent'] : 'TFD-Test/'.Config::get('application.version'));
+			unset($options['headers']['User-Agent']);
+
+			if($options['admin'] === true){
+				// if user isn't logged in and a username is set, create a valid admin session
+				// this will not work in Tea
+				if(!Admin::loggedin() && isset($options['username'])){
+					if(is_string($options['username'])){
+						$user = MySQL::table(Config::get('admin.table'))->where('username', '=', $options['username'])->limit(1)->get(array('id', 'secret'));
+						$_SESSION['user_id'] = $user['id'];
+					}else{
+						$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $options['username'])->limit(1)->get('secret');
+						$_SESSION['user_id'] = $options['username'];
+					}
+					if(empty($user)){
+						throw new \Exception('Not a valid username');
+					}
+					$_SESSION['logged_in'] = true;
+					$salt = Config::get('admin.auth_key').$user_agent.session_id();
+					$hash = Crypter::hash_with_salt($user['secret'], $salt);
+					$_SESSION['fingerprint'] = $hash;
+				}else{
+					// if the user is logged in, we need to match the User Agent so the session is valid
+					$user_agent = $_SERVER['HTTP_USER_AGENT'];
+				}
 				$cookie = session_name() . '=' . session_id() . '; path=' . session_save_path();
 				session_write_close();
 				curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-				curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-			}elseif($options['admin'] && isset($options['username'])){
-				// TDOD: allow to pass a username and create a valid session
-			}else{
-				curl_setopt($ch, CURLOPT_USERAGENT, (isset($options['headers']['User-Agent']) ? $options['User-Agent'] : 'TFD-Test/'.Config::get('application.version')));
 			}
-			unset($options['headers']['User-Agent']);
+			curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
 
 			if($options['method'] == 'post'){
 				curl_setopt($ch, CURLOPT_POST, true);
@@ -88,7 +107,6 @@
 			$content = curl_exec($ch);
 			$info = curl_getinfo($ch);
 			curl_close($ch);
-			print_p("{$page}: {$content}");
 			
 			// parse the returned headers
 			foreach(explode("\n", substr($content, 0, $info['header_size'])) as $header){

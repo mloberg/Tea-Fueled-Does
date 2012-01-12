@@ -26,7 +26,7 @@
 				)
 			);
 			self::$post = $this->page('/post', $post);
-			self::$admin = $this->page('/admin/index', array('admin' => true));
+			self::$admin = $this->page('/admin/index', array('admin' => true, 'username' => 1));
 		}
 
 		public function test_status(){
@@ -68,7 +68,9 @@
 		}
 
 		public function test_admin(){
+			// if there is no user with an id of 1, the expected is reversed
 			self::$admin->assertInContent('Hello Dashboard');
+			self::$admin->assertStatusIs(302); // expected
 		}
 
 	}
