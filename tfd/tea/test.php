@@ -2,7 +2,7 @@
 
 	use TFD\Test as Tests;
 	
-	class Tests{
+	class Test{
 	
 		public static function __flags(){
 			return array(
@@ -34,8 +34,8 @@ MAN;
 		}
 		
 		public static function run($args){
-			$test = $args[0];
-			$results = Test::cli($test);
+			$test = str_replace('/', '\\', $args[0]);
+			$results = Tests::cli($test);
 			self::print_results($results);
 		}
 
@@ -48,7 +48,7 @@ MAN;
 			$reset = "\033[0m";
 			foreach($results as $name => $result){
 				echo ucwords($name)."\n";
-				echo str_pad("=", 60, "=")."\n";
+				echo str_pad("=", 70, "=")."\n";
 				foreach($result as $test_name => $test_results){
 					$passed = array_filter($test_results, function($test){
 						return($test['result'] == 'passed');
@@ -66,26 +66,28 @@ MAN;
 					foreach($test_results as $test){
 						if($test['result'] == 'passed') $passes++;
 						if($test['result'] == 'failed') $fails++;
-						if($test['result'] == 'exception') $exceptions++;
-						if($test['result'] == 'passed' || $test['result'] == 'failed'){
-							echo str_pad("    {$test['test']}", 56);
-							if($test['result'] == 'passed'){
-								echo "{$bld_grn}PASS{$reset}\n";
-							}else{
-								echo "{$bld_red}FAIL{$reset}\n";
-								echo "        {$test['message']}\n";
-								echo "        at {$test['file']} line {$test['line']}\n";
-							}
+						if($test['result'] == 'exception'){
+							$test['test'] = 'Exception not handled';
+							$exceptions++;
+						}
+						echo str_pad("    {$test['test']}", 61);
+						if($test['result'] == 'passed'){
+							echo "{$bld_grn}     PASS{$reset}\n";
+						}else{
+							$verb = ($test['result'] == 'failed') ? '     FAIL' : 'EXCEPTION';
+							echo "{$bld_red}{$verb}{$reset}\n";
+							echo "        {$test['message']}\n";
+							echo "        at {$test['file']} line {$test['line']}\n";
 						}
 					}
 					echo "\n";
 				}
 			}
 			echo ($fails !== 0 || $exceptions !== 0) ? $red : $grn;
-			echo str_pad("=", 60, "=")."{$reset}\n";
+			echo str_pad("=", 70, "=")."{$reset}\n";
 			echo sprintf("  %s/%s test cases complete.\n  %s passes, %s fails, %s exceptions.\n  Ran in %s seconds.\n", $completed, $total, $passes, $fails, $exceptions, \TFD\Benchmark::check('run_tests'));
 			echo ($fails !== 0 || $exceptions !== 0) ? $red : $grn;
-			echo str_pad("=", 60, "=")."{$reset}\n";
+			echo str_pad("=", 70, "=")."{$reset}\n";
 		}
 	
 	}

@@ -70,7 +70,7 @@
 		public function test_admin(){
 			// if there is no user with an id of 1, the expected is reversed
 			self::$admin->assertInContent('Hello Dashboard');
-			self::$admin->assertStatusIs(302, 'Expected');
+			self::$admin->assertRedirect('Expected');
 		}
 
 	}
