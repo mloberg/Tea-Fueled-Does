@@ -25,7 +25,9 @@
 		}
 
 		public static function get(){
-			return self::$results;
+			$results = self::$results;
+			self::$results = array();
+			return $results;
 		}
 		
 	}
