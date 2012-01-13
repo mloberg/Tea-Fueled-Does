@@ -44,7 +44,7 @@
 	<?php endforeach;
 endforeach;?>
 <?php
-$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails, %s exceptions.", $completed, $total, $passes, $fails, $exceptions);
+$flash_message = sprintf("%s/%s test cases complete. %s passes, %s fails, %s exceptions. Ran in %s seconds.", $completed, $total, $passes, $fails, $exceptions, Benchmark::check('run_tests'));
 if($fails !== 0 || $exceptions !== 0){
 	Flash::error($flash_message, array('sticky' => true));
 }else{

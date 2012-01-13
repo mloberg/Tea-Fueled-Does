@@ -5,6 +5,7 @@
 	class Test{
 
 		private static function run_test($test, $show_passed = false){
+			Benchmark::start('run_tests');
 			$class = 'Content\Tests\\'.$test;
 			if(!class_exists($class)){
 				throw new \Exception('Test does not exist');
@@ -51,8 +52,12 @@
 			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('results' => $results, 'show_passed' => $show_passed));
 		}
 
-		public static function cli($test, $show_passed = false){
-			$results = self::run_test($test, $show_passed);
+		public static function cli($test){
+			$class = 'Content\Tests\\'.$test;
+			$name = (defined($class.'::name')) ? $class::name : $test;
+			$results = array(
+				$name => self::run_test($test, true)
+			);
 			return $results;
 		}
 

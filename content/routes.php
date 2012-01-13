@@ -32,7 +32,7 @@ return array(
 	'GET /tests' => function(){
 		return array(
 			'master' => 'master',
-			'content' => TFD\Test::run('test\fixtures', true)
+			'content' => TFD\Test::run('test\tests', true)
 		);
 	},
 
