@@ -13,7 +13,7 @@
 		public static function help(){
 			echo <<<MAN
 NAME
-	Tea\Tests
+	Tea\Test
 
 DESCRIPTION
 	
@@ -22,7 +22,9 @@ USAGE
 	tea tests [command] [args]
 
 COMMANDS
-	
+	run
+		Run a test.
+		Optional argument of test name.
 
 SEE ALSO
 	TFD: http://teafueleddoes.com/
