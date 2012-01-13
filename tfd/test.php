@@ -66,6 +66,16 @@
 			Results::add(!is_null($result), $message);
 		}
 
+		public function assertEmpty($result, $message = null){
+			if(is_null($message)) $message = sprintf("Value [%s] should be empty", var_export($result, true));
+			Results::add(empty($result), $message);
+		}
+
+		public function assertNotEmpty($result, $message = null){
+			if(is_null($message)) $message = sprintf("Value [%s] should not be empty", var_export($result, true));
+			Results::add(!empty($result), $message);
+		}
+
 		public function assertIsA($result, $type, $message = null){
 			if(is_null($message)) $message = sprintf("Value [%s] should be a %s", var_export($result, true), $type);
 			Results::add((gettype($result) === $type), $message);

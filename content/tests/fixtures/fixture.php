@@ -18,4 +18,14 @@ return array(
 		return '';
 	},
 
+	'foobar' => new Foo()
+
 );
+
+class Foo{
+	
+	public function foobar(){
+		return 'foobar';
+	}
+
+}

@@ -17,6 +17,9 @@
 			if(!array_key_exists($name, $this->data)){
 				throw new \Exception("Could not find {$name} in fixture");
 			}
+			if(is_callable($this->data[$name])){
+				return $this->data[$name]();
+			}
 			return $this->data[$name];
 		}
 

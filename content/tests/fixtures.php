@@ -16,6 +16,11 @@
 			$fixture = Test\Fixture::load('fixture');
 			$this->assertEqual($fixture->foo, 'bar');
 			$this->assertIsA($fixture->bar, 'array');
+			$this->assertIsA($fixture->x, 'string');
+			$this->assertEmpty($fixture->x);
+
+			$foo = $fixture->foobar;
+			$this->assertEqual($foo->foobar(), 'foobar');
 		}
 
 	}

@@ -13,94 +13,112 @@
 		const name = 'TFD\Test';
 
 		public function test_true(){
-			$this->assertTrue(true);
-			$this->assertTrue(false, 'Expected');
-			$this->assertTrue('foo', 'Expected');
-			$this->assertTrue(null, 'Expected');
+			self::assertTrue(true);
+			self::assertTrue(false, 'Expected');
+			self::assertTrue('foo', 'Expected');
+			self::assertTrue(null, 'Expected');
 		}
 
 		public function test_false(){
-			$this->assertFalse(false);
-			$this->assertFalse(true, 'Expected');
-			$this->assertFalse('foo', 'Expected');
-			$this->assertFalse(null, 'Expected');
+			self::assertFalse(false);
+			self::assertFalse(true, 'Expected');
+			self::assertFalse('foo', 'Expected');
+			self::assertFalse(null, 'Expected');
 		}
 
 		public function test_null(){
-			$this->assertNull(null);
-			$this->assertNull('', 'Expected');
-			$this->assertNull(true, 'Expected');
-			$this->assertNull(false, 'Expected');
+			self::assertNull(null);
+			self::assertNull('', 'Expected');
+			self::assertNull(true, 'Expected');
+			self::assertNull(false, 'Expected');
 		}
 
 		public function test_not_null(){
-			$this->assertNotNull(true);
-			$this->assertNotNull('');
-			$this->assertNotNull(null, 'Expected');
-			$this->assertNotNull(false);
+			self::assertNotNull(true);
+			self::assertNotNull('');
+			self::assertNotNull(null, 'Expected');
+			self::assertNotNull(false);
+		}
+
+		public function test_empty(){
+			self::assertEmpty('');
+			self::assertEmpty('foo', 'Expected');
+			self::assertEmpty(array());
+			self::assertEmpty(null);
+			self::assertEmpty(true, 'Expected');
+			self::assertEmpty(false);
+		}
+
+		public function test_not_empty(){
+			self::assertNotEmpty('', 'Expected');
+			self::assertNotEmpty('foo');
+			self::assertNotEmpty(array(), 'Expected');
+			self::assertNotEmpty(null, 'Expected');
+			self::assertNotEmpty(true);
+			self::assertNotEmpty(false, 'Expected');
 		}
 
 		public function test_type(){
-			$this->assertIsA(array(), 'array');
-			$this->assertIsA(true, 'boolean');
-			$this->assertIsA(null, 'string', 'Expected');
-			$this->assertIsA('foo', 'string');
+			self::assertIsA(array(), 'array');
+			self::assertIsA(true, 'boolean');
+			self::assertIsA(null, 'string', 'Expected');
+			self::assertIsA('foo', 'string');
 		}
 
 		public function test_not_type(){
-			$this->assertNotA(array(), 'array', 'Expected');
-			$this->assertNotA(true, 'boolean', 'Expected');
-			$this->assertNotA(null, 'string');
-			$this->assertNotA('foo', 'string', 'Expected');
+			self::assertNotA(array(), 'array', 'Expected');
+			self::assertNotA(true, 'boolean', 'Expected');
+			self::assertNotA(null, 'string');
+			self::assertNotA('foo', 'string', 'Expected');
 		}
 
 		public function test_equal(){
-			$this->assertEqual(1 + 1, '2');
-			$this->assertEqual(true, false, 'Expected');
-			$this->assertEqual(null, '');
-			$this->assertEqual(false, 1, 'Expected');
+			self::assertEqual(1 + 1, '2');
+			self::assertEqual(true, false, 'Expected');
+			self::assertEqual(null, '');
+			self::assertEqual(false, 1, 'Expected');
 		}
 
 		public function test_not_equal(){
-			$this->assertNotEqual(1 + 1, '2', 'Expected');
-			$this->assertNotEqual(true, false);
-			$this->assertNotEqual(null, '', 'Expected');
-			$this->assertNotEqual(false, 1);
+			self::assertNotEqual(1 + 1, '2', 'Expected');
+			self::assertNotEqual(true, false);
+			self::assertNotEqual(null, '', 'Expected');
+			self::assertNotEqual(false, 1);
 		}
 
 		public function test_within_margin(){
-			$this->assertWithinMargin(10, 2, 9);
-			$this->assertWithinMargin(10, 5, 2, 'Expected');
-			$this->assertWithinMargin(-4, 5, 10);
+			self::assertWithinMargin(10, 2, 9);
+			self::assertWithinMargin(10, 5, 2, 'Expected');
+			self::assertWithinMargin(-4, 5, 10);
 		}
 
 		public function test_outside_margin(){
-			$this->assertOutsideMargin(10, 2, 9, 'Expected');
-			$this->assertOutsideMargin(10, 5, 2);
-			$this->assertOutsideMargin(-4, 5, 10, 'Expected');
+			self::assertOutsideMargin(10, 2, 9, 'Expected');
+			self::assertOutsideMargin(10, 5, 2);
+			self::assertOutsideMargin(-4, 5, 10, 'Expected');
 		}
 
 		public function test_identical(){
-			$this->assertIdentical(1 + 1, 2);
-			$this->assertIdentical(true, true);
-			$this->assertIdentical(null, '', 'Expected');
-			$this->assertIdentical(false, 0, 'Expected');
+			self::assertIdentical(1 + 1, 2);
+			self::assertIdentical(true, true);
+			self::assertIdentical(null, '', 'Expected');
+			self::assertIdentical(false, 0, 'Expected');
 		}
 
 		public function test_not_identical(){
-			$this->assertNotIdentical(1 + 1, 2, 'Expected');
-			$this->assertNotIdentical(true, true, 'Expected');
-			$this->assertNotIdentical(null, '');
-			$this->assertNotIdentical(false, 0);
+			self::assertNotIdentical(1 + 1, 2, 'Expected');
+			self::assertNotIdentical(true, true, 'Expected');
+			self::assertNotIdentical(null, '');
+			self::assertNotIdentical(false, 0);
 		}
 
 		public function test_reference(){
 			$a = 'foo';
 			$b = 'bar';
 			$c =& $a;
-			$this->assertReference($a, $c);
-			$this->assertReference($a, $b, 'Expected');
-			$this->assertReference($a, $a);
+			self::assertReference($a, $c);
+			self::assertReference($a, $b, 'Expected');
+			self::assertReference($a, $a);
 		}
 
 		public function test_clone(){
@@ -113,29 +131,29 @@
 				'hello' => 'world'
 			);
 			$y = $x;
-			$this->assertClone($a, $b, 'Expected');
-			$this->assertClone($b, $d);
-			$this->assertClone($d, $d, 'Expected');
-			$this->assertClone($x, $y);
+			self::assertClone($a, $b, 'Expected');
+			self::assertClone($b, $d);
+			self::assertClone($d, $d, 'Expected');
+			self::assertClone($x, $y);
 			$y['foo'] = 'foobar';
-			$this->assertClone($x, $y, 'Expected');
+			self::assertClone($x, $y, 'Expected');
 		}
 
 		public function test_pattern(){
-			$this->assertPattern('foo', '/foo/i');
-			$this->assertPattern('foo', '/bar/i', 'Expected');
+			self::assertPattern('foo', '/foo/i');
+			self::assertPattern('foo', '/bar/i', 'Expected');
 		}
 
 		public function test_no_pattern(){
-			$this->assertNoPattern('foo', '/foo/i', 'Expected');
-			$this->assertNoPattern('foo', '/bar/i');
+			self::assertNoPattern('foo', '/foo/i', 'Expected');
+			self::assertNoPattern('foo', '/bar/i');
 		}
 
 		public function test_exception(){
-			$this->assertException(function(){
+			self::assertException(function(){
 				throw new \Exception('exception');
 			});
-			$this->assertException(function(){
+			self::assertException(function(){
 				return 'foobar';
 			}, 'Expected');
 		}
