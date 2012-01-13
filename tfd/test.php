@@ -38,6 +38,10 @@
 			return new Test\Page($page, $options);
 		}
 
+		public function fixture($fixture){
+			return new Test\Fixture($fixture);
+		}
+
 		/**
 		 * Assertions
 		 */

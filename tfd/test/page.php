@@ -17,6 +17,10 @@
 			$this->load_page($page, $options);
 		}
 
+		public static function make($page, $options = array()){
+			return new self($page, $options);
+		}
+
 		// TODO: multipart posts
 		private function load_page($page, $options){
 			$options = $options + array(
@@ -56,7 +60,7 @@
 			unset($options['headers']['User-Agent']);
 
 			if($options['admin'] === true){
-				// if user isn't logged in and a username is set, create a valid admin session
+				// create a valid admin session if one doesn't exist
 				// this will not work in Tea
 				if(!Admin::loggedin() && isset($options['username'])){
 					if(is_string($options['username'])){
