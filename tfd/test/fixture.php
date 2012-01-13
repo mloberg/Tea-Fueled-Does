@@ -6,7 +6,6 @@
 
 		public function __construct($load){
 			$fixture = CONTENT_DIR.'tests/fixtures/'.$load.EXT;
-			echo $fixture;
 			if(!file_exists($fixture)){
 				throw new \Exception('Fixture does not exist');
 			}

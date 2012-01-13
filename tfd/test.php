@@ -23,10 +23,32 @@
 		}
 
 		public static function run($test, $show_passed = false){
-			$results = self::run_test($test, $show_passed);
 			$class = 'Content\Tests\\'.$test;
 			$name = (defined($class.'::name')) ? $class::name : $test;
-			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('name' => $name, 'results' => $results, 'show_passed' => $show_passed));
+			$results = array(
+				$name => self::run_test($test, $show_passed)
+			);
+			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('results' => $results, 'show_passed' => $show_passed));
+		}
+
+		public static function run_all($show_passed = false){
+			$tests = array();
+			foreach(glob(CONTENT_DIR.'tests/*') as $file){
+				if(is_dir($file) && basename($file) != 'fixtures'){
+					foreach(glob($file.'/*') as $test){
+						$tests[] = basename($file).'\\'.basename($test, EXT);
+					}
+				}elseif(is_file($file)){
+					$tests[] = basename($file, EXT);
+				}
+			}
+			$results = array();
+			foreach($tests as $test){
+				$class = 'Content\Tests\\'.$test;
+				$name = (defined($class.'::name')) ? $class::name : $test;
+				$results[$name] = self::run_test($test, $show_passed);
+			}
+			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('results' => $results, 'show_passed' => $show_passed));
 		}
 
 		public static function cli($test, $show_passed = false){

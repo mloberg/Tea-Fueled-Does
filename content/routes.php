@@ -28,11 +28,18 @@ return array(
 	/**
 	 * For Tests
 	 */
-	
+
 	'GET /tests' => function(){
 		return array(
 			'master' => 'master',
-			'content' => TFD\Test::run('fixtures', true)
+			'content' => TFD\Test::run('test\fixtures', true)
+		);
+	},
+
+	'GET /tests/all' => function(){
+		return array(
+			'master' => 'master',
+			'content' => TFD\Test::run_all(true)
 		);
 	},
 

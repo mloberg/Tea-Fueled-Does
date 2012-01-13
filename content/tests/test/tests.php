@@ -1,4 +1,4 @@
-<?php namespace Content\Tests;
+<?php namespace Content\Tests\Test;
 
 	use TFD\Test;
 
