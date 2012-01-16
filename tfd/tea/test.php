@@ -7,6 +7,7 @@
 		public static function __flags(){
 			return array(
 				'h' => 'help',
+				'r' => 'run'
 			);
 		}
 		
@@ -19,10 +20,10 @@ DESCRIPTION
 	
 
 USAGE
-	tea tests [command] [args]
+	tea test [command] [args]
 
 COMMANDS
-	run
+	-r run
 		Run a test.
 		Optional argument of test name.
 

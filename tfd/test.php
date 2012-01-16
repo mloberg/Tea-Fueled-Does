@@ -53,6 +53,7 @@
 		}
 
 		public static function run($test, $show_passed = false){
+			$test = str_replace('/', '\\', $test);
 			$results = self::run_test($test, $show_passed);
 			return Core\Render::view(array('view' => 'test', 'dir' => 'error'))->set_options(array('results' => $results, 'show_passed' => $show_passed));
 		}
@@ -111,14 +112,24 @@
 			Results::add(!empty($result), $message);
 		}
 
-		public function assertIsA($result, $type, $message = null){
+		public function assertType($result, $type, $message = null){
 			if(is_null($message)) $message = sprintf("Value [%s] should be a %s", var_export($result, true), $type);
 			Results::add((gettype($result) === $type), $message);
 		}
 
-		public function assertNotA($result, $type, $message = null){
+		public function assertNotType($result, $type, $message = null){
 			if(is_null($message)) $message = sprintf("Value [%s] should not be a %s", var_export($result, true), $type);
 			Results::add(!(gettype($result) === $type), $message);
+		}
+
+		public function assertIsA($result, $type, $message = null){
+			if(is_null($message)) $message = sprintf("Value is not a %s", $type);
+			Results::add(is_a($result, $type), $message);
+		}
+
+		public function assertNotA($result, $type, $message = null){
+			if(is_null($message)) $message = sprintf("Value is a %s", $type);
+			Results::add(!is_a($result, $type), $message);
 		}
 
 		public function assertEqual($result, $expect, $message = null){

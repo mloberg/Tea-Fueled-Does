@@ -29,12 +29,12 @@
 		
 		public function current_memory($decimal = 2){
 			// return memory usage in mb
-			return number_format(memory_get_usage() / 1024 / 1024, $decimal);
+			return (double)number_format(memory_get_usage() / 1024 / 1024, $decimal);
 		}
 		
 		public function peak_memory($decimal = 2){
 			// return memory in mb
-			return number_format(memory_get_peak_usage() / 1024 / 1024, $decimal);
+			return (double)number_format(memory_get_peak_usage() / 1024 / 1024, $decimal);
 		}
 	
 	}

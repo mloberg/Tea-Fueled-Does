@@ -19,6 +19,7 @@
 		public static function set($key, $value){
 			if(($key = self::parse($key)) !== false){
 				self::$keys[$key] = $value;
+				return $value;
 			}
 		}
 		

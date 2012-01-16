@@ -31,7 +31,8 @@
 			if(($call = self::is_ajax()) !== false && method_exists('Ajax', $call)){
 				return (string) new Ajax($call);
 			}elseif(self::is_logout()){
-				return Admin::logout();
+				Admin::logout();
+				return redirect('');
 			}elseif(self::is_login()){
 				return Admin::login();
 			}elseif(self::is_admin()){

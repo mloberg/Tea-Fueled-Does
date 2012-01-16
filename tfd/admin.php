@@ -7,7 +7,7 @@
 	
 	class Admin{
 	
-		private static function __validate_session_fingerprint(){
+		private static function validate_session_fingerprint(){
 			try{
 				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_SESSION['user_id'])->limit(1)->get('secret');
 			}catch(\Exception $e){
@@ -22,7 +22,7 @@
 			return ($hash === $_SESSION['fingerprint']);
 		}
 		
-		private static function __validate_cookie_fingerprint(){
+		private static function validate_cookie_fingerprint(){
 			if($_COOKIE['PHPSESSID'] !== session_id()) return false;
 			try{
 				$user = MySQL::table(Config::get('admin.table'))->where('id', '=', $_COOKIE['user_id'])->limit(1)->get('secret');
@@ -42,15 +42,15 @@
 		
 		public static function loggedin(){
 			if(isset($_SESSION['logged_in'])){
-				return self::__validate_session_fingerprint();
+				return self::validate_session_fingerprint();
 			}elseif(isset($_COOKIE['logged_in'])){
-				return self::__validate_cookie_fingerprint();
+				return self::validate_cookie_fingerprint();
 			}
 			return false;
 		}
 		
 		public static function login(){
-			if((isset($_POST['submit']) && self::validate()) || self::loggedin()){
+			if((isset($_POST['submit']) && self::validate($_POST['username'], $_POST['password'])) || self::loggedin()){
 				if(isset($_COOKIE['redirect'])){
 					$redirect = $_COOKIE['redirect'];
 					setcookie('redirect', '', time() - 3600, '/');
@@ -77,12 +77,9 @@
 			setcookie('logged_in', false, time() - 3600, '/');
 			setcookie('user_id', '', time() - 3600, '/');
 			setcookie('fingerprint', '', time() - 3600, '/');
-			redirect('');
 		}
 		
-		private static function validate(){
-			$user = $_POST['username'];
-			$pass = $_POST['password'];
+		public static function validate($user, $pass){
 			// get user info
 			try{
 				$user_info = MySQL::table(Config::get('admin.table'))->where('username', '=', $user)->limit(1)->get();
@@ -176,6 +173,10 @@
 				redirect(Config::get('admin.login'));
 			}
 		}
+		
+		/**
+		 * DEPRECATED
+		 */
 		
 		public static function hash_pass($password){
 			return Crypter::hash($password);

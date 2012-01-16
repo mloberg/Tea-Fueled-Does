@@ -59,17 +59,17 @@
 		}
 
 		public function test_type(){
-			self::assertIsA(array(), 'array');
-			self::assertIsA(true, 'boolean');
-			self::assertIsA(null, 'string', 'Expected');
-			self::assertIsA('foo', 'string');
+			self::assertType(array(), 'array');
+			self::assertType(true, 'boolean');
+			self::assertType(null, 'string', 'Expected');
+			self::assertType('foo', 'string');
 		}
 
 		public function test_not_type(){
-			self::assertNotA(array(), 'array', 'Expected');
-			self::assertNotA(true, 'boolean', 'Expected');
-			self::assertNotA(null, 'string');
-			self::assertNotA('foo', 'string', 'Expected');
+			self::assertNotType(array(), 'array', 'Expected');
+			self::assertNotType(true, 'boolean', 'Expected');
+			self::assertNotType(null, 'string');
+			self::assertNotType('foo', 'string', 'Expected');
 		}
 
 		public function test_equal(){

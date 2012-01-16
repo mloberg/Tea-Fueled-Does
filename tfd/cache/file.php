@@ -22,6 +22,10 @@
 		
 		public function delete($key){
 			@unlink(Config::get('cache.dir').$key);
+			if(!file_exists(Config::get('cache.dir').$key)){
+				return true;
+			}
+			return false;
 		}
 		
 		public function flush(){
