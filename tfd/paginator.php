@@ -34,7 +34,7 @@
 		 */
 		
 		public function results(){
-			$offset = ($this->page == 1) ? 0 : (($this->page - 1) * 10) - 1;
+			$offset = ($this->page == 1) ? 0 : (($this->page - 1) * $this->per_page) - 1;
 			return array_slice($this->results, $offset, $this->per_page);
 		}
 		

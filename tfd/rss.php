@@ -21,7 +21,8 @@
 		public function add($info){
 			if(gettype($info) == 'object'){
 				$info = unserialize((string)$info);
-			}elseif(!isset($item['title'], $item['description'], $item['link'])){
+			}
+			if(!isset($info['title'], $info['description'], $info['link'])){
 				throw new \Exception("RSS item is missing mandatory info (title, link, and description)");
 			}
 			if(!isset($info['pubDate'])){

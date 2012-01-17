@@ -192,6 +192,11 @@
 			}
 		}
 
+		public function assert($assert, $message = null){
+			if(is_null($message)) $message = sprintf("Assertion failed");
+			Results::add($assert, $message);
+		}
+
 		/**
 		 * Reference checking
 		 */

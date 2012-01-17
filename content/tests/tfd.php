@@ -15,6 +15,16 @@
 	use TFD\File;
 	use TFD\Form;
 	use TFD\HTML;
+	use TFD\Image;
+	use TFD\JavaScript;
+	use TFD\Loader;
+	use TFD\Model;
+	use TFD\Paginator;
+	use TFD\Postmark;
+	use TFD\ReCAPTCHA;
+	use TFD\Redis;
+	use TFD\RSS;
+	use TFD\Template;
 	use TFD\DB\MySQL;
 
 	class TFD extends Test{
@@ -95,6 +105,7 @@
 			self::assertEqual(File::get($file), 'foobar');
 			self::assertType(File::snapshot('non-existant-file', 5), 'array');
 			self::assertType(File::snapshot($file, 1), 'array');
+			@unlink($file);
 		}
 
 		public function test_form(){
@@ -139,6 +150,133 @@
 		}
 
 		public function test_image(){
+			$ch = curl_init('http://placehold.it/174.jpg');
+			$img = BASE_DIR.'cache/foo.jpg';
+			$fp = fopen($img, 'wb');
+			curl_setopt($ch, CURLOPT_FILE, $fp);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_exec($ch);
+			curl_close($ch);
+			fclose($fp);
+			self::assertException(function(){
+				Image::make($img)->resize('string', 'string');
+			});
+			self::assertException(function(){
+				Image::make($img)->scale('string');
+			});
+			self::assertException(function(){
+				Image::make($img)->scale(array('width' => 175));
+			});
+			self::assertException(function(){
+				Image::make($img)->crop('string', 'string');
+			});
+			$image = Image::make($img);
+			self::assertIsA($image->rotate('right'), 'TFD\Image');
+			$image->resize(150, 150);
+			$image->scale(array('percent' => 50));
+			$image->crop(75, 75, 10, 10);
+			$image->watermark($img);
+			self::assertTrue($image->save(BASE_DIR.'cache', 'bar'));
+			list($width, $height) = getimagesize(BASE_DIR.'cache/bar.jpg');
+			self::assert(($width === 75 && $height === 75), 'Unexpected image size');
+			list($width, $height) = getimagesize($img);
+			self::assert(($width === 174 && $height === 174), 'Unexpected image size');
+			@unlink(BASE_DIR.'cache/bar.jpg');
+			@unlink($img);
+		}
+
+		public function test_javascript(){
+			JavaScript::update_library('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js', true);
+			JavaScript::library('tfd');
+			JavaScript::script('function(){ alert("hello");}');
+			JavaScript::ready('function(){alert("world");}');
+			$render = JavaScript::render();
+			self::assertPattern($render, '/googleapis/');
+			self::assertPattern($render, '/tfd\.js/');
+			self::assertPattern($render, '/hello/');
+			self::assertPattern($render, '/world/');
+		}
+
+		public function test_loader(){
+			self::assertException(function(){
+				new \TFD\No\File;
+			});
+		}
+
+		public function test_model(){
+			self::assertException(function(){
+				Model::make();
+			});
+			self::assertEqual(Model::make('model')->foo(), 'foobar');
+		}
+
+		public function test_paginator(){
+			$results = Test\Fixture::load('tfd')->paginator;
+			$paginator = Paginator::make($results, 2, array('per_page' => 3));
+			self::assertIsA($paginator, 'TFD\Paginator');
+			self::assert((count($paginator->results()) === 3), 'Expected 3 results');
+			self::assertNotEmpty($paginator->navigation());
+		}
+
+		public function test_postmark(){
+			self::assertException(function(){
+				Postmark::make()->send();
+			});
+			$postmark = Postmark::make();
+			$postmark->to('mail@example.com')->cc('cc@example.com')->bcc('bcc@example.com');
+			$postmark->subject('Postmark Test')->message('Lorem Ipsum')->tag('test');
+			$resp = $postmark->send();
+			self::assertFalse($resp->sent());
+		}
+
+		public function test_recaptcha(){
+			self::assertException(function(){
+				ReCAPTCHA::get_html();
+			});
+		}
+
+		public function test_redis(){
+			$redis = Redis::make(array('hostname' => '127.0.0.1', 'port' => 6379));
+			$redis->set('mykey', 'Hello');
+			self::assertEqual($redis->get('mykey'), 'Hello');
+			self::assertEqual($redis->del('mykey'), '1');
+		}
+
+		public function test_rss(){
+			$rss = RSS::make(array('title' => 'Test', 'link' => '/'));
+			$rss->description = 'RSS Test';
+			$item = RSS::item(array('title' => 'Item 1', 'link' => '/item/1'));
+			$item->description = 'RSS test item 1';
+			$rss->add($item);
+			$rss->add(array(
+				'title' => 'Item 2',
+				'link' => '/item/2',
+				'description' => 'RSS test item 2'
+			));
+			self::assertNotEmpty((string)$rss);
+		}
+
+		public function test_template(){
+			self::assertEqual(Template::make('hello {{name}}', array('name' => 'world')), 'hello world');
+		}
+
+		public function test_render(){
+			
+		}
+
+		public function test_router(){
+			
+		}
+
+		public function test_response(){
+			
+		}
+
+		public function test_request(){
+			
+		}
+
+		public function test_mysql(){
 			
 		}
 
