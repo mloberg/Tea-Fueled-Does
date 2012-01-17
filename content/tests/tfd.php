@@ -25,6 +25,9 @@
 	use TFD\Redis;
 	use TFD\RSS;
 	use TFD\Template;
+	use TFD\Core\Render;
+	use TFD\Core\Request;
+	use TFD\Core\Response;
 	use TFD\DB\MySQL;
 
 	class TFD extends Test{
@@ -261,23 +264,55 @@
 		}
 
 		public function test_render(){
-			
-		}
-
-		public function test_router(){
-			
-		}
-
-		public function test_response(){
-			
+			self::assertIsA(Render::page(array()), 'TFD\Core\Page');
+			self::assertIsA(Render::view(array()), 'TFD\Core\View');
+			self::assertIsA(Render::partial('foo'), 'TFD\Core\View');
+			self::assertIsA(Render::error('404'), 'TFD\Core\ErrorPage');
+			self::assertNotEmpty(Render::partial('test'));
 		}
 
 		public function test_request(){
-			
+			$request = new Request('/foo');
+			self::assertFalse($request->run());
+			self::assertFalse(Request::is_maintenance());
+			self::assertFalse(Request::is_ajax());
+			self::assertEqual(Request::uri(), '/foo');
+			self::assertNotEmpty(Request::method());
+			self::assertType(Request::spoofed(), 'boolean');
+			self::assertNotEmpty(Request::ip());
+			self::assertPattern(Request::protocol(), '/http/');
+			self::assertType(Request::is_secure(), 'boolean');
+		}
+
+		public function test_response(){
+			self::assertIsA(Response::make('', 200), 'TFD\Core\Response');
+			self::assertIsA(Response::error(500), 'TFD\Core\Response');
 		}
 
 		public function test_mysql(){
-			
+			$fixture = Test\Fixture::load('tfd');
+			self::assertIsA(MySQL::connection(), 'PDO');
+			$table = uniqid();
+			self::assertTrue(MySQL::query("CREATE TABLE `{$table}` (`id` int(11) unsigned NOT NULL AUTO_INCREMENT,`title` varchar(128) DEFAULT NULL,`content` text,PRIMARY KEY (`id`))"));
+			self::assertTrue(MySQL::table($table)->insert($fixture->mysql_insert));
+			self::assertEqual(MySQL::insert_id(), '1');
+			self::assertTrue(MySQL::table($table)->insert($fixture->mysql_multi_insert));
+			self::assertTrue(MySQL::table($table)->where('title', '=', 'bar')->and_where('content', '=', 'foo')->update(array('content' => 'Lorem Ipsum')));
+			self::assertTrue(MySQL::table($table)->where('title', 'LIKE', 'foo%')->or_where('content', '=', 'Lorem Ipsum')->set('content', 'new content'));
+			$results = MySQL::table($table)->get();
+			self::assertType($results, 'array');
+			self::assertEqual(MySQL::num_rows(), '3');
+			$test = true;
+			foreach($results as $result){
+				if($result['content'] !== 'new content') $test = false;
+			}
+			self::assert($test, 'Content was not updated as expected');
+			self::assert((count(MySQL::table($table)->limit(2)->get()) === 2), 'Unexpected number of results');
+			self::assertTrue(MySQL::table($table)->where('title', '=', 'foobar')->delete());
+			self::assert((count(MySQL::table($table)->get()) === 2), 'Unexpected number of results');
+			self::assertTrue(MySQL::table($table)->delete(true));
+			self::assertEmpty(MySQL::table($table)->get());
+			self::assertTrue(MySQL::query("DROP TABLE `{$table}"));
 		}
 
 	}

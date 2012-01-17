@@ -10,6 +10,17 @@ return array(
 	'paginator' => array(
 		'foo', 'bar', 'foobar',
 		'hello', 'world', 'hello world'
+	),
+
+	'mysql_insert' => array(
+		'title' => 'foo',
+		'content' => 'hello world!'
+	),
+
+	'mysql_multi_insert' => array(
+		array('title', 'content'),
+		array('bar', 'foo'),
+		array('foobar', 'foobar'),
 	)
 
 );
