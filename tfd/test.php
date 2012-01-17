@@ -70,6 +70,10 @@
 			return self::run_test($test, true);
 		}
 
+		public static function is_cli(){
+			return (php_sapi_name() === 'cli' && empty($_SERVER['REMOTE_ADDR'])) ? true : false;
+		}
+
 		public function page($page, $options = array()){
 			return new Test\Page($page, $options);
 		}

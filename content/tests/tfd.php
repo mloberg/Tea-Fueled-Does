@@ -276,10 +276,12 @@
 			self::assertFalse($request->run());
 			self::assertFalse(Request::is_maintenance());
 			self::assertFalse(Request::is_ajax());
-			self::assertEqual(Request::uri(), '/foo');
-			self::assertNotEmpty(Request::method());
 			self::assertType(Request::spoofed(), 'boolean');
-			self::assertNotEmpty(Request::ip());
+			if(!self::is_cli()){
+				self::assertEqual(Request::uri(), '/foo');
+				self::assertNotEmpty(Request::method());
+				self::assertNotEmpty(Request::ip());
+			}
 			self::assertPattern(Request::protocol(), '/http/');
 			self::assertType(Request::is_secure(), 'boolean');
 		}
