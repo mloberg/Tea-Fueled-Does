@@ -13,112 +13,112 @@
 		const name = 'TFD\Test';
 
 		public function test_true(){
-			self::assertTrue(true);
-			self::assertTrue(false, 'Expected');
-			self::assertTrue('foo', 'Expected');
-			self::assertTrue(null, 'Expected');
+			Test\Assert::true(true);
+			Test\Assert::true(false, 'Expected');
+			Test\Assert::true('foo', 'Expected');
+			Test\Assert::true(null, 'Expected');
 		}
 
 		public function test_false(){
-			self::assertFalse(false);
-			self::assertFalse(true, 'Expected');
-			self::assertFalse('foo', 'Expected');
-			self::assertFalse(null, 'Expected');
+			Test\Assert::false(false);
+			Test\Assert::false(true, 'Expected');
+			Test\Assert::false('foo', 'Expected');
+			Test\Assert::false(null, 'Expected');
 		}
 
 		public function test_null(){
-			self::assertNull(null);
-			self::assertNull('', 'Expected');
-			self::assertNull(true, 'Expected');
-			self::assertNull(false, 'Expected');
+			Test\Assert::null(null);
+			Test\Assert::null('', 'Expected');
+			Test\Assert::null(true, 'Expected');
+			Test\Assert::null(false, 'Expected');
 		}
 
 		public function test_not_null(){
-			self::assertNotNull(true);
-			self::assertNotNull('');
-			self::assertNotNull(null, 'Expected');
-			self::assertNotNull(false);
+			Test\Assert::notNull(true);
+			Test\Assert::notNull('');
+			Test\Assert::notNull(null, 'Expected');
+			Test\Assert::notNull(false);
 		}
 
 		public function test_empty(){
-			self::assertEmpty('');
-			self::assertEmpty('foo', 'Expected');
-			self::assertEmpty(array());
-			self::assertEmpty(null);
-			self::assertEmpty(true, 'Expected');
-			self::assertEmpty(false);
+			Test\Assert::isEmpty('');
+			Test\Assert::isEmpty('foo', 'Expected');
+			Test\Assert::isEmpty(array());
+			Test\Assert::isEmpty(null);
+			Test\Assert::isEmpty(true, 'Expected');
+			Test\Assert::isEmpty(false);
 		}
 
 		public function test_not_empty(){
-			self::assertNotEmpty('', 'Expected');
-			self::assertNotEmpty('foo');
-			self::assertNotEmpty(array(), 'Expected');
-			self::assertNotEmpty(null, 'Expected');
-			self::assertNotEmpty(true);
-			self::assertNotEmpty(false, 'Expected');
+			Test\Assert::notEmpty('', 'Expected');
+			Test\Assert::notEmpty('foo');
+			Test\Assert::notEmpty(array(), 'Expected');
+			Test\Assert::notEmpty(null, 'Expected');
+			Test\Assert::notEmpty(true);
+			Test\Assert::notEmpty(false, 'Expected');
 		}
 
 		public function test_type(){
-			self::assertType(array(), 'array');
-			self::assertType(true, 'boolean');
-			self::assertType(null, 'string', 'Expected');
-			self::assertType('foo', 'string');
+			Test\Assert::type(array(), 'array');
+			Test\Assert::type(true, 'boolean');
+			Test\Assert::type(null, 'string', 'Expected');
+			Test\Assert::type('foo', 'string');
 		}
 
 		public function test_not_type(){
-			self::assertNotType(array(), 'array', 'Expected');
-			self::assertNotType(true, 'boolean', 'Expected');
-			self::assertNotType(null, 'string');
-			self::assertNotType('foo', 'string', 'Expected');
+			Test\Assert::notType(array(), 'array', 'Expected');
+			Test\Assert::notType(true, 'boolean', 'Expected');
+			Test\Assert::notType(null, 'string');
+			Test\Assert::notType('foo', 'string', 'Expected');
 		}
 
 		public function test_equal(){
-			self::assertEqual(1 + 1, '2');
-			self::assertEqual(true, false, 'Expected');
-			self::assertEqual(null, '');
-			self::assertEqual(false, 1, 'Expected');
+			Test\Assert::equal(1 + 1, '2');
+			Test\Assert::equal(true, false, 'Expected');
+			Test\Assert::equal(null, '');
+			Test\Assert::equal(false, 1, 'Expected');
 		}
 
 		public function test_not_equal(){
-			self::assertNotEqual(1 + 1, '2', 'Expected');
-			self::assertNotEqual(true, false);
-			self::assertNotEqual(null, '', 'Expected');
-			self::assertNotEqual(false, 1);
+			Test\Assert::notEqual(1 + 1, '2', 'Expected');
+			Test\Assert::notEqual(true, false);
+			Test\Assert::notEqual(null, '', 'Expected');
+			Test\Assert::notEqual(false, 1);
 		}
 
 		public function test_within_margin(){
-			self::assertWithinMargin(10, 2, 9);
-			self::assertWithinMargin(10, 5, 2, 'Expected');
-			self::assertWithinMargin(-4, 5, 10);
+			Test\Assert::withinMargin(10, 2, 9);
+			Test\Assert::withinMargin(10, 5, 2, 'Expected');
+			Test\Assert::withinMargin(-4, 5, 10);
 		}
 
 		public function test_outside_margin(){
-			self::assertOutsideMargin(10, 2, 9, 'Expected');
-			self::assertOutsideMargin(10, 5, 2);
-			self::assertOutsideMargin(-4, 5, 10, 'Expected');
+			Test\Assert::outsideMargin(10, 2, 9, 'Expected');
+			Test\Assert::outsideMargin(10, 5, 2);
+			Test\Assert::outsideMargin(-4, 5, 10, 'Expected');
 		}
 
 		public function test_identical(){
-			self::assertIdentical(1 + 1, 2);
-			self::assertIdentical(true, true);
-			self::assertIdentical(null, '', 'Expected');
-			self::assertIdentical(false, 0, 'Expected');
+			Test\Assert::identical(1 + 1, 2);
+			Test\Assert::identical(true, true);
+			Test\Assert::identical(null, '', 'Expected');
+			Test\Assert::identical(false, 0, 'Expected');
 		}
 
 		public function test_not_identical(){
-			self::assertNotIdentical(1 + 1, 2, 'Expected');
-			self::assertNotIdentical(true, true, 'Expected');
-			self::assertNotIdentical(null, '');
-			self::assertNotIdentical(false, 0);
+			Test\Assert::notIdentical(1 + 1, 2, 'Expected');
+			Test\Assert::notIdentical(true, true, 'Expected');
+			Test\Assert::notIdentical(null, '');
+			Test\Assert::notIdentical(false, 0);
 		}
 
 		public function test_reference(){
 			$a = 'foo';
 			$b = 'bar';
 			$c =& $a;
-			self::assertReference($a, $c);
-			self::assertReference($a, $b, 'Expected');
-			self::assertReference($a, $a);
+			Test\Assert::reference($a, $c);
+			Test\Assert::reference($a, $b, 'Expected');
+			Test\Assert::reference($a, $a);
 		}
 
 		public function test_clone(){
@@ -131,29 +131,29 @@
 				'hello' => 'world'
 			);
 			$y = $x;
-			self::assertClone($a, $b, 'Expected');
-			self::assertClone($b, $d);
-			self::assertClone($d, $d, 'Expected');
-			self::assertClone($x, $y);
+			Test\Assert::isClone($a, $b, 'Expected');
+			Test\Assert::isClone($b, $d);
+			Test\Assert::isClone($d, $d, 'Expected');
+			Test\Assert::isClone($x, $y);
 			$y['foo'] = 'foobar';
-			self::assertClone($x, $y, 'Expected');
+			Test\Assert::isClone($x, $y, 'Expected');
 		}
 
 		public function test_pattern(){
-			self::assertPattern('foo', '/foo/i');
-			self::assertPattern('foo', '/bar/i', 'Expected');
+			Test\Assert::pattern('foo', '/foo/i');
+			Test\Assert::pattern('foo', '/bar/i', 'Expected');
 		}
 
 		public function test_no_pattern(){
-			self::assertNoPattern('foo', '/foo/i', 'Expected');
-			self::assertNoPattern('foo', '/bar/i');
+			Test\Assert::notPattern('foo', '/foo/i', 'Expected');
+			Test\Assert::notPattern('foo', '/bar/i');
 		}
 
 		public function test_exception(){
-			self::assertException(function(){
+			Test\Assert::exception(function(){
 				throw new \Exception('exception');
 			});
-			self::assertException(function(){
+			Test\Assert::exception(function(){
 				return 'foobar';
 			}, 'Expected');
 		}

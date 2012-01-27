@@ -21,7 +21,6 @@
 			return new self($page, $options);
 		}
 
-		// TODO: multipart posts
 		private function load_page($page, $options){
 			$options = $options + array(
 				'method' => 'get',
@@ -127,77 +126,62 @@
 		}
 
 		public function assertExists($message = null){
-			if(is_null($message)) $message = sprintf("Page does not exist");
 			Results::add(!($this->info['http_code'] === 404), $message);
 		}
 
 		public function assertStatusIs($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected to have HTTP Status code of [%s]", $expected);
 			Results::add(((integer)$expected === $this->info['http_code']), $message);
 		}
 
 		public function assertStatusNot($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected to not have HTTP Status code of [%s]", $expected);
 			Results::add(!((integer)$expected === (integer)$this->info['http_code']), $message);
 		}
 
 		public function assertContent($message = null){
-			if(is_null($message)) $message = sprintf("Page content is empty");
 			Results::add((!empty($this->content) && !($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertContentEmpty($message = null){
-			if(is_null($message)) $message = sprintf("Page content is not empty");
 			Results::add((empty($this->content) || ($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertInContent($search, $message = null){
-			if(is_null($message)) $message = sprintf("Expected [%s] in page content", $search);
 			Results::add(((strpos($this->content, $search) !== false)  && !($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertNotInContent($search, $message = null){
-			if(is_null($message)) $message = sprintf("Did not expect [%s] in page content", $search);
 			Results::add(((strpos($this->content, $search) === false) || ($this->info['http_code'] === 404)), $message);
 		}
 
 		public function assertHeaderExists($header, $message = null){
-			if(is_null($message)) $message = sprintf("Expected header [%s]", $header);
 			Results::add(array_key_exists($header, $this->headers), $message);
 		}
 
 		public function assertHeaderNotExists($header, $message = null){
-			if(is_null($message)) $message = sprintf("Did not expect header [%s]", $header);
 			Results::add(!array_key_exists($header, $this->headers), $message);
 		}
 
 		public function assertHeaderIs($header, $expected, $message = null){
-			if(is_null($message)) $message = sprintf("Header [%s] should be [%s]", $header, $expected);
 			Results::add(($this->headers[$header] == $expected), $message);
 		}
 
 		public function assertHeaderNot($header, $expected, $message = null){
-			if(is_null($message)) $message = sprintf("Header [%s] should not be [%s]", $header, $expected);
 			Results::add(($this->headers[$header] != $expected), $message);
 		}
 
 		public function assertContentType($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected content type to be [%s]", $expected);
 			Results::add((strpos(strtolower($this->info['content_type']), strtolower($expected)) !== false), $message);
 		}
 
 		public function assertContentTypeNot($expected, $message = null){
-			if(is_null($message)) $message = sprintf("Expected content type to not be [%s]", $expected);
 			Results::add((strpos(strtolower($this->info['content_type']), strtolower($expected)) === false), $message);	
 		}
 
 		public function assertRedirect($message = null){
-			if(is_null($message)) $message = sprintf("Expected a redirect", $expected);
 			Results::add(isset($this->headers['Location']), $message);
 		}
 
 		public function assertNotRedirect($message = null){
-			if(is_null($message)) $message = sprintf("Did not expected a redirect", $expected);
 			Results::add(!isset($this->headers['Location']), $message);
 		}
 
@@ -206,7 +190,6 @@
 				if(!preg_match('/^\//', $location)) $location = '/' . $location;
 				$location = Config::get('site.url') . $location;
 			}
-			if(is_null($message)) $message = sprintf("Expected a redirect to [%s]", $location);
 			Results::add(($this->headers['Location'] === $location), $message);
 		}
 

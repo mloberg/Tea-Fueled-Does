@@ -14,13 +14,13 @@
 
 		public function test_fixture(){
 			$fixture = Test\Fixture::load('fixture');
-			$this->assertEqual($fixture->foo, 'bar');
-			$this->assertIsA($fixture->bar, 'array');
-			$this->assertIsA($fixture->x, 'string');
-			$this->assertEmpty($fixture->x);
+			Test\Assert::equal($fixture->foo, 'bar');
+			Test\Assert::type($fixture->bar, 'array');
+			Test\Assert::type($fixture->x, 'string');
+			Test\Assert::isEmpty($fixture->x);
 
 			$foo = $fixture->foobar;
-			$this->assertEqual($foo->foobar(), 'foobar');
+			Test\Assert::equal($foo->foobar(), 'foobar');
 		}
 
 	}
