@@ -34,10 +34,10 @@
 		
 		public function url($segment = null){
 			if($segment == null){
-				return $this->request();
+				return self::request();
 			}else{
-				$segments = explode('/', $this->request());
-				return $segments[$segment - 1];
+				$segments = explode('/', self::request());
+				return $segments[$segment];
 			}
 		}
 		
