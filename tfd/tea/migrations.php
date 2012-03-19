@@ -122,7 +122,7 @@ MAN;
 			}
 
 			if(!Database::table_exists(Config::get('migrations.table'))){
-				Generate::table();
+				Generate::table(Config::get('migrations.table'));
 			}
 
 			$migrations = glob(Config::get('migrations.dir').'*'.EXT);
