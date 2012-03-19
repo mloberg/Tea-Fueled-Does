@@ -304,7 +304,6 @@ MAN;
 		
 		public static function name($default = null){
 			$response = Tea::response_to_lower($default);
-			$response = ucwords($response);
 			return preg_replace('/[^a-zA-Z]/', '', $response);
 		}
 
