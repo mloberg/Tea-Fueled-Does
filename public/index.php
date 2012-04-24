@@ -25,11 +25,10 @@
 	include_once('../bootstrap.php');
 
 	// load environment config
-	Config::load($environment);
+	Config::load(strtolower($environment));
 	
 	// make a new instance of our app class
 	$app = new TFD\App();
 	
 	// and finally echo the site output
-	
 	echo $app->site();

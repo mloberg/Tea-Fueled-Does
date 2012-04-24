@@ -12,7 +12,7 @@ define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', __DIR__.'/');
 define('APP_DIR', realpath($app_dir).'/');
 define('CONTENT_DIR', realpath($content_dir).'/');
-unset($public_dir, $app_dir, $content_dir); // cleanup the global namespace
+unset($public_dir, $app_dir, $content_dir);
 
 // app directories
 define('FUNCTIONS_DIR', APP_DIR.'functions/');
@@ -31,9 +31,9 @@ include_once(FUNCTIONS_DIR.'helpful'.EXT);
 
 // Config class
 include_once(APP_DIR.'config'.EXT);
-// load some default config options
+
 TFD\Config::load(array(
-	'application.version' => '2.1',
+	'application.version' => 'pre-3',
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
 	'render.default_master' => MASTERS_DIR.'master'.EXT,
 	
@@ -45,22 +45,9 @@ TFD\Config::load(array(
 	'views.error' => 'error'
 ));
 
-// include our application config file
-include_once(CONTENT_DIR.'config'.EXT);
-
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);
 spl_autoload_register(array('TFD\Loader', 'load'));
-
-// Error Handlers
-set_exception_handler(function($e){
-	\TFD\Exception\Handler::make($e)->handle();
-});
-
-set_error_handler(function($number, $error, $file, $line){
-	if(error_reporting() === 0) return;
-	\TFD\Exception\Handler::make(new \ErrorException($error, $number, 0, $file, $line))->handle();
-}, E_ALL ^ E_NOTICE);
 
 // create some class aliases
 use TFD\Loader;
@@ -87,8 +74,22 @@ Loader::create_aliases(array(
 	'File' => 'TFD\File',
 	'Model' => 'TFD\Model',
 	'RSS' => 'TFD\RSS',
+	'Event' => 'TFD\Core\Event',
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
 Loader::add_alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);
 if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
 if(CONTENT_DIR !== BASE_DIR.'content/') Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));
+
+// Load app.php
+include_once(CONTENT_DIR.'app'.EXT);
+
+// Error Handlers
+set_exception_handler(function($e){
+	\TFD\Core\Event::fire('exception', $e);
+});
+
+set_error_handler(function($number, $error, $file, $line){
+	if(error_reporting() === 0) return;
+	\TFD\Core\Event::fire('error', $number, $error, $file, $line);
+}, E_ALL ^ E_NOTICE);
