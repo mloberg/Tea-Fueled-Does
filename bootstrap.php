@@ -45,10 +45,8 @@ TFD\Config::load(array(
 	'views.error' => 'error'
 ));
 
-// include our environment file (with our application config)
+// include our application config file
 include_once(CONTENT_DIR.'config'.EXT);
-new Content\Environment($environment);
-unset($environment); // cleanup the global namespace
 
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);
