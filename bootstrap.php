@@ -90,6 +90,6 @@ set_exception_handler(function($e){
 });
 
 set_error_handler(function($number, $error, $file, $line){
-	if(error_reporting() === 0) return;
+	if(error_reporting() === 0) return; // ignore @
 	\TFD\Core\Event::fire('error', $number, $error, $file, $line);
 }, E_ALL ^ E_NOTICE);

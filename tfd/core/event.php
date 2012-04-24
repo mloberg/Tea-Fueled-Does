@@ -4,9 +4,23 @@
 
 		private static $events = array();
 
+		/**
+		 * Add an event listener.
+		 *
+		 * @param string $event Event name
+		 * @param function $callback Event callback
+		 */
+
 		public static function listen($event, $callback) {
 			static::$events[$event] = $callback;
 		}
+
+		/**
+		 * Fire an event.
+		 *
+		 * @param string $event Event name
+		 * @param mixed Callbakc variables
+		 */
 
 		public static function fire() {
 			// get args
