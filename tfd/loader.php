@@ -1,62 +1,50 @@
 <?php namespace TFD;
 
-	class Loader{
+	class LoaderException extends \Exception { }
+
+	class Loader {
 	
 		private static $alias = array();
-		private static $app = false;
-		private static $content = false;
 		
-		public static function load($name){
-			// if content and tfd have been moved
-			if(self::$app !== false && preg_match('/^TFD\\\/', $name)){
-				$name = preg_replace('/^TFD/', self::$app, $name);
-			}elseif(self::$content !== false && preg_match('/^content\\\/', strtolower($name))){
-				$name = preg_replace('/^content/', self::$content, strtolower($name));
-			}
+		/**
+		 * Load a class.
+		 * 
+		 * @param string $name Class name
+		 */
+
+		public static function load($name) {
 			$file = BASE_DIR.strtolower(str_replace('\\', '/', $name)).EXT;
-			if(file_exists($file)){
-				include_once($file);
-			}elseif(array_key_exists($name, self::$alias)){
-				$file = (!is_null(self::$alias[$name]['file'])) ? self::$alias[$name]['file'] : BASE_DIR.strtolower(str_replace('\\', '/', self::$alias[$name]['class'])).EXT;
-				if(self::$app !== false && preg_match('/^'.preg_quote(BASE_DIR, '/').'tfd\//', $file)){
-					$file = preg_replace('/^('.preg_quote(BASE_DIR, '/').')tfd\//', '${1}'.self::$app.'/', $file);
-				}elseif(self::$content !== false && preg_match('/^'.preg_quote(BASE_DIR, '/').'content\//', $file)){
-					$file = preg_replace('/^('.preg_quote(BASE_DIR, '/').')content\//', '${1}'.self::$content.'/', $file);
-				}
-				if(file_exists($file)){
+			if (array_key_exists($name, static::$alias)) {
+				$alias = static::$alias[$name];
+				$file = $alias['file'] ?: BASE_DIR.strtolower(str_replace('\\', '/', $alias['class'])).EXT;
+				if (file_exists($file)) {
 					include_once($file);
 					class_alias(self::$alias[$name]['class'], $name);
-				}else{
-					throw new \Exception("Could not load class {$name}. No file found at {$file}");
+				} else {
+					throw new LoaderException("Could not load class {$name}. No file found at {$file}");
 				}
-			}else{
-				throw new \Exception("Could not load class {$name}. No file found at {$file}");
+			} elseif (file_exists($file)) {
+				include_once($file);
+			} else {
+				throw new LoaderException("Could not load class {$name}. No file found at {$file}");
 			}
 		}
-		
-		public static function app_dir($dir){
-			self::$app = $dir;
-		}
-		
-		public static function content_dir($dir){
-			self::$content = $dir;
-		}
-		
-		public static function add_alias($name, $class, $file = null){
-			self::$alias[$name] = array(
-				'class' => $class,
-				'file' => $file
-			);
-		}
-		
-		public static function create_aliases($aliases){
-			if(!is_array($aliases)){
-				$type = gettype($aliases);
-				throw new \LogicException("Loader::create_aliases expects an array, {$type} sent");
-			}else{
-				foreach($aliases as $name => $class){
-					self::add_alias($name, $class);
+
+		/**
+		 * Add a class alias.
+		 *
+		 * @param string|array $name Name of alias or array of aliases
+		 * @param string $class Class to alias to
+		 * @param string $file Class file (if it does not match Namespace to file convention)
+		 */
+
+		public static function alias($name, $class = null, $file = null) {
+			if (is_array($name)) {
+				foreach ($name as $alias => $class) {
+					static::$alias[$alias] = array('class' => $class);
 				}
+			} else {
+				static::$alias[$name] = array('class' => $class, 'file' => $file);
 			}
 		}
 	

@@ -54,7 +54,7 @@ spl_autoload_register(array('TFD\Loader', 'load'));
 
 // create some class aliases
 use TFD\Loader;
-Loader::create_aliases(array(
+Loader::alias(array(
 	'CSS' => 'TFD\CSS',
 	'JavaScript' => 'TFD\JavaScript',
 	'Flash' => 'TFD\Flash',
@@ -79,10 +79,8 @@ Loader::create_aliases(array(
 	'RSS' => 'TFD\RSS',
 	'Event' => 'TFD\Event',
 ));
-Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
-Loader::add_alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);
-if(APP_DIR !== BASE_DIR.'tfd/') Loader::app_dir(str_replace(BASE_DIR, '', APP_DIR));
-if(CONTENT_DIR !== BASE_DIR.'content/') Loader::content_dir(str_replace(BASE_DIR, '', CONTENT_DIR));
+Loader::alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
+Loader::alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);
 
 // Load app.php
 include_once(CONTENT_DIR.'app'.EXT);

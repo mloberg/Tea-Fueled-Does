@@ -11,7 +11,7 @@
 		 */
 
 		public function __construct($request) {
-			session_start();
+			// session_start();
 			Hooks::spinup();
 			Request::make($request);
 			Flash::bootstrap();

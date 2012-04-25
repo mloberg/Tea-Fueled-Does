@@ -31,6 +31,11 @@ Route::get('/admin', 'auth', function() {
 	// route with filter
 });
 
+Route::get('/test', function() {
+	Flash::message("foobar");
+	return array('view' => 'index');
+});
+
 Route::get('/foo', function() {
 	die('foobar!');
 });

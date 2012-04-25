@@ -10,7 +10,7 @@
 	define('START_MEM', memory_get_usage());
 	
 	error_reporting(E_ERROR | E_WARNING | E_PARSE);
-	
+
 	// grab the environment from the .htaccess file
 	$environment = $_SERVER['ENV'];
 	
@@ -28,9 +28,11 @@
 	Config::load(strtolower($environment));
 	
 	// make a new instance of our app class
-	$app = new TFD\App($_GET['tfd_request']);
+	$app = new App($_GET['tfd_request']);
 	
 	// and finally echo the site output
 	echo $app->site();
+
+	echo $app->test();
 
 	echo "\n<br />".round(microtime(true) - START_TIME, 4);

@@ -12,6 +12,12 @@ Event::listen('404', function() {
 	return (string)TFD\Response::error('404');
 });
 
+use TFD\Loader;
+
+Loader::alias(array(
+	'App' => 'Content\Classes\App'
+));
+
 use TFD\Config;
 
 Config::group(array(

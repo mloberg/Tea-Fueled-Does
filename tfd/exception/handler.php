@@ -1,7 +1,7 @@
 <?php namespace TFD\Exception;
 
-	use TFD\Core\Response;
-	use TFD\Core\Render;
+	use TFD\Response;
+	use TFD\Render;
 	use TFD\Config;
 	
 	class Handler{
