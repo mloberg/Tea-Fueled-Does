@@ -23,6 +23,8 @@ use TFD\Config;
 Config::group(array(
 	'site.maintenance' => false,
 	'site.title' => 'Tea-Fueled Does',
+
+	'render.master' => 'master', // default master
 	
 	'admin.login' => '/login',
 	'admin.logout' => '/logout',
@@ -55,6 +57,7 @@ Config::group(array(
 Config::group('development', array(
 	'site.url' => 'http://localhost', // without trailing slash
 	
+	'application.debug' => true,
 	'error.log' => false,
 	'error.detailed' => true,
 	
@@ -84,6 +87,7 @@ Config::group('development', array(
 Config::group('testing', array(
 	'site.url' => '', // without trailing slash
 	
+	'application.debug' => true,
 	'error.log' => BASE_DIR.'error.log',
 	'error.detailed' => true,
 	
@@ -113,6 +117,7 @@ Config::group('testing', array(
 Config::group('production', array(
 	'site.url' => '', // without trailing slash
 	
+	'application.debug' => false,
 	'error.log' => BASE_DIR.'error.log',
 	'error.detailed' => false,
 	

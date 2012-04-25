@@ -40,10 +40,7 @@ TFD\Config::load(array(
 	'application.maintenance_page' => MASTERS_DIR.'maintenance'.EXT,
 	'render.default_master' => MASTERS_DIR.'master'.EXT,
 	
-	'views.admin' => 'admin',
-	'views.login' => 'login',
 	'views.public' => 'public',
-	'views.protected' => 'protected',
 	'views.partials' => 'partials',
 	'views.error' => 'error'
 ));
@@ -63,7 +60,6 @@ Loader::alias(array(
 	// 'Postmark' => 'TFD\Postmark',
 	// 'Image' => 'TFD\Image',
 	// 'Validate' => 'TFD\Validate',
-	// 'Template' => 'TFD\Template',
 	// 'Benchmark' => 'TFD\Benchmark',
 	'Render' => 'TFD\Render',
 	// 'Redis' => 'TFD\Redis',

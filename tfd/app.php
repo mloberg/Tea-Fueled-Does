@@ -36,7 +36,7 @@
 			if (!isset($route['master'])) $route['master'] = 'master';
 			
 			$render = Render::page($route);
-			return (string)Response::make($render->render(), $render->status());
+			return (string)Response::make($render->render(), $render->status);
 		}
 	
 	}

@@ -11,28 +11,6 @@ Route::filter('before', function() {
 	}
 });
 
-Route::filter('auth', function() {
-	// 
-});
-
-Route::get('/login', function() {
-	// 
-});
-
-Route::post('/login', function() {
-	// 
-});
-
-Route::get('/logout', function() {
-	// 
-});
-
-Route::auto('/admin', 'admin', 'auth');
-
-Route::get('/admin', function() {
-	redirect('/admin/');
-});
-
 Route::get('/test', function() {
 	die(Test::foobar());
 });
