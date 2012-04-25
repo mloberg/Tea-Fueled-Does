@@ -28,7 +28,9 @@
 	Config::load(strtolower($environment));
 	
 	// make a new instance of our app class
-	$app = new TFD\App();
+	$app = new TFD\App($_GET['tfd_request']);
 	
 	// and finally echo the site output
 	echo $app->site();
+
+	echo "\n<br />".round(microtime(true) - START_TIME, 4);

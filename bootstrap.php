@@ -8,14 +8,18 @@
 define('EXT', '.php');
 
 // main directories
+if (($app_dir = realpath($public_dir.'/'.$app_dir)) === false)
+	throw new Exception('Application directory does not exist');
+if (($content_dir = realpath($public_dir.'/'.$content_dir)) === false)
+	throw new Exception('Content direcotry does not exist');
+
 define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', __DIR__.'/');
-define('APP_DIR', realpath($app_dir).'/');
-define('CONTENT_DIR', realpath($content_dir).'/');
+define('APP_DIR', $app_dir.'/');
+define('CONTENT_DIR', $content_dir.'/');
 unset($public_dir, $app_dir, $content_dir);
 
 // app directories
-define('FUNCTIONS_DIR', APP_DIR.'functions/');
 define('LIBRARY_DIR', APP_DIR.'library/');
 define('TEA_DIR', APP_DIR.'tea/');
 
@@ -26,8 +30,7 @@ define('PARTIALS_DIR', CONTENT_DIR.'partials/');
 define('TEMPLATES_DIR', CONTENT_DIR.'templates/');
 define('VIEWS_DIR', CONTENT_DIR.'views/');
 
-// our helper
-include_once(FUNCTIONS_DIR.'helpful'.EXT);
+include_once(APP_DIR.'functions'.EXT);
 
 // Config class
 include_once(APP_DIR.'config'.EXT);
@@ -74,7 +77,7 @@ Loader::create_aliases(array(
 	'File' => 'TFD\File',
 	'Model' => 'TFD\Model',
 	'RSS' => 'TFD\RSS',
-	'Event' => 'TFD\Core\Event',
+	'Event' => 'TFD\Event',
 ));
 Loader::add_alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
 Loader::add_alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);
@@ -86,10 +89,17 @@ include_once(CONTENT_DIR.'app'.EXT);
 
 // Error Handlers
 set_exception_handler(function($e){
-	\TFD\Core\Event::fire('exception', $e);
+	\TFD\Event::fire('exception', $e);
 });
 
 set_error_handler(function($number, $error, $file, $line){
 	if(error_reporting() === 0) return; // ignore @
-	\TFD\Core\Event::fire('error', $number, $error, $file, $line);
+	\TFD\Event::fire('error', $number, $error, $file, $line);
 }, E_ALL ^ E_NOTICE);
+
+// load routes
+
+foreach (new DirectoryIterator(CONTENT_DIR.'routes/') as $route) {
+	if ($route->isFile())
+		include_once($route->getPathName());
+}

@@ -1,4 +1,4 @@
-<?php namespace TFD\Core;
+<?php namespace TFD;
 
 	use TFD\Config;
 	

@@ -24,10 +24,6 @@ Config::group(array(
 	
 	'crypter.rounds' => 10, // default rounds for the crypter class
 	
-	'ajax.path' => '/ajax',
-	'ajax.parameter' => 'method',
-	'ajax.debug' => false,
-	
 	'cache.key' => '',
 
 	// ReCAPTCHA - http://www.google.com/recaptcha

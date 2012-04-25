@@ -1,4 +1,4 @@
-<?php namespace TFD\Core;
+<?php namespace TFD;
 
 	class Event {
 
@@ -23,7 +23,6 @@
 		 */
 
 		public static function fire() {
-			// get args
 			$args = func_get_args();
 			$event = array_shift($args);
 			if (array_key_exists($event, static::$events)) {

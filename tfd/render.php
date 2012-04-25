@@ -1,10 +1,6 @@
-<?php namespace TFD\Core;
+<?php namespace TFD;
 
-	use TFD\Admin;
-	use TFD\App;
 	use Content\Hooks;
-	use TFD\Template;
-	use TFD\Config;
 	
 	class Render{
 	

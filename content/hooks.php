@@ -15,10 +15,6 @@
 			
 		}
 		
-		static function www(){
-			
-		}
-		
 		static function pre_render(){
 			CSS::load('reset');
 		}
