@@ -20,13 +20,14 @@
 		 *
 		 * @param string $event Event name
 		 * @param mixed Callbakc variables
+		 * @return mixed Callback return
 		 */
 
 		public static function fire() {
 			$args = func_get_args();
 			$event = array_shift($args);
 			if (array_key_exists($event, static::$events)) {
-				call_user_func_array(static::$events[$event], $args);
+				return call_user_func_array(static::$events[$event], $args);
 			}
 		}
 

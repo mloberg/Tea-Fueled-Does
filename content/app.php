@@ -8,6 +8,10 @@ Event::listen('error', function($number, $error, $file, $line) {
 	\TFD\Exception\Handler::make(new \ErrorException($error, $number, 0, $file, $line))->handle();
 });
 
+Event::listen('404', function() {
+	return (string)TFD\Response::error('404');
+});
+
 use TFD\Config;
 
 Config::group(array(

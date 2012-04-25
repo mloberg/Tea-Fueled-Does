@@ -88,7 +88,7 @@
 		private function __render_page(){
 			Hooks::render();
 			if(self::$status != 200 && empty(self::$content)){ // if the status is not 200 and content is empty, send error page
-				return Render::error(self::$status)->render();
+				return Event::fire(self::$status);
 			}else{
 				if(!isset(self::$options['master'])){
 					$master = Config::get('render.default_master');

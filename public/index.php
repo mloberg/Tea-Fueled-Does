@@ -4,12 +4,12 @@
 	 * Tea-Fueled Does is a php framework developed by Matthew Loberg (http://mloberg.com).
 	 * Tea-Fueled Does is designed to be fast, in both development and performance.
 	 */
-	
-	error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 	// start the timer!
 	define('START_TIME', microtime(true));
 	define('START_MEM', memory_get_usage());
+	
+	error_reporting(E_ERROR | E_WARNING | E_PARSE);
 	
 	// grab the environment from the .htaccess file
 	$environment = $_SERVER['ENV'];
