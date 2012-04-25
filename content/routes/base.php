@@ -27,8 +27,10 @@ Route::get('/logout', function() {
 	// 
 });
 
-Route::get('/admin', 'auth', function() {
-	// route with filter
+Route::auto('/admin', 'admin', 'auth');
+
+Route::get('/admin', function() {
+	redirect('/admin/');
 });
 
 Route::get('/test', function() {

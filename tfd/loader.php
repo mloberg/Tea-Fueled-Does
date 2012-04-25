@@ -25,7 +25,7 @@
 				}
 			} elseif (file_exists($file)) {
 				include_once($file);
-			} elseif(file_exists(LIBRARY_DIR.$name.EXT)) {
+			} elseif (file_exists(LIBRARY_DIR.$name.EXT)) {
 				include_once(LIBRARY_DIR.$name.EXT);
 			} else {
 				throw new LoaderException("Could not load class {$name}. No file found at {$file}");

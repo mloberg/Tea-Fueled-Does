@@ -6,7 +6,8 @@
 			'get' => array(),
 			'post' => array(),
 			'put' => array(),
-			'delete' => array()
+			'delete' => array(),
+			'auto' => array()
 		);
 		private static $filters = array();
 
@@ -24,10 +25,23 @@
 			if (!empty($args)) {
 				$filter = $callback;
 				$callback = array_shift($args);
-				if (is_string($filter))
-					$filter = static::$filters[$filter];
+				if (is_string($filter)) $filter = static::$filters[$filter];
 			}
 			static::$routes[$name][] = array('route' => $route, 'match' => static::escape($route), 'filter' => $filter ?: null, 'callback' => $callback);
+		}
+
+		/**
+		 * Auto-route a folder
+		 * 
+		 * @param string $route Route to match
+		 * @param string $folder Folder within content/views
+		 * @param string|function $filter Filter to apply
+		 * @param array $options Render options
+		 */
+
+		public static function auto($route, $folder, $filter = null, $options = array()) {
+			if (is_string($filter)) $filter = static::$filters[$filter];
+			 static::$routes['auto'][] = array('route' => $route, 'match' => static::escape($route), 'folder' => $folder, 'filter' => $filter, 'options' => $options);
 		}
 
 		/**
@@ -42,7 +56,7 @@
 		}
 
 		/**
-		 * 
+		 * Get the route result for a request.
 		 * 
 		 * @param string $request Reqest
 		 * @param string $method Request method
@@ -58,6 +72,15 @@
 				if (preg_match('/^'.$route['match'].'$/', $request, $matches)) {
 					if ($route['filter']) $route['filter']();
 					return $route['callback']($matches);
+				}
+			}
+			foreach (static::$routes['auto'] as $route) {
+				if (preg_match('/^'.$route['match'].'(.+)/', $request, $matches)) {
+					if ($route['filter']) $route['filter']();
+					return $route['options'] + array(
+						'view' => $matches[1],
+						'dir' => $route['folder']
+					);
 				}
 			}
 			return false;

@@ -66,9 +66,7 @@
 		
 		private function __render_view($options){
 			if(isset($options['dir'])){
-				if(($options['dir'] === Config::get('views.admin') && Admin::loggedin()) || $options['dir'] !== Config::get('views.admin')){
-					$view = VIEWS_DIR.$options['dir'].'/'.$options['view'].EXT;
-				}
+				$view = VIEWS_DIR.$options['dir'].'/'.$options['view'].EXT;
 			}else{
 				$view = VIEWS_DIR.Config::get('views.public').'/'.$options['view'].EXT;
 			}
