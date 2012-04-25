@@ -20,7 +20,7 @@ define('CONTENT_DIR', $content_dir.'/');
 unset($public_dir, $app_dir, $content_dir);
 
 // app directories
-define('LIBRARY_DIR', APP_DIR.'library/');
+define('LIBRARY_DIR', CONTENT_DIR.'library/');
 define('TEA_DIR', APP_DIR.'tea/');
 
 // public directories
@@ -50,7 +50,7 @@ TFD\Config::load(array(
 
 // Autoloader
 include_once(APP_DIR.'loader'.EXT);
-spl_autoload_register(array('TFD\Loader', 'load'));
+spl_autoload_register(array('TFD\Loader', 'autoload'));
 
 // create some class aliases
 use TFD\Loader;
@@ -59,24 +59,23 @@ Loader::alias(array(
 	'JavaScript' => 'TFD\JavaScript',
 	'Flash' => 'TFD\Flash',
 	'MySQL' => 'TFD\DB\MySQL',
-	'ReCAPTCHA' => 'TFD\ReCAPTCHA',
-	'Postmark' => 'TFD\Postmark',
-	'Image' => 'TFD\Image',
-	'Validate' => 'TFD\Validate',
-	'Template' => 'TFD\Template',
-	'Benchmark' => 'TFD\Benchmark',
+	// 'ReCAPTCHA' => 'TFD\ReCAPTCHA',
+	// 'Postmark' => 'TFD\Postmark',
+	// 'Image' => 'TFD\Image',
+	// 'Validate' => 'TFD\Validate',
+	// 'Template' => 'TFD\Template',
+	// 'Benchmark' => 'TFD\Benchmark',
 	'Render' => 'TFD\Render',
-	'Redis' => 'TFD\Redis',
+	// 'Redis' => 'TFD\Redis',
 	'Config' => 'TFD\Config',
-	'HTML' => 'TFD\HTML',
-	'Form' => 'TFD\Form',
-	'S3' => 'TFD\S3',
+	// 'HTML' => 'TFD\HTML',
+	// 'Form' => 'TFD\Form',
+	// 'S3' => 'TFD\S3',
 	'Cache' => 'TFD\Cache',
-	'Paginator' => 'TFD\Paginator',
+	// 'Paginator' => 'TFD\Paginator',
 	'Request' => 'TFD\Request',
-	'File' => 'TFD\File',
+	// 'File' => 'TFD\File',
 	'Model' => 'TFD\Model',
-	'RSS' => 'TFD\RSS',
 	'Event' => 'TFD\Event',
 ));
 Loader::alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);

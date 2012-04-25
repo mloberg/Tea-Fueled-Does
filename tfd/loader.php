@@ -7,12 +7,12 @@
 		private static $alias = array();
 		
 		/**
-		 * Load a class.
+		 * Autoloader
 		 * 
 		 * @param string $name Class name
 		 */
 
-		public static function load($name) {
+		public static function autoload($name) {
 			$file = BASE_DIR.strtolower(str_replace('\\', '/', $name)).EXT;
 			if (array_key_exists($name, static::$alias)) {
 				$alias = static::$alias[$name];
@@ -25,6 +25,8 @@
 				}
 			} elseif (file_exists($file)) {
 				include_once($file);
+			} elseif(file_exists(LIBRARY_DIR.$name.EXT)) {
+				include_once(LIBRARY_DIR.$name.EXT);
 			} else {
 				throw new LoaderException("Could not load class {$name}. No file found at {$file}");
 			}

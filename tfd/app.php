@@ -11,7 +11,7 @@
 		 */
 
 		public function __construct($request) {
-			// session_start();
+			session_start();
 			Hooks::spinup();
 			Request::make($request);
 			Flash::bootstrap();
@@ -21,6 +21,12 @@
 			Hooks::spindown();
 		}
 		
+		/**
+		 * The main method.
+		 *
+		 * @return string Site Page
+		 */
+
 		public function site() {
 			$route = Route::run(Request::get(), Request::method());
 			

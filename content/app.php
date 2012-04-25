@@ -15,7 +15,7 @@ Event::listen('404', function() {
 use TFD\Loader;
 
 Loader::alias(array(
-	'App' => 'Content\Classes\App'
+	'App' => 'Content\Library\App'
 ));
 
 use TFD\Config;

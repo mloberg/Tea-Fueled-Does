@@ -1,4 +1,4 @@
-<?php namespace Content\Classes;
+<?php namespace Content\Library;
 
 	class App extends \TFD\App {
 

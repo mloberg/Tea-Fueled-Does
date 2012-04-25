@@ -32,8 +32,7 @@ Route::get('/admin', 'auth', function() {
 });
 
 Route::get('/test', function() {
-	Flash::message("foobar");
-	return array('view' => 'index');
+	die(Test::foobar());
 });
 
 Route::get('/foo', function() {
