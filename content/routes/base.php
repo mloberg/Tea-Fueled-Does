@@ -11,6 +11,12 @@ Route::filter('before', function() {
 	}
 });
 
+use TFD\DB;
+
+Route::get('/db', function() {
+	die(print_p(DB::table('posts')->get()));
+});
+
 Route::get('/test', function() {
 	die(Test::foobar());
 });

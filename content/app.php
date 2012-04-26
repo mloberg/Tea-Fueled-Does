@@ -24,6 +24,8 @@ Config::group(array(
 	'site.maintenance' => false,
 	'site.title' => 'Tea-Fueled Does',
 
+	'db.class' => 'MySQL',
+
 	'render.master' => 'master', // default master
 	
 	'admin.login' => '/login',
