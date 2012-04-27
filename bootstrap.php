@@ -1,7 +1,8 @@
 <?php
 
 /**
- * This file gets everything going. Unless you know what your doing, I wouldn't touch this file.
+ * This file gets everything going.
+ * Unless you know what your doing, I wouldn't touch this file.
  */
 
 // our file extension

@@ -28,13 +28,9 @@ Config::group(array(
 
 	'render.master' => 'master', // default master
 	
-	'admin.login' => '/login',
-	'admin.logout' => '/logout',
-	'admin.path' => '/admin',
-	'admin.table' => 'users',
-	'admin.auth_key' => '4f0712cd96a93',
+	'auth.table' => 'users',
+	'auth.key' => '4f0712cd96a93',
 	'admin.login_time' => 3600,
-	'admin.cost' => 12, // rounds for hashing passwords
 	
 	'crypter.rounds' => 10, // default rounds for the crypter class
 	

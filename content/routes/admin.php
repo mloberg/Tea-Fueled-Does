@@ -24,6 +24,5 @@ Route::get('/logout', function() {
 Route::auto('/admin', 'admin', 'auth');
 
 Route::get('/admin', function() {
-	return Render::template('foo.statche');
 	redirect('/admin/');
 });
