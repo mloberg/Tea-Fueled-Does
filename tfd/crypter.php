@@ -1,29 +1,46 @@
 <?php namespace TFD;
 
-	class Crypter{
-	
-		private static $random;
-		
-		private static function get_salt($rounds = null){
-			if(is_null($rounds)) $rounds = Config::get('crypter.rounds');
+	class CrypterException extends \Exception { }
+
+	class Crypter {
+
+		/**
+		 * Generate a random salt.
+		 *
+		 * @param integer $cost Blowfish cost parameter
+		 * @return string Blowfish salt
+		 */
+
+		public static function generate_salt($cost = null) {
+			if (is_null($rounds)) $rounds = Config::get('crypter.cost');
+			if ($rounds < 4 || $rounds > 31) throw new CrypterException('Cost must be between 4 and 31');
 			$salt = '$2a$' . str_pad($rounds, 2, '0', STR_PAD_LEFT) . '$';
-			$salt .= substr(strtr(base64_encode(openssl_random_pseudo_bytes(16)), '+', '.'), 0, 22);
+			$salt .= substr(str_replace('+', '.', base64_encode(openssl_random_pseudo_bytes(16))), 0, 22);
 			return $salt;
 		}
+
+		/**
+		 * Hash a string value using the Blowfish algorithm.
+		 *
+		 * @param string $input String to hash
+		 * @param integer $cost Blowfish cost parameter
+		 * @return string Hashed value
+		 */
 		
-		public static function hash($input, $rounds = null){
-			return crypt($input, self::get_salt($rounds));
+		public static function hash($input, $cost = null) {
+			return crypt($input, static::generate_salt($cost));
 		}
 		
-		public static function hash_with_salt($input, $salt, $rounds = null){
-			if(is_null($rounds)) $rounds = Config::get('crypter.rounds');
-			$salt = '$2a$' . str_pad($rounds, 2, '0', STR_PAD_LEFT) . '$'.$salt.'$';
-			return crypt($input, $salt);
-		}
-		
-		public static function verify($input, $existing){
-			$hash = crypt($input, $existing);
-			return $hash === $existing;
+		/**
+		 * Verify a hashed value.
+		 *
+		 * @param string $input String value
+		 * @param string $hash Hashed value
+		 * @return boolean True if input matches hash
+		 */
+
+		public static function verify($input, $hash) {
+			return crypt($input, $hash) === $hash;
 		}
 	
 	}

@@ -32,7 +32,7 @@ Config::group(array(
 	'auth.key' => '4f0712cd96a93',
 	'admin.login_time' => 3600,
 	
-	'crypter.rounds' => 10, // default rounds for the crypter class
+	'crypter.cost' => 10, // default cost for the crypter class
 	
 	'cache.key' => '',
 

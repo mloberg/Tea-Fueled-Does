@@ -1,12 +1,11 @@
 # Tea-Fueled Does
 
-Tea-Fueled Does (TFD) is a PHP 5.3 framework that aims to be awesome.
+Tea-Fueled Does is a loosely-based MVC PHP 5.3 framework that is awesome. It aims to be easy to use and understand and tries not to get in your way. It was born out of the disapointment of other PHP frameworks at the time of development.
 
 ## Requirements
 
 * PHP 5.3 or greater
-* Apache with mod_rewrite
-* MySQL (for admin class)
+* Apache with mod_rewrite (for now)
 
 ## Authors
 
