@@ -25,15 +25,9 @@ Config::group(array(
 	'site.title' => 'Tea-Fueled Does',
 
 	'db.class' => 'MySQL',
-
 	'render.master' => 'master', // default master
-	
-	'auth.table' => 'users',
 	'auth.key' => '4f0712cd96a93',
-	'admin.login_time' => 3600,
-	
 	'crypter.cost' => 10, // default cost for the crypter class
-	
 	'cache.key' => '',
 
 	// ReCAPTCHA - http://www.google.com/recaptcha

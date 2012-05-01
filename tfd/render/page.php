@@ -28,6 +28,10 @@
 			Hooks::post_render();
 		}
 
+		public function __toString() {
+			return $this->render();
+		}
+
 		/**
 		 * Return the HTTP status of the page.
 		 *
