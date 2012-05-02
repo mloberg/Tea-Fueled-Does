@@ -8,10 +8,8 @@
 		 * @param string $request Request string
 		 */
 
-		public function __construct($request) {
-			session_start();
+		public function __construct() {
 			Event::fire('spinup');
-			Request::make($request);
 			Flash::bootstrap();
 		}
 		

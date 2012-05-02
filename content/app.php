@@ -1,5 +1,20 @@
 <?php
 
+/*
+| app.php's purpose is to hold the configuration for the
+| application along with some other core application code.
+*/
+
+/*
+| Set PHP's error reporting level.
+*/
+
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
+/*
+| Set up our event listeners
+*/
+
 Event::listen('exception', function($e) {
 	\TFD\Exception\Handler::make($e)->handle();
 });
@@ -36,11 +51,20 @@ Event::listen('spindown', function() {
 	// 
 });
 
+/*
+| If you are extending core classes, you
+| need to add an alias to use them.
+*/
+
 use TFD\Loader;
 
 Loader::alias(array(
 	'App' => 'Content\Library\App'
 ));
+
+/*
+| Set application and environment config items.
+*/
 
 use TFD\Config;
 
@@ -159,3 +183,21 @@ Config::group('production', array(
 		)
 	)
 ));
+
+/*
+| Set the environment and load environment config.
+*/
+
+$environments = array(
+	'development' => array('localhost', '*.dev'),
+	'testing' => array('test.livedomain.com'),
+	'production' => array('livedomain.com'),
+);
+
+Config::load(Request::detect_env($environments, $_SERVER['HTTP_HOST']));
+
+/*
+| Set the request string.
+*/
+
+Request::make($_GET['tfd_request']);
