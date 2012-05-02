@@ -1,7 +1,5 @@
 <?php namespace TFD;
 	
-	use Content\Hooks;
-		
 	class App {
 	
 		private static $request;
@@ -12,13 +10,13 @@
 
 		public function __construct($request) {
 			session_start();
-			Hooks::spinup();
+			Event::fire('spinup');
 			Request::make($request);
 			Flash::bootstrap();
 		}
 		
 		public function __destruct() {
-			Hooks::spindown();
+			Event::fire('spindown');
 		}
 		
 		/**

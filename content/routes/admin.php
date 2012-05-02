@@ -27,6 +27,7 @@ Route::filter('auth', function() {
 	}
 });
 
+// add a user
 // Route::get('/admin/adduser', function() {
 // 	var_dump(DB::table('users')->insert(array(
 // 		'username' => $_GET['username'],

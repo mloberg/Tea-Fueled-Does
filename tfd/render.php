@@ -1,6 +1,5 @@
 <?php namespace TFD;
 
-	use Content\Hooks;
 	use TFD\Render\View;
 	use TFD\Render\Page;
 	use TFD\Render\Error;
@@ -78,7 +77,7 @@
 		 */
 
 		public static function partial($file, $options = array()) {
-			Hooks::partial();
+			Event::fire('partial');
 			$options['dir'] = Config::get('views.partials');
 			$options['view'] = $file;
 			return new View($options);

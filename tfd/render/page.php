@@ -1,6 +1,5 @@
 <?php namespace TFD\Render;
 
-	use Content\Hooks;
 	use TFD\Config;
 	use TFD\Event;
 	use TFD\Render;
@@ -18,14 +17,14 @@
 		 */
 
 		public function __construct($options) {
-			Hooks::pre_render();
+			Event::fire('pre_render');
 			$options = $options + array('title' => Config::get('site.title'), 'master' => Config::get('render.master'), 'status' => 200);
 			$this->options = $options;
 			return $this;
 		}
 		
 		public function __destruct(){
-			Hooks::post_render();
+			Event::fire('post_render');
 		}
 
 		public function __toString() {
@@ -49,7 +48,7 @@
 		 */
 		
 		public function render(){
-			Hooks::render();
+			Event::fire('render');
 			$status = $this->options['status'];
 			if ($status !== 200) {
 				return Event::fire($this->options['status']);

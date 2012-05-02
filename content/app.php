@@ -12,6 +12,30 @@ Event::listen('404', function() {
 	return (string)TFD\Response::error('404');
 });
 
+Event::listen('spinup', function() {
+	// 
+});
+
+Event::listen('pre_render', function() {
+	CSS::load('reset');
+});
+
+Event::listen('render', function() {
+	// 
+});
+
+Event::listen('post_render', function() {
+	// 
+});
+
+Event::listen('partial', function() {
+	// 
+});
+
+Event::listen('spindown', function() {
+	// 
+});
+
 use TFD\Loader;
 
 Loader::alias(array(
