@@ -1,67 +1,100 @@
 <?php
 
 	/**
-	 * Redirect to another internal or external website
+	 * Redirect to another internal or external website.
+	 *
+	 * @param string $location Url to redirect to
 	 */
 	
-	function redirect($location){
+	function redirect($location) {
 		// check if external link
-		if(preg_match('/^https?:\/\//',$location)){
+		if (preg_match('/^https?:\/\//',$location)) {
 			header('Location: ' . $location);
 			exit();
-		}else{
-			if(!preg_match('/^\//', $location)) $location = '/' . $location;
+		} else {
+			if (!preg_match('/^\//', $location)) $location = '/' . $location;
 			header('Location: '.Config::get('site.url').$location);
 			exit();
 		}
 	}
 	
 	/**
-	 * Get a POST request variable
+	 * Get a POST request variable.
+	 * 
+	 * @param string $name POST variable name
 	 */
 	
-	function post($name){
+	function post($name) {
 		return $_POST[$name];
 	}
 	
 	/**
-	 * Get a GET request variable
+	 * Get a GET request variable.
+	 *
+	 * @param string $name GET variable name
 	 */
 	
-	function get($name){
+	function get($name) {
 		return $_GET[$name];
 	}
 	
 	/**
-	 * Print pretty (print_r wrapped with <pre> tags
+	 * Print pretty (print_r wrapped with <pre> tags.
+	 *
+	 * @param mixed $print Variable to print
 	 */
 	
-	function print_p($print){
+	function print_p($print) {
 		echo '<pre>';
 		print_r($print);
 		echo '</pre>';
 	}
+
+	/**
+	 * Dump variables and exit.
+	 */
+
+	function drop() {
+		$args = func_get_args();
+		$return = array();
+		ob_start();
+		for ($i = 0; $i < count($args); $i++) { 
+			$return[] = ">>> Arg No. {$i} <<<";
+			var_dump($args[$i]);
+			$return[] = ob_get_contents();
+			ob_clean();
+		}
+		ob_end_clean();
+		die('<pre>'.implode(PHP_EOL, $return).'</pre>');
+	}
 	
 	/**
-	 * Evaluate a math function stored as a string
+	 * Evaluate a math function stored as a string.
+	 * 
+	 * @param string $equation Math equation to solve
+	 * @return integer Solved equation
 	 */
 	
-	function matheval($equation){
+	function matheval($equation) {
 		$equation = preg_replace('/[^0-9+\-.*\/()%]/', '', $equation);
 		$equation = preg_replace('/([+-])([0-9]{1})(%)/', '*(1\$1.0\$2)', $equation);
 		$equation = preg_replace('/([+-])([0-9]+)(%)/', '*(1\$1.\$2)', $equation);
 		$equation = preg_replace('/([0-9]+)(%)/', '.\$1', $equation);
-		if(empty($equation)) return 0;
+		if (empty($equation)) return 0;
 		eval("\$return=" . $equation . ";" );
 		return $return;
 	}
 	
 	/**
-	 * Parse a User Agent string into it's different parts
+	 * Parse a User Agent string into it's different parts.
+	 *
 	 * Original script by Jesse Donat <donatj@gmail.com> (https://github.com/donatj/)
+	 *
+	 * @param string $u_agent User Agent to parse
+	 * @return array Array of User Agent information
 	 */
 	
-	function parse_user_agent($u_agent = null){ 
+	function parse_user_agent($u_agent = null) {
 		if(is_null($u_agent)) $u_agent = $_SERVER['HTTP_USER_AGENT'];
 
 		$data = array();
@@ -83,8 +116,6 @@
 
 		# (?<browser>Camino|Kindle|Firefox|Safari|MSIE|AppleWebKit|Chrome|IEMobile|Opera|Silk|Lynx|Version)(?:[/ ])(?<version>[0-9.]+)
 		preg_match_all('%(?P<browser>Camino|Kindle|Firefox|Safari|MSIE|AppleWebKit|Chrome|IEMobile|Opera|Silk|Lynx|Version)(?:[/ ])(?P<version>[0-9.]+)%im', $u_agent, $result, PREG_PATTERN_ORDER);
-
-		//print_r( $result );
 
 		if( ($key = array_search( 'Kindle', $result['browser'] )) !== false || ($key = array_search( 'Silk', $result['browser'] )) !== false ) {
 			$data['browser']  = $result['browser'][$key];
@@ -129,12 +160,15 @@
 	}
 	
 	/**
-	 * Check for a multidimensional array
+	 * Check for a multidimensional array.
+	 * 
+	 * @param array $array Array to check
+	 * @return boolean True if multidimensional array
 	 */
 	
-	function is_multi($array){
-		if(!is_array($array)) throw new LogicException('is_multi expects an array.');
+	function is_multi($array) {
+		if (!is_array($array)) throw new LogicException('is_multi expects an array.');
 		$rv = array_filter($array, 'is_array');
-		if(count($rv) > 0) return true;
+		if (count($rv) > 0) return true;
 		return false;
 	}
