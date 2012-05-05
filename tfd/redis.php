@@ -66,9 +66,19 @@
 		 */
 
 		public function __call($method, $args) {
+			$check_for_callback = end($args);
+			if (is_callable($check_for_callback) || method_exists(__CLASS__, $check_for_callback)) {
+				$callback = array_pop($args);
+			}
 			$command = $this->build($method, $args);
 			fwrite($this->connection, $command);
-			return $this->read_reply();
+			$reply = $this->read_reply();
+			if (is_string($callback)) {
+				return call_user_func(array($this, $callback), $reply);
+			} elseif ($callback) {
+				return $callback($reply);
+			}
+			return $reply;
 		}
 
 		/**
@@ -149,6 +159,26 @@
 			}
 			fread($this->connection, 2);
 			return $data;
+		}
+
+		/**
+		 * Convert a Redis reply into an associative array.
+		 * 
+		 * @param array $reply Array to turn into associative array
+		 * @return array Associative array
+		 */
+
+		public static function to_assoc($reply) {
+			$keys = array();
+			$values = array();
+			foreach ($reply as $key => $value) {
+				if ($key & 1) {
+					$values[] = $value;
+				} else {
+					$keys[] = $value;
+				}
+			}
+			return array_combine($keys, $values);
 		}
 
 	}
