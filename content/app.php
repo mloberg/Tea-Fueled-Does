@@ -107,9 +107,9 @@ Config::group('development', array(
 	'mysql.pass' => 'root',
 	'mysql.db' => 'tfd',
 	
-	'redis.host' => '',
+	'redis.host' => '127.0.0.1',
 	'redis.port' => 6379,
-	'redis.pass' => '', // blank for none
+	'redis.auth' => '', // blank for none
 	
 	'cache.driver' => 'file',
 	'cache.dir' => BASE_DIR.'cache/',
@@ -139,7 +139,7 @@ Config::group('testing', array(
 	
 	'redis.host' => '',
 	'redis.port' => 6379,
-	'redis.pass' => '', // blank for none
+	'redis.auth' => '', // blank for none
 	
 	'cache.driver' => 'file',
 	'cache.dir' => BASE_DIR.'cache/',
@@ -169,7 +169,7 @@ Config::group('production', array(
 	
 	'redis.host' => '',
 	'redis.port' => 6379,
-	'redis.pass' => '', // blank for none
+	'redis.auth' => '', // blank for none
 	
 	'cache.driver' => 'file',
 	'cache.dir' => BASE_DIR.'cache/',
