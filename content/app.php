@@ -190,11 +190,26 @@ Config::group('production', array(
 
 $environments = array(
 	'development' => array('localhost', '*.dev'),
-	'testing' => array('test.livedomain.com'),
-	'production' => array('livedomain.com'),
+	'testing' => array('test.example.com'),
+	'production' => array('example.com'),
 );
 
-Config::load(Request::detect_env($environments, $_SERVER['HTTP_HOST']));
+$environment = Request::detect_env($environments, $_SERVER['HTTP_HOST']);
+
+Config::load($environment);
+
+/*
+| Drop any PHP specific code for environments here.
+*/
+
+switch ($environment) {
+	case 'production':
+		break;
+	case 'testing':
+		break;
+	default: // development
+		break;
+}
 
 /*
 | Set the request string.
