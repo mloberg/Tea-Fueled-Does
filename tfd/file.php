@@ -41,7 +41,7 @@
 		 * @param string $path File
 		 * @param integer $line Line to get
 		 * @param integer $padding Lines around to get
-		 * @return array Fiel lines
+		 * @return array File lines
 		 */
 		
 		public static function snapshot($path, $line, $padding = 5) {
@@ -51,6 +51,18 @@
 			if (($start = $line - $padding) < 0) $start = 0;
 			if (($length = ($line - $start) + $padding + 1) < 0) $length = 0;
 			return array_slice($file, $start, $length, true);
+		}
+
+		/**
+		 * Get a line of a file.
+		 * 
+		 * @param string $path File
+		 * @param integer $line Line to get
+		 * @return string Line
+		 */
+
+		public static function line($path, $line) {
+			return array_shift(static::snapshot($path, $line, 0));
 		}
 	
 	}
