@@ -35,6 +35,8 @@
 				case 'redis':
 					return new Session\Redis;
 					break;
+				case 'file':
+					return new Session\File;
 				default:
 					throw new \Exception("Unknown session handler '{$class}'");
 					break;

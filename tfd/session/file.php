@@ -1,14 +1,11 @@
 <?php namespace TFD\Session;
 
-	use TFD\Config;
-	use TFD\Redis as Store;
-
 	/**
-	 * 'session.handler' => 'redis'
-	 * 'session.save_path' => 'host:port:auth'
+	 * 'session.handler' => 'file'
+	 * 'session.save_path' => BASE_DIR.'storage/sessions/'
 	 */
 
-	class Redis implements Session {
+	class File implements Session {
 
 		private $save_path;
 
@@ -21,11 +18,7 @@
 		 */
 
 		public function open($save_path, $session_name) {
-			$save_path = explode(':', $save_path);
-			$host = $save_path[0] ?: Config::get('redis.host');
-			$port = ($save_path[1] ?: Config::get('redis.port')) ?: 6379;
-			$auth = $save_path[2] ?: Config::get('redis.auth');
-			$this->save_path = new Store($host, $port, $auth);
+			$this->save_path = $save_path;
 			return true;
 		}
 
@@ -47,7 +40,7 @@
 		 */
 
 		public function read($id) {
-			return $this->save_path->hget('session:data', $id);
+			return (string)@file_get_contents("{$this->save_path}sess_{$id}");
 		}
 
 		/**
@@ -59,8 +52,7 @@
 		 */
 
 		public function write($id, $data) {
-			$this->save_path->hset('session:life', $id, time());
-			return (boolean)$this->save_path->hset('session:data', $id, $data);
+			return file_put_contents("{$this->save_path}sess_{$id}", $data) === false ?: true;
 		}
 
 		/**
@@ -71,8 +63,8 @@
 		 */
 
 		public function destroy($id) {
-			$this->save_path->hdel('session:life', $id);
-			return $this->save_path->hdel('session:data', $id);
+			@unlink("{$this->save_path}sess_{$id}");
+			return true;
 		}
 
 		/**
@@ -85,9 +77,9 @@
 		 */
 
 		public function gc($maxlifetime) {
-			foreach ($this->save_path->hgetall('session:life', 'to_assoc') as $id => $lifetime) {
-				if ($lifetime + $maxlifetime < time()) {
-					$this->destroy($id);
+			foreach (glob("{$this->save_path}sess_*") as $file) {
+				if (filemtime($file) + $maxlifetime < time()) {
+					@unlink($file);
 				}
 			}
 			return true;
