@@ -26,6 +26,14 @@
 		}
 
 		/**
+		 * Cleanup Redis connection.
+		 */
+
+		public function __destruct() {
+			fclose($this->connection);
+		}
+
+		/**
 		 * Foward all static calls to an instance of this class.
 		 * 
 		 * @param string $method Method call
@@ -48,7 +56,6 @@
 		 */
 
 		private function connection($server, $port = 6379) {
-			$errno = $errstr = null;
 			if (!$this->connection) {
 				if (!$this->connection = fsockopen($server, $port, $errno, $errstr)) {
 					throw new \RedisException($errstr, $errno);

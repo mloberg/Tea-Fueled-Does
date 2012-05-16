@@ -6,11 +6,6 @@
 */
 
 /*
-| Start our PHP session.
-*/
-session_start();
-
-/*
 | Make sure our content and app directories actually exist.
 */
 
@@ -102,6 +97,13 @@ set_error_handler(function($number, $error, $file, $line){
 */
 
 include_once(CONTENT_DIR.'app'.EXT);
+
+/*
+| Set and start our Session handler.
+*/
+
+TFD\Session::register();
+session_start();
 
 /*
 | Load our routes.

@@ -100,6 +100,9 @@ Config::group('development', array(
 	'application.debug' => true,
 	'error.log' => false,
 	'error.detailed' => true,
+
+	'session.handler' => 'redis',
+	'session.save_path' => '127.0.0.1:6379',
 	
 	'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
 	'mysql.port' => 3306, // MySQL default is 3306
@@ -130,6 +133,9 @@ Config::group('testing', array(
 	'application.debug' => true,
 	'error.log' => BASE_DIR.'error.log',
 	'error.detailed' => true,
+
+	'session.handler' => '',
+	'session.save_path' => '',
 	
 	'mysql.host' => '',
 	'mysql.port' => 3306,
@@ -160,6 +166,9 @@ Config::group('production', array(
 	'application.debug' => false,
 	'error.log' => BASE_DIR.'error.log',
 	'error.detailed' => false,
+
+	'session.handler' => '',
+	'session.save_path' => '',
 	
 	'mysql.host' => '',
 	'mysql.port' => 3306,
@@ -194,22 +203,7 @@ $environments = array(
 	'production' => array('example.com'),
 );
 
-$environment = Request::detect_env($environments, $_SERVER['HTTP_HOST']);
-
-Config::load($environment);
-
-/*
-| Drop any PHP specific code for environments here.
-*/
-
-switch ($environment) {
-	case 'production':
-		break;
-	case 'testing':
-		break;
-	default: // development
-		break;
-}
+Config::load(Request::detect_env($environments, $_SERVER['HTTP_HOST']));
 
 /*
 | Set the request string.
