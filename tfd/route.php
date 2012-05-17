@@ -15,7 +15,7 @@
 		 * Catch-all to add routes.
 		 *
 		 * @param string $route Route
-		 * @param string|function $filters Route filter or callback
+		 * @param string|function|array $filters Route filter or callback
 		 * @param function $callback Route callback
 		 */
 
@@ -35,7 +35,7 @@
 		 * 
 		 * @param string $route Route to match
 		 * @param string $folder Folder within content/views
-		 * @param string|function $filter Filter to apply
+		 * @param string|function|array $filter Filter to apply
 		 * @param array $options Render options
 		 */
 
@@ -64,23 +64,40 @@
 		 */
 
 		public static function run($request, $method = 'GET') {
-			$method = strtolower($method);
-			$filter = static::$filters['before'];
-			$before = $filter();
-			if (is_string($before)) return $before;
-			foreach (static::$routes[$method] as $route) {
+			// "before" is a global filter. If it is a string, return that and don't run routes
+			$filter = static::$filters['before'] ?: function() { return; };
+			if (is_string($before = $filter($request, $method))) return $before;
+			foreach (static::$routes[strtolower($method)] as $route) {
 				if (preg_match('/^'.$route['match'].'$/', $request, $matches)) {
-					if ($route['filter']) $route['filter']();
-					return $route['callback']($matches);
+					// before filter
+					$filter = is_array($route['filter']) ? $route['filter']['before'] : $route['filter'];
+					if (is_string($filter)) $filter = static::$filters[$filter];
+					if ($filter && is_string($before = $filter($request, $method))) return $before;
+					$route_result = $route['callback']($matches);
+					// after filter
+					$after = is_array($route['filter']) ? $route['filter']['after'] : null;
+					if (!is_null($after)) {
+						if (is_string($after)) $after = static::$filters[$after];
+						if (is_string($after = $after($route_result, $request, $method))) return $after;
+					}
+					return $route_result;
 				}
 			}
 			foreach (static::$routes['auto'] as $route) {
 				if (preg_match('/^'.$route['match'].'(.+)/', $request, $matches)) {
-					if ($route['filter']) $route['filter']();
-					return $route['options'] + array(
+					$filter = is_array($route['filter']) ? $route['filter']['before'] : $route['filter'];
+					if (is_string($filter)) $filter = static::$filters[$filter];
+					if ($filter && is_string($before = $filter($request, $method))) return $before;
+					$route_result = $route['options'] + array(
 						'view' => $matches[1],
 						'dir' => $route['folder']
 					);
+					$after = is_array($route['filter']) ? $route['filter']['after'] : null;
+					if (!is_null($after)) {
+						if (is_string($after)) $after = static::$filters[$after];
+						if (is_string($after = $after($route_result, $request, $method))) return $after;
+					}
+					return $route_result;
 				}
 			}
 			return false;

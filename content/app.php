@@ -102,8 +102,8 @@ Config::group('development', array(
 	'error.log' => false,
 	'error.detailed' => true,
 
-	'session.handler' => 'file',
-	'session.save_path' => BASE_DIR.'storage/sessions/',
+	'session.handler' => '',
+	'session.save_path' => '',
 	
 	'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
 	'mysql.port' => 3306, // MySQL default is 3306
