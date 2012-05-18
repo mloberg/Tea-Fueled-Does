@@ -32,6 +32,7 @@
 		 * 
 		 * @param string $username Username of logged in user
 		 * @param string $secret User's secret
+		 * @return string Hashed fingerprint
 		 */
 
 		protected static function fingerprint($username, $secret) {
@@ -39,7 +40,11 @@
 		}
 
 		/**
+		 * Return the formatted string fingerprints use.
 		 *
+		 * @param string $username Username
+		 * @param string $secret User secret
+		 * @return string Formatted string
 		 */
 
 		protected static function fingerprint_string($username, $secret) {
