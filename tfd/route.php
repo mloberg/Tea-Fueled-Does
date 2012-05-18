@@ -67,7 +67,7 @@
 			// "before" is a global filter. If it is a string, return that and don't run routes
 			$filter = static::$filters['before'] ?: function() { return; };
 			if (is_string($before = $filter($request, $method))) return $before;
-			foreach (static::$routes[strtolower($method)] as $route) {
+			foreach (static::$routes[strtolower($method)] ?: array() as $route) {
 				if (preg_match('/^'.$route['match'].'$/', $request, $matches)) {
 					// before filter
 					$filter = is_array($route['filter']) ? $route['filter']['before'] : $route['filter'];
@@ -83,7 +83,7 @@
 					return $route_result;
 				}
 			}
-			foreach (static::$routes['auto'] as $route) {
+			foreach (static::$routes['auto'] ?: array() as $route) {
 				if (preg_match('/^'.$route['match'].'(.+)/', $request, $matches)) {
 					$filter = is_array($route['filter']) ? $route['filter']['before'] : $route['filter'];
 					if (is_string($filter)) $filter = static::$filters[$filter];
