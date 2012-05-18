@@ -9,9 +9,9 @@
 | Make sure our content and app directories actually exist.
 */
 
-if (($app_dir = realpath($public_dir.'/'.$app_dir)) === false)
+if (($app_dir = realpath($app_dir)) === false)
 	throw new Exception('Application directory does not exist');
-if (($content_dir = realpath($public_dir.'/'.$content_dir)) === false)
+if (($content_dir = realpath($content_dir)) === false)
 	throw new Exception('Content direcotry does not exist');
 
 /*
