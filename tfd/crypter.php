@@ -12,9 +12,9 @@
 		 */
 
 		public static function generate_salt($cost = null) {
-			if (is_null($rounds)) $rounds = Config::get('crypter.cost');
-			if ($rounds < 4 || $rounds > 31) throw new CrypterException('Cost must be between 4 and 31');
-			$salt = '$2a$' . str_pad($rounds, 2, '0', STR_PAD_LEFT) . '$';
+			if (is_null($cost)) $cost = Config::get('crypter.cost');
+			if ($cost < 4 || $cost > 31) throw new CrypterException('Cost must be between 4 and 31');
+			$salt = '$2a$' . str_pad($cost, 2, '0', STR_PAD_LEFT) . '$';
 			$salt .= substr(str_replace('+', '.', base64_encode(openssl_random_pseudo_bytes(16))), 0, 22);
 			return $salt;
 		}
