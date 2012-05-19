@@ -8,6 +8,8 @@
 	 * If you attempt to store a key that doesn't follow this sytax,
 	 * an exception will be thrown.
 	 */
+
+	class ConfigException extends \Exception { }
 	
 	class Config {
 	
@@ -37,7 +39,7 @@
 			if (($key = static::parse($key)) !== false) {
 				static::$keys[$key] = $value;
 			} else {
-				throw new \Exception($key . ' is not a valid config key. Must be in the format of category.item');
+				throw new ConfigException($key . ' is not a valid config key. Must be in the format of category.item');
 			}
 		}
 
@@ -78,8 +80,6 @@
 
 		/**
 		 * Get the value of a config key.
-		 *
-		 * @since 2.0a
 		 * 
 		 * @param string $key Key name
 		 * @param mixed $default Value if key doesn't exist
@@ -89,13 +89,11 @@
 			if (($key = static::parse($key)) !== false && (array_key_exists($key, static::$keys))) {
 				return static::$keys[$key];
 			}
-			return false;
+			return $default;
 		}
 
 		/**
 		 * Parse the key into a valid format
-		 *
-		 * @since 2.0a
 		 * 
 		 * @param string $key Key to format
 		 * @return string Formatted string
