@@ -18,6 +18,7 @@
 		 * 
 		 * @param string $path File
 		 * @param string $data Content
+		 * @return boolean|integer Number of bytes written to file or false if not written
 		 */
 		
 		public static function put($path, $data) {

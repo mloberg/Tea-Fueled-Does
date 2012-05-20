@@ -126,9 +126,11 @@
 					throw new RedisException($reply);
 					break;
 				case '+': // single line
-				case ':': // integer
 					if ($reply == 'OK') return true;
 					return $reply;
+					break;
+				case ':': // integer
+					return (integer)$reply;
 					break;
 				case '$': // bulk
 					return $this->bulk_reply($reply);
