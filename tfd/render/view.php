@@ -62,9 +62,11 @@
 		 * @return string Rendered view
 		 */
 
-		private function render() {
+		public function render() {
 			$options = $this->options;
-			return parent::render_view($options);
+			$render = parent::render_view($options, $this);
+			if ($render === false) throw new RenderException("View {$options['view']}");
+			return $render;
 		}
 	
 	}

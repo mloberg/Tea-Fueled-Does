@@ -7,7 +7,7 @@
 
 	class Page extends View {
 		
-		private $options = array();
+		protected $options = array();
 		
 		/**
 		 * Constructor method
@@ -18,8 +18,7 @@
 
 		public function __construct($options) {
 			Event::fire('pre_render');
-			$options = $options + array('title' => Config::get('site.title'), 'master' => Config::get('render.master'), 'status' => 200);
-			$this->options = $options;
+			$this->options = $options + array('title' => Config::get('site.title'), 'master' => Config::get('render.master'), 'status' => 200);
 			return $this;
 		}
 		
@@ -29,6 +28,28 @@
 
 		public function __toString() {
 			return $this->render();
+		}
+
+		/**
+		 * Set a single option.
+		 *
+		 * @param string $name Option name
+		 * @param mixed $value Option value
+		 */
+
+		public function __set($name, $value){
+			$this->options[$name] = $value;
+		}
+		
+		/**
+		 * Get the value of an option item.
+		 *
+		 * @param string $name Options name
+		 */
+		
+		public function __get($name){
+			if (array_key_exists($name, $this->options)) return $this->options[$name];
+			return null;
 		}
 
 		/**
@@ -53,20 +74,18 @@
 			if ($status !== 200) {
 				return Event::fire($this->options['status']);
 			} else {
-				$options = $this->options;
-				$master = MASTERS_DIR.$options['master'].EXT;
+				$master = MASTERS_DIR.$this->options['master'].EXT;
 				if (!file_exists($master)) {
 					throw new RenderException("Master {$master} does not exist");
 				}
-				unset($options['master'], $options['status']);
 
 				// render view
-				$options['content'] = parent::render_view($options);
-				if ($options['content'] === false) return Event::fire('404');
+				$this->options['content'] = parent::render_view($this->options, $this);
+				if ($this->options['content'] === false) return Event::fire('404');
 				
-				if ($master === false) return self::$options['content'];
+				if ($master === false) return $this->options['content'];
 				
-				return parent::render_file($master, $options);
+				return parent::render_file($master, $this, $this->options);
 			}
 		}
 

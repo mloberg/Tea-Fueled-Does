@@ -16,7 +16,7 @@
 		 * @return string Rendered page
 		 */
 
-		protected function render_file($file, $extra = array()) {
+		protected function render_file($file, $render, $extra = array()) {
 			ob_start();
 			extract($extra, EXTR_SKIP);
 			include($file);
@@ -31,7 +31,7 @@
 		 * @param array $options Render options
 		 */
 
-		protected static function render_view($options) {
+		protected static function render_view($options, $render) {
 			if (isset($options['dir'])) {
 				$dir = VIEWS_DIR.$options['dir'].'/';
 			} else {
@@ -42,7 +42,7 @@
 				return false;
 			} else {
 				unset($options['view']);
-				return static::render_file($view, $options);
+				return static::render_file($view, $render, $options);
 			}
 		}
 		
@@ -92,7 +92,10 @@
 		 */
 
 		public static function error($type, $data = array()) {
-			return new Error($type, $data);
+			$data['dir'] = Config::get('views.error');
+			$data['view'] = $type;
+			$data['status'] = $type;
+			return new Error($data);
 		}
 	
 	}

@@ -32,7 +32,7 @@ Event::listen('spinup', function() {
 });
 
 Event::listen('pre_render', function() {
-	CSS::load('reset');
+	// 
 });
 
 Event::listen('render', function() {
