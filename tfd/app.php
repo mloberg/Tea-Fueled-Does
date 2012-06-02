@@ -1,8 +1,6 @@
 <?php namespace TFD;
 	
 	class App {
-	
-		private static $request;
 		
 		/**
 		 * @param string $request Request string
