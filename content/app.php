@@ -12,6 +12,15 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 /*
+| Preloaded CSS and JavaScript assets.
+*/
+
+Config::set('css.stylesheets', array(
+	'reset' => 'css/reset.css',
+	'jquery-ui' => 'css/ui-lightness/jquery-ui.css',
+));
+
+/*
 | Set up our event listeners
 */
 

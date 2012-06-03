@@ -2,67 +2,101 @@
 
 	use TFD\Config;
 	
-	class CSS{
+	class CSS {
 	
-		private static $sheets = array();
+		private static $stylesheets = array();
 		private static $styles = null;
-		private static $preloaded = array(
-			'reset' => 'css/reset.css',
-			'jquery-ui' => 'css/ui-lightness/jquery-ui.css'
-		);
+
+		/**
+		 * Prepare a stylesheet.
+		 *
+		 * @param string $src Stylesheet
+		 * @return string Prepared stylesheet
+		 */
 		
-		private static function __prepare($src){
-			if(!preg_match('/^http(s*)\:\/\//', $src)){
-				if(!preg_match('/^\//', $src)) $src = '/' . $src;
+		protected static function prepare($src) {
+			if (!preg_match('/^http(s*)\:\/\//', $src)) {
+				if (!preg_match('/^\//', $src)) {
+					$src = '/' . $src;
+				}
 				$src = Config::get('site.url').$src;
 			}
 			return '<link rel="stylesheet" href="'.$src.'" />';
 		}
+
+		/**
+		 * Return the render CSS styles.
+		 *
+		 * @return string CSS tags
+		 */
 				
-		public static function render(){
-			$return = '';
-			if(is_array(self::$sheets)){
-				ksort(self::$sheets);
-				foreach(self::$sheets as $s){
-					$return .= "\t{$s}\n";
+		public static function render() {
+			ksort(self::$stylesheets);
+			$render = implode('', self::$stylesheets);
+			if (!is_null(self::$styles)) {
+				$render .= '<style>'.self::$styles.'</style>';
+			}
+			return $render;
+		}
+
+		/**
+		 * Clear loaded styles and stylesheets.
+		 *
+		 * @return boolean True
+		 */
+
+		public static function reset() {
+			self::$stylesheets = array();
+			self::$styles = null;
+			return true;
+		}
+
+		/**
+		 * Load a stylesheet.
+		 *
+		 * @param string|array $src Stylesheet location or name
+		 * @param integer $order Load order (does not apply to arrays)
+		 */
+		
+		public static function load($src, $order = null) {
+			$preloaded = Config::get('css.stylesheets');
+			// because people like to start counting at 1
+			if (is_int($order)) $order--;
+			if (is_array($src)) {
+				foreach ($src as $stylesheet) {
+					// check if it's a preloaded stylesheet
+					if (isset($preloaded[$stylesheet])) {
+						$stylesheet = $preloaded[$stylesheet];
+					}
+					self::$stylesheets[] = static::prepare($stylesheet);
+				}
+			} else {
+				// check if it's a preloaded stylesheet
+				if (isset($preloaded[$src])) {
+					$src = $preloaded[$src];
+				}
+				$src = static::prepare($src);
+				if (is_null($order)) {
+					self::$stylesheets[] = $src;
+				} elseif (isset(self::$stylesheets[$order])) {
+					array_splice(self::$stylesheets, $order, 0, $src);
+				} else {
+					self::$stylesheets[$order] = $src;
 				}
 			}
-			if(!is_null(self::$styles)){
-				$return .= '<style>'.self::$styles."</style>\n";
-			}
-			return $return;
 		}
+
+		/**
+		 * Add inline CSS styling.
+		 *
+		 * @param array $styles An array of elements => style => value
+		 */
 		
-		public static function add_sheet($name, $src){
-			self::$sheets[$name] = $src;
-		}
-		
-		public static function load($src, $order = null){
-			if(is_array($src)){
-				ksort($src);
-				foreach($src as $index => $style){
-					$o = $index + $order;
-					if(isset(self::$sheets[$o])) $o = @max(array_keys(self::$sheets)) + 1;
-					$style = self::__prepare($style);
-					if(!in_array($style, self::$sheets)) self::$sheets[$o] = $style;
-				}
-			}else{
-				if(isset(self::$preloaded[$src])) $src = self::$preloaded[$src];
-				if(is_null($order) && empty(self::$sheets)){
-					$order = 0;
-				}elseif(is_null($order) || isset(self::$sheets[$order])){
-					$order = @max(array_keys(self::$sheets)) + 1;
-				}
-				
-				$src = self::__prepare($src);
-				if(!in_array($src, self::$sheets)) self::$sheets[$order] = $src;
-			}
-		}
-		
-		public static function style($styles){
-			foreach($styles as $element => $style){
+		public static function style($styles) {
+			$sheet = '';
+			foreach ($styles as $element => $style){
 				$sheet .= $element.'{';
-				foreach($style as $key => $value){
+				foreach ($style as $key => $value) {
 					$sheet .= $key.':'.$value.';';
 				}
 				$sheet .= '}';
