@@ -2,147 +2,148 @@
 
 	use TFD\Config;
 	
-	class JavaScript{
-	
-		private static $scripts = array();
-		private static $script = array();
-		private static $ready = array();
-		private static $config = array();
+	class JavaScript {
+
+		protected static $library = array();
+		protected static $scripts = array();
+		protected static $script = array();
+		protected static $ready = array();
+		protected static $ready_string = '(function(){ ++SOURCE++ })';
 		
-		private static $libraries = array(
-			'mootools' => 'js/mootools-core.min.js',
-			'mootools-more' => 'js/mootools-more.min.js',
-			'jquery' => 'js/jquery.min.js',
-			'jquery-ui' => 'js/jquery-ui.min.js',
-			'dojo' => 'http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js',
-			'tfd' => '/js/tfd.js',
-		);
-		
-		private static function __prepare($src){
+		/**
+		 * Prepare a external JavaScript asset.
+		 * 
+		 * @param string $src Script location
+		 * @return string Prepared script
+		 */
+
+		protected static function prepare($src) {
 			if(!preg_match('/^http(s*)\:\/\//', $src)){
 				if(!preg_match('/^\//', $src)) $src = '/' . $src;
 				$src = Config::get('site.url').$src;
 			}
 			return '<script src="'.$src.'"></script>';
 		}
+
+		/**
+		 * Render the JavaScript for the page.
+		 *
+		 * @return string Rendered JavaScript
+		 */
 		
 		public static function render(){
-			$return = '';
-			if(!empty(self::$scripts)){
-				ksort(self::$scripts);
-				foreach(self::$scripts as $s){
-					$return .= "$s\n";
+			$return = implode('', static::$scripts);
+			if(!empty(static::$script) || !empty(static::$ready)) {
+				$return .= '<script>';
+				$return .= implode(';', static::$script);
+				if (!empty(static::$ready)) {
+					$return .= str_replace('++SOURCE++', implode(';', static::$ready), static::$ready_string);
 				}
+				$return .= '</script>';
 			}
-			if(!empty(self::$script) || self::$ready) $return .= '<script>';
-			if(!empty(self::$script)){
-				ksort(self::$script);
-				foreach(self::$script as $s){
-					$return .= $s;
-				}
-			}
-			if(!empty(self::$ready)){
-				ksort(self::$ready);
-				switch(self::$config['library']){
-					case 'mootools':
-						$return .= 'window.addEvent("domready",function(){';
-						break;
-					case 'jquery':
-						$return .= '$(document).ready(function(){';
-						break;
-					case 'dojo':
-						$return .= 'dojo.ready(function(){';
-					default:
-						$return .= 'window.onDomReady(function(){';
-				}
-				foreach(self::$ready as $s){
-					$return .= $s;
-				}
-				$return .= '});';
-			}
-			if(!empty(self::$script) || self::$ready) $return .= "</script>\n";
 			return $return;
 		}
-		
-		public static function add_library($name, $src, $load = false, $order = null){
-			self::$libraries[$name] = $src;
-			if($load) self::library($name, true, $order);
-		}
-		
-		public static function update_library($name, $src, $load = false, $order = null){
-			self::$libraries[$name] = $src;
-			if($load) self::library($name, true, $order);
-		}
-		
-		public static function library($lib, $load = true, $order = null){
-			if(!array_key_exists($lib, self::$libraries)){
-				throw new \Exception("No such JavaScript library, {$lib}");
-				return false;
-			}
-			if($load && !in_array($src, self::$scripts)){
-				if(is_null($order) && empty(self::$scripts)){
-					$order = 0;
-				}elseif(is_null($order) || isset(self::$scripts[$order])){
-					$order = @max(array_keys(self::$scripts)) + 1;
-				}
-				self::$scripts[$order] = self::__prepare(self::$libraries[$lib]);;
-			}
-			switch($lib){
-				case 'mootools':
-					self::$config['library'] = 'mootools';
-					break;
-				case 'jquery':
-					self::$config['library'] = 'jquery';
-					break;
-				case 'dojo':
-					self::$config['library'] = 'dojo';
-					break;
-				default:
-					self::$config['library'] = 'tfd';
-			}
+
+		/**
+		 * Clear out loaded data.
+		 * 
+		 * @return boolean True
+		 */
+
+		public static function reset() {
+			static::$scripts = array();
+			static::$script = array();
+			static::$ready = array();
+			static::$ready_string = '(function(){ ++SOURCE++ })';
 			return true;
 		}
+
+		/**
+		 * Load a JavaScript to the page.
+		 *
+		 * @param string $src JavaScript location or library name
+		 * @param integer $order Load order
+		 */
 		
-		public static function load($src, $order = null){
-			if(is_array($src)){
-				ksort($src);
-				foreach($src as $index => $s){
-					$o = $index + $order;
-					if(isset(self::$scripts[$o])) $o = @max(array_keys(self::$scripts)) + 1;
-					$s = self::__prepare($s);
-					if(!in_array($s, self::$scripts)) self::$scripts[$o] = $s;
+		public static function load($src, $order = null) {
+			// because people like to start counting at 1
+			if (is_int($order)) $order--;
+			if (is_array($src)) {
+				foreach ($src as $script) {
+					$script = static::parse($script);
+					if (!in_array($script, static::$scripts)) {
+						static::$scripts[] = $script;
+					}
 				}
-			}else{
-				if(is_null($order) && empty(self::$scripts)){
-					$order = 0;
-				}elseif(is_null($order) || isset(self::$scripts[$order])){
-					$order = @max(array_keys(self::$scripts)) + 1;
+			} else {
+				$script = static::parse($src);
+				if (isset(static::$scripts[$order])){
+					array_splice(static::$scripts, $order, 0, $script);
+				} else {
+					static::$scripts[] = $script;
 				}
-				$src = self::__prepare($src);
-				if(!in_array($src, self::$scripts)) self::$scripts[$order] = $src;
+			}
+		}
+
+		/**
+		 * Parse a JavaScript source.
+		 *
+		 * @param string $name JavaScript source
+		 * @return string Parsed JavaScript
+		 */
+
+		private static function parse($name) {
+			if (isset(static::$library[$name])) {
+				$script = static::$library[$name];
+				if (isset($script['depends'])) {
+					static::load($script['depends']);
+				}
+				if (isset($script['ready'])) {
+					static::$ready_string = $script['ready'];
+				}
+				return static::prepare($script['source']);
+			}
+			return static::prepare($name);
+		}
+
+		/**
+		 * Load JavaScript libraries.
+		 *
+		 * @param Array $lib JavaScript libraries
+		 */
+
+		public static function library($lib) {
+			static::$library = $lib + static::$library;
+		}
+		
+		/**
+		 * Functions, vars, etc. that go outside of the ready function.
+		 *
+		 * @param string $script Script
+		 * @param integer $order Script order
+		 */
+		
+		public static function script($script, $order = null) {
+			if (isset(static::$script[$order])) {
+				array_splice(static::$script, $order, 0, $script);
+			} else {
+				static::$script[] = $script;
 			}
 		}
 		
-		// functions, vars, etc. that go outside of the domready function
+		/**
+		 * Function, vars, etc. that go inside of the read function.
+		 *
+		 * @param string $script Script
+		 * @param integer $order Script order
+		 */
 		
-		public static function script($script, $order = null){
-			if(is_null($order) && empty(self::$script)){
-				$order = 0;
-			}elseif(is_null($order) || isset(self::$script[$order])){
-				$order = @max(array_keys(self::$script)) + 1;
+		public static function ready($script, $order = null) {
+			if (isset(static::$ready[$order])) {
+				array_splice(static::$ready, $order, 0, $script);
+			} else {
+				static::$ready[] = $script;
 			}
-			if(!in_array($script, self::$script)) self::$script[$order] = $script;
-		}
-		
-		// function, vars, etc. that go inside of the domready function
-		
-		public static function ready($script, $order = null){
-			if(is_null($order) && empty(self::$ready)){
-				$order = 0;
-			}elseif(is_null($order) || isset(self::$ready[$order])){
-				$order = @max(array_keys(self::$ready)) + 1;
-			}
-			if(!in_array($script, self::$ready)) self::$ready[$order] = $script;
 		}
 	
 	}

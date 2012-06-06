@@ -12,12 +12,53 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 /*
-| Preloaded CSS and JavaScript assets.
+| Preloaded CSS stylesheets for TFD\CSS.
+|
+| Syntax:
+|   name => source
 */
 
-Config::set('css.stylesheets', array(
-	'reset' => 'css/reset.css',
-	'jquery-ui' => 'css/ui-lightness/jquery-ui.css',
+CSS::library(array(
+	'reset' => '/css/reset.css',
+	'jquery-ui' => '/css/ui-lightness/jquery-ui.css',
+));
+
+/*
+| Preloaded JavaScripts for TFD\JavaScript.
+|
+| The syntax for this is a little more complex
+| then the CSS list, because each script has
+| multiple options.
+|
+| Options:
+|   Source (Required): Location of the script.
+|   Ready: Window ready script. ++SOURCE++ will
+|     be repalced with scripts loaded through
+|     JavaScript::ready
+|   Depends: An array of dependencies
+*/
+
+JavaScript::library(array(
+	'mootools' => array(
+		'source' => '/js/mootools-core.min.js',
+		'ready' => 'window.addEvent("domready",function(){ ++SOURCE++ })'
+	),
+	'mootools-more' => array(
+		'source' => '/js/mootools-more.min.js',
+		'depends' => array('mootools')
+	),
+	'jquery' => array(
+		'source' => '/js/jquery.min.js',
+		'ready' => '$(document).ready(function(){ ++SOURCE++ })'
+	),
+	'jquery-ui' => array(
+		'source' => '/js/jquery-ui.min.js',
+		'depends' => array()
+	),
+	'dojo' => array(
+		'source' => 'http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js',
+		'ready' => 'dojo.ready(function(){ ++SOURCE++ })'
+	),
 ));
 
 /*

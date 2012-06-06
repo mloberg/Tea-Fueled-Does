@@ -4,8 +4,9 @@
 	
 	class CSS {
 	
-		private static $stylesheets = array();
-		private static $styles = null;
+		protected static $stylesheets = array();
+		protected static $styles = null;
+		protected static $library = array();
 
 		/**
 		 * Prepare a stylesheet.
@@ -31,10 +32,10 @@
 		 */
 				
 		public static function render() {
-			ksort(self::$stylesheets);
-			$render = implode('', self::$stylesheets);
-			if (!is_null(self::$styles)) {
-				$render .= '<style>'.self::$styles.'</style>';
+			ksort(static::$stylesheets);
+			$render = implode('', static::$stylesheets);
+			if (!is_null(static::$styles)) {
+				$render .= '<style>'.static::$styles.'</style>';
 			}
 			return $render;
 		}
@@ -46,9 +47,17 @@
 		 */
 
 		public static function reset() {
-			self::$stylesheets = array();
-			self::$styles = null;
+			static::$stylesheets = array();
+			static::$styles = null;
 			return true;
+		}
+
+		/**
+		 * 
+		 */
+
+		public static function library($lib) {
+			static::$library = $lib + static::$library;
 		}
 
 		/**
@@ -59,31 +68,34 @@
 		 */
 		
 		public static function load($src, $order = null) {
-			$preloaded = Config::get('css.stylesheets');
 			// because people like to start counting at 1
 			if (is_int($order)) $order--;
 			if (is_array($src)) {
 				foreach ($src as $stylesheet) {
-					// check if it's a preloaded stylesheet
-					if (isset($preloaded[$stylesheet])) {
-						$stylesheet = $preloaded[$stylesheet];
-					}
-					self::$stylesheets[] = static::prepare($stylesheet);
+					static::$stylesheets[] = static::parse($stylesheet);
 				}
 			} else {
-				// check if it's a preloaded stylesheet
-				if (isset($preloaded[$src])) {
-					$src = $preloaded[$src];
-				}
-				$src = static::prepare($src);
-				if (is_null($order)) {
-					self::$stylesheets[] = $src;
-				} elseif (isset(self::$stylesheets[$order])) {
-					array_splice(self::$stylesheets, $order, 0, $src);
+				$src = static::parse($src);
+				if (isset(static::$stylesheets[$order])) {
+					array_splice(static::$stylesheets, $order, 0, $src);
 				} else {
-					self::$stylesheets[$order] = $src;
+					static::$stylesheets[$order] = $src;
 				}
 			}
+		}
+
+		/**
+		 * Parse a CSS source.
+		 * 
+		 * @param string $name CSS source
+		 * @return string Parsed CSS
+		 */
+
+		private static function parse($name) {
+			if (isset(static::$library[$name])) {
+				return static::prepare(static::$library[$name]);
+			}
+			return static::prepare($name);
 		}
 
 		/**
@@ -101,7 +113,7 @@
 				}
 				$sheet .= '}';
 			}
-			self::$styles .= $sheet;
+			static::$styles .= $sheet;
 		}
 	
 	}
