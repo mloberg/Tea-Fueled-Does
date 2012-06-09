@@ -22,8 +22,8 @@ define('START_MEM', memory_get_usage());
 */
 
 $public_dir = __DIR__;
-$app_dir = '../tfd';
-$content_dir = '../content';
+$app_dir = '../app';
+$core_dir = '../core';
 
 /*
 | Include our bootstrap file that sets up the application
@@ -36,14 +36,14 @@ include_once('../bootstrap.php');
 | of our App class.
 */
 
-$app = new App();
+$app = new TFD\Core\App();
 echo $app->site();
 
 /*
 | This is an example of extending a core application file.
 */
 
-echo $app->test();
+// echo $app->test();
 
 /*
 | Here to benchmark the framework.

@@ -11,7 +11,7 @@
 
 if (($app_dir = realpath($app_dir)) === false)
 	throw new Exception('Application directory does not exist');
-if (($content_dir = realpath($content_dir)) === false)
+if (($core_dir = realpath($core_dir)) === false)
 	throw new Exception('Content direcotry does not exist');
 
 /*
@@ -22,37 +22,37 @@ define('EXT', '.php');
 
 define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', __DIR__.'/');
+define('CORE_DIR', $core_dir.'/');
 define('APP_DIR', $app_dir.'/');
-define('CONTENT_DIR', $content_dir.'/');
-unset($public_dir, $app_dir, $content_dir);
+unset($public_dir, $app_dir, $core_dir);
 
-define('LIBRARY_DIR', CONTENT_DIR.'library/');
-define('TEA_DIR', APP_DIR.'tea/');
+define('LIBRARY_DIR', APP_DIR.'library/');
+define('TEA_DIR', CORE_DIR.'tea/');
 
-define('MASTERS_DIR', CONTENT_DIR.'masters/');
-define('MODELS_DIR', CONTENT_DIR.'models/');
-define('PARTIALS_DIR', CONTENT_DIR.'partials/');
-define('TEMPLATES_DIR', CONTENT_DIR.'templates/');
-define('VIEWS_DIR', CONTENT_DIR.'views/');
+define('MASTERS_DIR', APP_DIR.'masters/');
+define('MODELS_DIR', APP_DIR.'models/');
+define('PARTIALS_DIR', APP_DIR.'partials/');
+define('TEMPLATES_DIR', APP_DIR.'templates/');
+define('VIEWS_DIR', APP_DIR.'views/');
 
 /*
 | Include our functions and autoloader.
 */
 
-include_once(APP_DIR.'functions'.EXT);
-include_once(APP_DIR.'loader'.EXT);
+include_once(CORE_DIR.'functions'.EXT);
+include_once(CORE_DIR.'loader'.EXT);
 
 /*
 | Register our autoloader
 */
 
-spl_autoload_register(array('TFD\Loader', 'autoload'));
+TFD\Core\Loader::register();
 
 /*
 | Set some core config items.
 */
 
-TFD\Config::load(array(
+TFD\Core\Config::load(array(
 	'application.version' => '3.0a',
 	'views.public' => 'public',
 	'views.partials' => 'partials',
@@ -63,53 +63,51 @@ TFD\Config::load(array(
 | Set some autoloader aliases
 */
 
-use TFD\Loader;
+use TFD\Core\Loader;
 Loader::alias(array(
-	'CSS' => 'TFD\CSS',
-	'JavaScript' => 'TFD\JavaScript',
-	'Flash' => 'TFD\Flash',
-	'MySQL' => 'TFD\DB\MySQL',
-	'Render' => 'TFD\Render',
-	'Config' => 'TFD\Config',
-	'Cache' => 'TFD\Cache',
-	'Request' => 'TFD\Request',
-	'Model' => 'TFD\Model',
-	'Event' => 'TFD\Event',
+	'CSS' => 'TFD\Core\CSS',
+	'JavaScript' => 'TFD\Core\JavaScript',
+	'Flash' => 'TFD\Core\Flash',
+	'MySQL' => 'TFD\Core\DB\MySQL',
+	'Render' => 'TFD\Core\Render',
+	'Config' => 'TFD\Core\Config',
+	'Cache' => 'TFD\Core\Cache',
+	'Request' => 'TFD\Core\Request',
+	'Model' => 'TFD\Core\Model',
+	'Event' => 'TFD\Core\Event',
 ));
-Loader::alias('PostmarkBatch', '\TFD\PostmarkBatch', APP_DIR.'postmark'.EXT);
-Loader::alias('PostmarkBounces', '\TFD\PostmarkBounces', APP_DIR.'postmark'.EXT);
 
 /*
 | Set our error and exception handlers.
 */
 
 set_exception_handler(function($e){
-	\TFD\Event::fire('exception', $e);
+	TFD\Core\Event::fire('exception', $e);
 });
 
 set_error_handler(function($number, $error, $file, $line){
 	if(error_reporting() === 0) return; // ignore @
-	\TFD\Event::fire('error', $number, $error, $file, $line);
+	TFD\Core\Event::fire('error', $number, $error, $file, $line);
 }, E_ALL ^ E_NOTICE);
 
 /*
 | Include app.php
 */
 
-include_once(CONTENT_DIR.'app'.EXT);
+include_once(APP_DIR.'app'.EXT);
 
 /*
 | Set and start our Session handler.
 */
 
-TFD\Session::register();
+TFD\Core\Session::register();
 session_start();
 
 /*
 | Load our routes.
 */
 
-foreach (glob(CONTENT_DIR.'routes/*') as $route) {
+foreach (glob(APP_DIR.'routes/*') as $route) {
 	if (is_file($route))
 		include_once $route;
 }
