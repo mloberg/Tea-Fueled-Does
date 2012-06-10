@@ -1,10 +1,10 @@
 <?php namespace TFD\Core;
 
-	use TFD\Core\Config;
+	use TFD\Core\Render;
 	
-	class Response{
+	class Response {
 	
-		private static $statuses = array(
+		protected static $statuses = array(
 			100 => 'Continue',
 			101 => 'Switching Protocols',
 			200 => 'OK',
@@ -52,62 +52,96 @@
 			507 => 'Insufficient Storage',
 			509 => 'Bandwidth Limit Exceeded'
 		);
-		private static $headers = array();
-		private static $content;
-		private static $status;
+
+		protected $headers = array();
+		protected $content;
+		protected $status;
 		
-		function __construct($content = null, $status = 200){
-			self::$content = $content;
-			self::$status = $status;
+		/**
+		 * Return a new Response object.
+		 * 
+		 * @param string $content Response content
+		 * @param integer $status HTTP status
+		 * @return object New Response object
+		 */
+
+		function __construct($content = null, $status = 200) {
+			$this->content = $content;
+			$this->status = $status;
 		}
 		
-		public function __toString(){
+		/**
+		 * Redirects to send method.
+		 */
+
+		public function __toString() {
 			return $this->send();
 		}
 		
 		/**
-		 * Setters
+		 * Set an HTTP header.
+		 *
+		 * @param string $name HTTP Header name
+		 * @param string $value HTTP Hader value
+		 * @return object Self
 		 */
 		
-		public function header($name, $value){
-			self::$headers[$name] = $value;
+		public function header($name, $value) {
+			$this->headers[$name] = $value;
 			return $this;
 		}
 		
 		/**
-		 * Class methods
+		 * Return the response.
+		 *
+		 * @return string Response
 		 */
 		
-		public function send(){
-			if(!array_key_exists('Content-Type', self::$headers)){
+		public function send() {
+			// set a Content-Type header if we don't have one already
+			if(!array_key_exists('Content-Type', $this->headers)){
 				$this->header('Content-Type', 'text/html; charset=utf-8');
 			}
-			
-			if(!headers_sent()) $this->send_headers();
-			
-			return (string)self::$content;
+			// make sure we haven't sent headers already
+			if(!headers_sent()) {
+				$this->send_headers();
+			}
+			return (string)$this->content;
 		}
+
+		/**
+		 * Send HTTP headers.
+		 */
 		
-		private function send_headers(){
+		private function send_headers() {
 			$protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
-			
-			header($protocol.' '.self::$status.' '.self::$statuses[self::$status]);
-			
-			foreach(self::$headers as $name => $value){
+			header($protocol.' '.$this->status.' '.static::$statuses[$this->status]);
+			foreach($this->headers as $name => $value){
 				header($name.': '.$value, true);
 			}
 		}
 		
 		/**
-		 * Static methods
+		 * Return a new Response object.
+		 * 
+		 * @param string $content Response content
+		 * @param integer $status HTTP status
+		 * @return object New Response object
 		 */
 		
-		public static function make($content = null, $status = 200){
-			return new self($content, $status);
+		public static function make($content = null, $status = 200) {
+			return new static($content, $status);
 		}
+
+		/**
+		 * Return an error response (non 200)
+		 *
+		 * @param integer $code HTTP code
+		 * @param array $data 
+		 */
 		
-		public static function error($code, $data = array()){
-			return new self(Render::error($code, $data)->render(), $code);
+		public static function error($code, $data = array()) {
+			return new static(Render::error($code, $data)->render(), $code);
 		}
 	
 	}
