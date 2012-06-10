@@ -24,7 +24,7 @@ define('PUBLIC_DIR', $public_dir.'/');
 define('BASE_DIR', __DIR__.'/');
 define('CORE_DIR', $core_dir.'/');
 define('APP_DIR', $app_dir.'/');
-define('LIBRARY_DIR', BASE_DIR.'library/');
+define('LIBRARY_DIR', BASE_DIR.'Library/');
 unset($public_dir, $app_dir, $core_dir);
 
 define('TEA_DIR', CORE_DIR.'tea/');

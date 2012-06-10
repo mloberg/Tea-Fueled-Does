@@ -22,8 +22,8 @@ define('START_MEM', memory_get_usage());
 */
 
 $public_dir = __DIR__;
-$app_dir = '../app';
-$core_dir = '../core';
+$app_dir = '../App';
+$core_dir = '../Core';
 
 /*
 | Include our bootstrap file that sets up the application

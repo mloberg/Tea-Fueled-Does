@@ -43,7 +43,7 @@
 		 */
 
 		protected static function parse($name, $prefix = BASE_DIR) {
-			return $prefix . strtolower(preg_replace('/TFD\//', '', str_replace(array('\\', '_'), '/', $name))) . EXT;
+			return $prefix . preg_replace('/TFD\//', '', str_replace(array('\\', '_'), '/', $name)) . EXT;
 		}
 
 		/**
