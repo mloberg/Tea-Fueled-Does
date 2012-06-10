@@ -14,12 +14,16 @@
 
 		public static function autoload($name) {
 			$name = ltrim($name, '\\');
+			$alias = false;
 			if (array_key_exists($name, static::$aliases)) {
 				$file = static::parse(static::$aliases[$name]);
 				$alias = self::$aliases[$name];
+			} elseif(!preg_match('/^TFD\\\/', $name) && file_exists($file = static::parse($name, LIBRARY_DIR))) {
+				if (preg_match('/namespace (.*);/', file_get_contents($file), $match)) {
+					$alias = $match[1] . '\\' . end(explode('\\', $name));
+				}
 			} else {
 				$file = static::parse($name);
-				$alias = false;
 			}
 			if (!file_exists($file)) {
 				throw new LoaderException("Could not load class {$name}. No file found at {$file}");

@@ -36,14 +36,14 @@ include_once('../bootstrap.php');
 | of our App class.
 */
 
-$app = new TFD\Core\App();
+$app = new Core\App();
 echo $app->site();
 
 /*
 | This is an example of extending a core application file.
 */
 
-// echo $app->test();
+echo $app->test();
 
 /*
 | Here to benchmark the framework.
