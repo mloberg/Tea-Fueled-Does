@@ -40,7 +40,7 @@ define('VIEWS_DIR', APP_DIR.'views/');
 */
 
 include_once(CORE_DIR.'functions'.EXT);
-include_once(CORE_DIR.'loader'.EXT);
+include_once(CORE_DIR.'Loader'.EXT);
 
 /*
 | Register our autoloader

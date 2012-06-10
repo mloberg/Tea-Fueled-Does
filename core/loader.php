@@ -20,7 +20,8 @@
 				$alias = self::$aliases[$name];
 			} elseif(!preg_match('/^TFD\\\/', $name) && file_exists($file = static::parse($name, LIBRARY_DIR))) {
 				if (preg_match('/namespace (.*);/', file_get_contents($file), $match)) {
-					$alias = $match[1] . '\\' . end(explode('\\', $name));
+					$class = explode('\\', $name);
+					$alias = $match[1] . '\\' . end($class);
 				}
 			} else {
 				$file = static::parse($name);

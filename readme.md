@@ -5,7 +5,6 @@ Tea-Fueled Does is a loosely-based MVC PHP 5.3 framework that is awesome. It aim
 ## Requirements
 
 * PHP 5.3 or greater
-* Apache with mod_rewrite (for now)
 
 ## Authors
 
@@ -13,4 +12,4 @@ Tea-Fueled Does is a loosely-based MVC PHP 5.3 framework that is awesome. It aim
 
 ## Links
 
-* [Documentation](http://teafueleddoes.com/docs/)
+* [Documentation](http://teafueleddoes.com/)

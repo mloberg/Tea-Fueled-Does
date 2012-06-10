@@ -16,7 +16,7 @@
 		 * @return string Rendered page
 		 */
 
-		protected function render_file($file, $render, $extra = array()) {
+		protected static function render_file($file, $render, $extra = array()) {
 			ob_start();
 			extract($extra, EXTR_SKIP);
 			include($file);
