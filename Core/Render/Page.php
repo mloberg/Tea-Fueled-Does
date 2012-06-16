@@ -22,7 +22,7 @@
 			return $this;
 		}
 		
-		public function __destruct(){
+		public function __destruct() {
 			Event::fire('post_render');
 		}
 
@@ -37,7 +37,7 @@
 		 * @param mixed $value Option value
 		 */
 
-		public function __set($name, $value){
+		public function __set($name, $value) {
 			$this->options[$name] = $value;
 		}
 		
@@ -47,7 +47,7 @@
 		 * @param string $name Options name
 		 */
 		
-		public function __get($name){
+		public function __get($name) {
 			if (array_key_exists($name, $this->options)) return $this->options[$name];
 			return null;
 		}
@@ -68,7 +68,7 @@
 		 * @return string Rendered page
 		 */
 		
-		public function render(){
+		public function render() {
 			Event::fire('render');
 			$status = $this->options['status'];
 			if ($status !== 200) {

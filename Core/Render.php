@@ -1,5 +1,7 @@
 <?php namespace TFD\Core;
 
+	use TFD\Core\Config;
+	use TFD\Core\Event;
 	use TFD\Core\Render\View;
 	use TFD\Core\Render\Page;
 	use TFD\Core\Render\Error;

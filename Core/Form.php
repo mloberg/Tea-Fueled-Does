@@ -175,7 +175,7 @@
 		 * @return string Form check tag
 		 */
 		
-		public static function checkable($type, $name, $value = null, $checked = false, $attributes = array()){
+		public static function checkable($type, $name, $value = null, $checked = false, $attributes = array()) {
 			if ($checked === true) {
 				$attributes[] = 'checked';
 			}
@@ -192,7 +192,7 @@
 		 * @return string Form check tag
 		 */
 		
-		public static function checkbox($name, $value = null, $checked = false, $attributes = array()){
+		public static function checkbox($name, $value = null, $checked = false, $attributes = array()) {
 			return static::checkable('checkbox', $name, $value, $checked, $attributes);
 		}
 
@@ -206,7 +206,7 @@
 		 * @return string Form check tag
 		 */
 		
-		public static function radio($name, $value = null, $checked = false, $attributes = array()){
+		public static function radio($name, $value = null, $checked = false, $attributes = array()) {
 			return static::checkable('radio', $name, $value, $checked, $attributes);
 		}
 	

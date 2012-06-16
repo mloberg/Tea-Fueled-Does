@@ -106,7 +106,7 @@
 		
 		public static function style($styles) {
 			$sheet = '';
-			foreach ($styles as $element => $style){
+			foreach ($styles as $element => $style) {
 				$sheet .= $element.'{';
 				foreach ($style as $key => $value) {
 					$sheet .= $key.':'.$value.';';

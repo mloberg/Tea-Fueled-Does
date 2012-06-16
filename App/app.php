@@ -126,7 +126,6 @@ Config::group(array(
 	'render.master' => 'master', // default master
 	'auth.key' => '4f0712cd96a93',
 	'crypter.cost' => 10, // default cost for the crypter class
-	'cache.key' => '',
 	'cache.dir' => BASE_DIR.'storage/cache/',
 
 	// ReCAPTCHA - http://www.google.com/recaptcha

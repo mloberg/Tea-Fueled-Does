@@ -18,8 +18,8 @@
 		 */
 
 		protected static function prepare($src) {
-			if(!preg_match('/^http(s*)\:\/\//', $src)){
-				if(!preg_match('/^\//', $src)) $src = '/' . $src;
+			if (!preg_match('/^http(s*)\:\/\//', $src)) {
+				if (!preg_match('/^\//', $src)) $src = '/' . $src;
 				$src = Config::get('site.url').$src;
 			}
 			return '<script src="'.$src.'"></script>';
@@ -31,7 +31,7 @@
 		 * @return string Rendered JavaScript
 		 */
 		
-		public static function render(){
+		public static function render() {
 			$return = implode('', static::$scripts);
 			if(!empty(static::$script) || !empty(static::$ready)) {
 				$return .= '<script>';
@@ -77,7 +77,7 @@
 				}
 			} else {
 				$script = static::parse($src);
-				if (isset(static::$scripts[$order])){
+				if (isset(static::$scripts[$order])) {
 					array_splice(static::$scripts, $order, 0, $script);
 				} else {
 					static::$scripts[] = $script;

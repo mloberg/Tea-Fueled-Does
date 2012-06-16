@@ -99,11 +99,11 @@
 		
 		public function send() {
 			// set a Content-Type header if we don't have one already
-			if(!array_key_exists('Content-Type', $this->headers)){
+			if (!array_key_exists('Content-Type', $this->headers)) {
 				$this->header('Content-Type', 'text/html; charset=utf-8');
 			}
 			// make sure we haven't sent headers already
-			if(!headers_sent()) {
+			if (!headers_sent()) {
 				$this->send_headers();
 			}
 			return (string)$this->content;
@@ -116,7 +116,7 @@
 		private function send_headers() {
 			$protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
 			header($protocol.' '.$this->status.' '.static::$statuses[$this->status]);
-			foreach($this->headers as $name => $value){
+			foreach ($this->headers as $name => $value) {
 				header($name.': '.$value, true);
 			}
 		}

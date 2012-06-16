@@ -1,5 +1,10 @@
 <?php namespace TFD\Core;
 	
+	use TFD\Core\Event;
+	use TFD\Core\Render;
+	use TFD\Core\Response;
+	use TFD\Core\Request;
+
 	class App {
 		
 		/**

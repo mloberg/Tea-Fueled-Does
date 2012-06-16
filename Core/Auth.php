@@ -1,5 +1,8 @@
 <?php namespace TFD\Core;
 
+	use TFD\Core\Config;
+	use TFD\Core\Crypter;
+
 	class Auth {
 
 		/**

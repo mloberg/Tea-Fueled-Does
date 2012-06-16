@@ -1,5 +1,7 @@
 <?php namespace TFD\Core;
 
+	use TFD\Core\Config;
+
 	class CrypterException extends \Exception { }
 
 	class Crypter {

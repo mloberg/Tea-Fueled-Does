@@ -18,10 +18,15 @@
 			if (array_key_exists($name, static::$aliases)) {
 				$file = static::parse(static::$aliases[$name]);
 				$alias = self::$aliases[$name];
-			} elseif(!preg_match('/^TFD\\\/', $name) && file_exists($file = static::parse($name, LIBRARY_DIR))) {
-				if (preg_match('/namespace (.*);/', file_get_contents($file), $match)) {
-					$class = explode('\\', $name);
-					$alias = $match[1] . '\\' . end($class);
+			} elseif (!preg_match('/^TFD\\\/', $name)) {
+				if (file_exists($file = static::parse($name, LIBRARY_DIR))) {
+					if (preg_match('/namespace (.*);/', file_get_contents($file), $match)) {
+						$class = explode('\\', $name);
+						$alias = $match[1] . '\\' . end($class);
+					}
+				} else {
+					$file = static::parse($name);
+					$alias = 'TFD\\'.$name;
 				}
 			} else {
 				$file = static::parse($name);

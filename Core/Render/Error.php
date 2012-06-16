@@ -13,7 +13,7 @@
 		 * @return string Rendered page
 		 */
 
-		public function render(){
+		public function render() {
 			Event::fire('render');
 			$master = MASTERS_DIR.$this->options['master'].EXT;
 			if (!file_exists($master)) {

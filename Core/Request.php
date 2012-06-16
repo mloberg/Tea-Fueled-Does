@@ -97,7 +97,7 @@
 		 * @return string https or http
 		 */
 
-		public static function protocol(){
+		public static function protocol() {
 			return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 		}
 
