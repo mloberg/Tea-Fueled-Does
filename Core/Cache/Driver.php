@@ -44,13 +44,15 @@
 		 * Delete a cache item.
 		 *
 		 * @param string $key Cache key
-		 * @return True on success
+		 * @return boolean True on success
 		 */
 		
 		public function delete($key);
 		
 		/**
 		 * Delete all cache items.
+		 *
+		 * @return boolean True on success
 		 */
 		
 		public function flush();
