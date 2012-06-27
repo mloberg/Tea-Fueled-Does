@@ -126,7 +126,6 @@ Config::group(array(
 	'render.master' => 'master', // default master
 	'auth.key' => '4f0712cd96a93',
 	'crypter.cost' => 10, // default cost for the crypter class
-	'cache.dir' => BASE_DIR.'storage/cache/',
 
 	// ReCAPTCHA - http://www.google.com/recaptcha
 	'recaptcha.public_key' => '',
@@ -146,13 +145,12 @@ Config::group(array(
 
 Config::group('development', array(
 	'site.url' => 'http://localhost', // without trailing slash
-	
-	'application.debug' => true,
-	'error.log' => false,
-	'error.detailed' => true,
 
 	'session.handler' => '',
 	'session.save_path' => '',
+
+	'cache.driver' => 'file',
+	'cache.save_path' => BASE_DIR.'storage/cache/',
 	
 	'mysql.host' => '127.0.0.1', // do not use "localhost" (use 127.0.0.1 instead)
 	'mysql.port' => 3306, // MySQL default is 3306
@@ -178,13 +176,12 @@ Config::group('development', array(
 
 Config::group('testing', array(
 	'site.url' => '', // without trailing slash
-	
-	'application.debug' => true,
-	'error.log' => BASE_DIR.'error.log',
-	'error.detailed' => true,
 
 	'session.handler' => '',
 	'session.save_path' => '',
+
+	'cache.driver' => '',
+	'cache.save_path' => '',
 	
 	'mysql.host' => '',
 	'mysql.port' => 3306,
@@ -210,13 +207,12 @@ Config::group('testing', array(
 
 Config::group('production', array(
 	'site.url' => '', // without trailing slash
-	
-	'application.debug' => false,
-	'error.log' => BASE_DIR.'error.log',
-	'error.detailed' => false,
 
 	'session.handler' => '',
 	'session.save_path' => '',
+
+	'cache.driver' => '',
+	'cache.save_path' => '',
 	
 	'mysql.host' => '',
 	'mysql.port' => 3306,
