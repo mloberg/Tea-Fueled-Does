@@ -164,7 +164,7 @@ Config::group('development', array(
 	
 	'cache.driver' => 'file',
 	
-	'memcached.class' => '', // defaults to memcache
+	'memcached.class' => '', // defaults to memcached
 	'memcached.servers' => array(
 		array(
 			'host' => '',
@@ -195,7 +195,7 @@ Config::group('testing', array(
 	
 	'cache.driver' => 'file',
 	
-	'memcached.class' => '', // defaults to memcache
+	'memcached.class' => '', // defaults to memcached
 	'memcached.servers' => array(
 		array(
 			'host' => '',
@@ -226,7 +226,7 @@ Config::group('production', array(
 	
 	'cache.driver' => 'file',
 	
-	'memcached.class' => '', // defaults to memcache
+	'memcached.class' => '', // defaults to memcached
 	'memcached.servers' => array(
 		array(
 			'host' => '',

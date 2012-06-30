@@ -95,5 +95,5 @@
 			$files = glob(Config::get('cache.save_path').'*');
 			return empty($files);
 		}
-	
+
 	}

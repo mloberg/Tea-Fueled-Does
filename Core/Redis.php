@@ -1,5 +1,7 @@
 <?php namespace TFD\Core;
 
+	use TFD\Core\Config;
+
 	class RedisException extends \Exception { }
 
 	class Redis {
