@@ -68,6 +68,22 @@
 				static::set($key, $value, $time);
 			}
 		}
+
+		/**
+		 * Get the item or store the value.
+		 *
+		 * @param string $key Cache key
+		 * @param function $value A callback for the value
+		 * @param integer $time Time to live
+		 * @return mixed Cache value
+		 */
+
+		public function remember($key, $value, $time = 0) {
+			if (!$this->has($key)) {
+				$this->set($key, $value(), $time);
+			}
+			return $this->get($key);
+		}
 		
 		/**
 		 * Delete a cache item.

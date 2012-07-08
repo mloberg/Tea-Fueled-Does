@@ -39,6 +39,17 @@
 		 */
 
 		public function store($values, $time = 0);
+
+		/**
+		 * Get the item or store the value.
+		 *
+		 * @param string $key Cache key
+		 * @param function $value A callback for the value
+		 * @param integer $time Time to live
+		 * @return mixed Cache value
+		 */
+
+		public function remember($key, $value, $time = 0);
 		
 		/**
 		 * Delete a cache item.
